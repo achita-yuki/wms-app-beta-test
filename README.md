@@ -30,4 +30,4 @@
 
 ---
 
-💡 **ลิงก์เข้าใช้งานระบบ:** [https://achita-yuki.github.io/wms-app/](https://achita-yuki.github.io/wms-app/)
+💡 **ลิงก์เข้าใช้งานระบบ:** [https://achita-yuki.github.io/wms-app-beta-test/](https://achita-yuki.github.io/wms-app-beta-test/)
