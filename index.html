@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>WMS Cold Storage · Master Cap</title>
+<link rel="icon" id="fav" href="Logo%20sungroup.jpg">
+<link rel="apple-touch-icon" href="Logo%20sungroup.jpg">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
@@ -64,7 +66,7 @@ dialog::backdrop{background:rgba(8,12,24,.55)}
 <!-- ===== ส่วนหัว + แท็บ ===== -->
 <header class="hd">
   <div class="max-w-[1400px] mx-auto px-4 py-2 flex flex-wrap items-center gap-2">
-    <div class="flex-1 min-w-[180px]"><div class="font-semibold text-base">WMS Cold Storage</div><div class="sub">ตัดยอด · จัดชุดพาเลทให้พอดี Master Cap</div></div>
+    <div style="display:flex;align-items:center;gap:12px;flex:1 1 220px;min-width:200px"><div id="logoBox" title="โลโก้บริษัท · คลิกเพื่ออัปโหลดรูปใหม่ · Shift+คลิกเพื่อกลับไปใช้ไฟล์เดิม" style="height:42px;min-width:42px;padding:3px;background:#fff;border:1px solid var(--bd);border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;flex:0 0 auto"><img id="logoImg" class="hide" alt="โลโก้บริษัท" style="height:100%;width:auto;max-width:150px;object-fit:contain;display:block"><span id="logoMk" style="font-weight:700;color:#0e7c66;font-size:13px;padding:0 6px">LOGO</span></div><input type="file" id="logoFile" accept="image/*" class="hide"><div><div class="font-semibold text-base">WMS Cold Storage</div><div class="sub">ตัดยอด · จัดชุดพาเลทให้พอดี Master Cap</div></div></div>
     <button class="btn p" id="bImp">นำเข้า Excel / CSV</button>
     <button class="btn" id="bExp">Export ที่กรองแล้ว</button>
     <button class="btn d" id="bClr">ล้างข้อมูล</button>
@@ -653,6 +655,38 @@ function barEvt(e) {
   if (k === 'o') renderOpt(); else renderMrg();
 }
 ['#oBar', '#mBar'].forEach(s => { $(s).addEventListener('input', barEvt); $(s).addEventListener('click', e => { if (e.target.closest('[data-fr]')) barEvt(e); }); });
+
+/* ===== โลโก้บริษัท (ใช้ไฟล์ข้าง HTML ใน GitHub / หรืออัปโหลดเอง) ===== */
+const LOGO_FILES = ['Logo sungroup.jpg', 'Logo sungroup.png', 'Logo sungroup.jpeg', 'logo.png', 'logo.jpg', 'logo.jpeg', 'logo.svg'];
+function showLogo(src) {                               // แสดงโลโก้ในหัวเว็บ + ตั้งเป็น favicon
+  const im = $('#logoImg'); im.src = src; im.classList.remove('hide'); $('#logoMk').classList.add('hide');
+  const fav = $('#fav'); if (fav) { fav.removeAttribute('type'); fav.href = src; }
+  const ap = document.querySelector('link[rel="apple-touch-icon"]'); if (ap) ap.href = src;
+}
+function findLogo(i) {                                 // ลองหาไฟล์โลโก้ตามลำดับ
+  if (i >= LOGO_FILES.length) return;
+  const t = new Image(); t.onload = () => showLogo(encodeURI(LOGO_FILES[i])); t.onerror = () => findLogo(i + 1); t.src = encodeURI(LOGO_FILES[i]);
+}
+(function initLogo() {
+  let saved = null; try { saved = localStorage.getItem('wms_logo'); } catch (e) {}
+  if (saved) showLogo(saved); else findLogo(0);       // รูปที่อัปโหลดเองมาก่อน ถ้าไม่มีใช้ไฟล์ในโฟลเดอร์เดียวกับ HTML
+  $('#logoBox').onclick = e => {
+    if (e.shiftKey) { try { localStorage.removeItem('wms_logo'); } catch (x) {} location.reload(); return; }
+    $('#logoFile').click();
+  };
+  $('#logoFile').onchange = e => {
+    const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+    const fr = new FileReader();
+    fr.onload = () => { const im = new Image(); im.onload = () => {            // ย่อรูปไม่เกิน 256px เพื่อเก็บในเบราว์เซอร์
+      const k = Math.min(1, 256 / Math.max(im.width, im.height)), c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(im.width * k)); c.height = Math.max(1, Math.round(im.height * k));
+      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+      const d = c.toDataURL('image/png'); try { localStorage.setItem('wms_logo', d); } catch (x) {}
+      showLogo(d); toast('ตั้งโลโก้แล้ว');
+    }; im.src = fr.result; };
+    fr.readAsDataURL(f);
+  };
+})();
 
 load().then(refresh);
 })();
