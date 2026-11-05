@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>WMS Cold Storage · Master Cap</title>
+<link rel="icon" id="fav" href="Logo%20sungroup.jpg">
+<link rel="apple-touch-icon" href="Logo%20sungroup.jpg">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+/* ===== Base reset (แทน Tailwind preflight) ===== */
+*,::before,::after{box-sizing:border-box;border:0 solid}
+h1,h2,h3,h4,h5,h6{margin:0;font-size:inherit;font-weight:inherit}
+p,dl,dd,figure{margin:0}
+button,input,select,textarea{font:inherit;color:inherit;margin:0}
+button{background:transparent;cursor:pointer}
+button:disabled{cursor:default}
+/* ===== Design tokens (สว่าง / มืด / ตามระบบ) ===== */
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f3f5f9;--sf:#fff;--s2:#f6f8fc;--bd:#e3e8f0;--tx:#0f172a;--mu:#64748b;--ac:#0e7c66;--ac2:#e6f4f0;--ok:#15803d;--ok2:#e7f6ec;--wn:#b45309;--wn2:#fdf3e2;--bad:#b91c1c;--bad2:#fdeaea}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#080c12;--sf:#111825;--s2:#161f2e;--bd:#243040;--tx:#e9eef7;--mu:#8494aa;--ac:#2ec4a6;--ac2:#12302a;--ok:#4ade80;--ok2:#122e1f;--wn:#fbbf24;--wn2:#33260c;--bad:#f87171;--bad2:#3a1616}}
+:root[data-theme="dark"]{--bg:#080c12;--sf:#111825;--s2:#161f2e;--bd:#243040;--tx:#e9eef7;--mu:#8494aa;--ac:#2ec4a6;--ac2:#12302a;--ok:#4ade80;--ok2:#122e1f;--wn:#fbbf24;--wn2:#33260c;--bad:#f87171;--bad2:#3a1616}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--tx);font:400 13px/1.5 'Prompt',system-ui,sans-serif}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--sf);z-index:40}
+.hd{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--sf);border-bottom:1px solid var(--bd)}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:14px}
+.btn{border:1px solid var(--bd);background:var(--sf);color:var(--tx);border-radius:9px;padding:6px 11px;cursor:pointer;font-weight:500;white-space:nowrap}
+a.btn{display:inline-block;text-decoration:none}
+.btn:hover{background:var(--s2)}.btn.p{background:var(--ac);border-color:var(--ac);color:var(--bg)}.btn.d{color:var(--bad)}.btn.s{padding:2px 8px;font-size:12px}.btn[disabled]{opacity:.45;cursor:not-allowed}
+.inp{width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:5px 8px;color:var(--tx);font:inherit}
+.inp:focus{outline:2px solid var(--ac);outline-offset:-1px}
+.tab{border:0;background:none;color:var(--mu);padding:9px 14px;cursor:pointer;font-weight:500;border-bottom:2px solid transparent}
+.tab.on{color:var(--ac);border-color:var(--ac)}
+table{border-collapse:separate;border-spacing:0;width:100%}
+th{background:var(--s2);color:var(--mu);font-size:11px;text-align:left;padding:7px 9px;white-space:nowrap;border-bottom:1px solid var(--bd)}
+th.so{cursor:pointer}th.so:hover{color:var(--ac)}
+td{padding:7px 9px;border-bottom:1px solid var(--bd);vertical-align:top}
+tr:hover td{background:var(--s2)}
+.r{text-align:right}.sub{font-size:11px;color:var(--mu)}.mono{font-variant-numeric:tabular-nums}
+.chip{display:inline-block;padding:1px 8px;border-radius:99px;font-size:11px;background:var(--s2);border:1px solid var(--bd)}
+.ok{background:var(--ok2);color:var(--ok);border-color:transparent}.wn{background:var(--wn2);color:var(--wn);border-color:transparent}.bad{background:var(--bad2);color:var(--bad);border-color:transparent}
+.bar{height:5px;border-radius:9px;background:var(--bd);margin-top:3px;width:90px;overflow:hidden}.bar i{display:block;height:100%}
+dialog{border:1px solid var(--bd);border-radius:14px;background:var(--sf);color:var(--tx);padding:0;width:min(460px,94vw)}
+dialog::backdrop{background:rgba(8,12,24,.55)}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:9px 16px;border-radius:10px;opacity:0;pointer-events:none;transition:.25s;z-index:99}
+#toast.on{opacity:1}
+.hide{display:none!important}
+.tg{display:inline-block;transition:transform .15s}details[open]>summary .tg{transform:rotate(90deg)}
+/* ===== Utility classes ที่ใช้จริง (แทน Tailwind CDN: ไม่ต้องพึ่งเน็ต/ไม่มี warning) ===== */
+.flex{display:flex}.grid{display:grid}.flex-wrap{flex-wrap:wrap}.flex-col{flex-direction:column}.flex-1{flex:1 1 0%}
+.items-center{align-items:center}.items-end{align-items:flex-end}.justify-end{justify-content:flex-end}
+.gap-1{gap:.25rem}.gap-2{gap:.5rem}.gap-3{gap:.75rem}.gap-4{gap:1rem}
+.grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(min-width:768px){.md\:grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}.md\:grid-cols-6{grid-template-columns:repeat(6,minmax(0,1fr))}}
+.max-w-\[1400px\]{max-width:1400px}.min-w-\[180px\]{min-width:180px}.mx-auto{margin-left:auto;margin-right:auto}
+.px-3{padding-left:.75rem;padding-right:.75rem}.px-4{padding-left:1rem;padding-right:1rem}.py-2{padding-top:.5rem;padding-bottom:.5rem}
+.p-2{padding:.5rem}.p-3{padding:.75rem}.p-4{padding:1rem}.p-6{padding:1.5rem}
+.mb-1{margin-bottom:.25rem}.mb-2{margin-bottom:.5rem}.mb-3{margin-bottom:.75rem}.mb-4{margin-bottom:1rem}.mt-1{margin-top:.25rem}.mt-2{margin-top:.5rem}
+.font-semibold{font-weight:600}.text-base{font-size:1rem;line-height:1.5rem}.text-xl{font-size:1.25rem;line-height:1.75rem}
+.overflow-hidden{overflow:hidden}.overflow-x-auto{overflow-x:auto}.cursor-pointer{cursor:pointer}
+</style>
+</head>
+<body>
+
+<!-- ===== ส่วนหัว + แท็บ ===== -->
+<header class="hd">
+  <div class="max-w-[1400px] mx-auto px-4 py-2 flex flex-wrap items-center gap-2">
+    <div style="display:flex;align-items:center;gap:12px;flex:1 1 220px;min-width:200px"><div id="logoBox" title="โลโก้บริษัท · คลิกเพื่ออัปโหลดรูปใหม่ · Shift+คลิกเพื่อกลับไปใช้ไฟล์เดิม" style="height:42px;min-width:42px;padding:3px;background:#fff;border:1px solid var(--bd);border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;flex:0 0 auto"><img id="logoImg" class="hide" alt="โลโก้บริษัท" style="height:100%;width:auto;max-width:150px;object-fit:contain;display:block"><span id="logoMk" style="font-weight:700;color:#0e7c66;font-size:13px;padding:0 6px">LOGO</span></div><input type="file" id="logoFile" accept="image/*" class="hide"><div><div class="font-semibold text-base">WMS Cold Storage</div><div class="sub">ตัดยอด · จัดชุดพาเลทให้พอดี Master Cap</div></div></div>
+    <button class="btn p" id="bImp">นำเข้า Excel / CSV</button>
+    <button class="btn" id="bExp">Export ที่กรองแล้ว</button>
+    <button class="btn d" id="bClr">ล้างข้อมูล</button>
+    <a href="https://forms.gle/7TehEGxbBTK1XoYa8" target="_blank" rel="noopener noreferrer" class="btn" id="bReport" title="แจ้งหรือรายงานข้อผิดพลาด">⚠️ แจ้งปัญหา</a>
+    <button class="btn" id="bTheme">ธีม</button>
+    <input type="file" id="fIn" accept=".xlsx,.xls,.csv" class="hide">
+  </div>
+  <div class="max-w-[1400px] mx-auto px-3 flex overflow-x-auto" id="tabs">
+    <button class="tab on" data-t="stock">สต็อก</button><button class="tab" data-t="opt">จัดชุด Cap</button>
+    <button class="tab" data-t="mrg">รวมเลท</button><button class="tab" data-t="fix">แก้เกิน Cap</button><button class="tab" data-t="cap">Master Cap</button><button class="tab" data-t="log">ประวัติ</button>
+  </div>
+</header>
+
+<main class="max-w-[1400px] mx-auto p-4 grid gap-4">
+  <div class="grid grid-cols-2 md:grid-cols-6 gap-3" id="kpi" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))"></div>
+
+  <!-- ===== แท็บสต็อก ===== -->
+  <section id="v-stock" class="card overflow-hidden">
+    <div class="p-3 flex flex-wrap gap-2 items-center">
+      <input class="inp" style="max-width:340px" id="q" placeholder="ค้นหารวม Item / LPN / Lot / Location (กด / )">
+      <select class="inp" style="max-width:150px" id="fWh"></select>
+      <button class="btn" id="bReset">ล้างตัวกรอง</button>
+      <span class="sub" id="cnt"></span>
+    </div>
+    <div class="overflow-x-auto"><table style="min-width:1400px"><thead>
+      <tr id="hSort"></tr>
+      <!-- Inline Column Filter -->
+      <tr id="hFilt">
+        <th><input class="inp" data-f="item" placeholder="กรอง Item"></th><th><input class="inp" data-f="desc" placeholder="กรองชื่อ"></th>
+        <th><input class="inp" data-f="lot" placeholder="กรอง Lot"></th><th style="min-width:190px"><div class="flex flex-col gap-1"><select class="inp" data-f="locz"><option value="">ทุก Location</option><option value="nopk">ไม่เอา PICKTO</option><option value="nosg">ไม่เอา STAGE</option><option value="nopksg">ไม่เอา PICKTO + STAGE</option><option value="rack">เฉพาะ Rack ปกติ</option><option value="pk">เฉพาะ PICKTO</option><option value="sg">เฉพาะ STAGE</option></select><input class="inp" data-f="loc" placeholder="กรอง Location"><input class="inp" data-f="locx" placeholder="ไม่เอา เช่น 02A, CS3"></div></th>
+        <th style="min-width:210px"><div class="flex flex-col gap-1"><select class="inp" data-f="lpnt"><option value="">ทุกประเภท LPN</option><option value="nonum">ไม่เอา LPN ตัวเลขล้วน (0000178433)</option><option value="num">เฉพาะ LPN ตัวเลขล้วน</option></select><input class="inp" data-f="lpn" placeholder="กรอง LPN"><input class="inp" data-f="lpnx" placeholder="ไม่เอาขึ้นต้นด้วย เช่น 00001784"></div></th><th></th><th><select class="inp" data-f="alloc"><option value="">ทุก Allocated</option><option value="free">Allocated = 0 (พร้อมรวม/ตัด)</option><option value="held">มี Allocated &gt; 0</option></select></th><th></th>
+        <th><select class="inp" data-f="st"><option value="">ทุกสถานะ</option><option value="ok">OK</option><option value="merge">รอรวม</option><option value="over">เกิน Cap</option><option value="alloc">ติด Allocated (ทั้งหมด)</option><option value="partial">จองบางล็อต (ต้องเคลียร์ทั้งพาเลท)</option></select></th><th><select class="inp" data-f="fs"><option value="">ทุก Status (ไฟล์)</option><option value="ok">OK</option><option value="not">ไม่ใช่ OK (ไม่นำไปรวม)</option></select></th>
+        <th><select class="inp" data-f="wh" id="cWh"></select></th><th></th>
+      </tr></thead><tbody id="tb"></tbody></table></div>
+    <div class="p-3 flex gap-2 items-center"><button class="btn hide" id="bMore">แสดงเพิ่ม 200 แถว</button></div>
+  </section>
+
+  <!-- ===== แท็บจัดชุด ===== -->
+  <section id="v-opt" class="card p-3 hide">
+    <div class="flex flex-wrap gap-2 items-center mb-3">
+      <input class="inp" style="max-width:320px" id="oq" placeholder="ค้นหา Item / ชื่อ / LPN">
+      <select class="inp" style="max-width:260px" id="om"><option value="bal">กระจายสมดุล (พาเลทน้อยสุด)</option><option value="fill">เติมเต็ม Cap ก่อน</option></select>
+      <span class="sub">ชุดละไม่เกิน Master Cap · ไม่แยก LPN ข้ามชุด · ไม่รวมข้ามคลัง (CS ต่างกัน)</span>
+    </div>
+    <div id="oBar" class="flex flex-wrap gap-2 items-end mb-3"></div><div id="oList" class="grid gap-2"></div>
+  </section>
+
+  <!-- ===== แท็บรวมเลท (เลือกเอง / ให้โปรแกรมหาชุดที่ตรง Cap) ===== -->
+  <section id="v-mrg" class="grid gap-3 hide">
+    <details class="card p-3" id="mPrioBox" open>
+      <summary class="cursor-pointer font-semibold">ลำดับ Item ที่ควรทำก่อน <span class="sub" id="mPrioSub"></span></summary>
+      <div class="flex flex-wrap gap-2 items-center mt-2 mb-2"><button class="btn p" id="bNext">ทำ Item ถัดไป ▶</button>
+        <span class="sub">เรียงตามลำดับที่ตั้งเอง (ถ้ามี) แล้วตามจำนวนพาเลทที่รวมแล้วจะว่างได้มากสุด · Item ที่ OK แล้วจะอยู่ท้ายสุด · ตั้งลำดับเองได้ที่แท็บ Master Cap</span></div>
+      <div id="mPrio" class="overflow-x-auto"></div>
+    </details>
+    <div class="card p-3 grid gap-2">
+      <div class="flex flex-wrap gap-2 items-center">
+        <input class="inp" style="max-width:240px" id="mq" placeholder="ค้นหา Item / ชื่อ">
+        <select class="inp" style="max-width:440px" id="mi"></select>
+        
+      </div>
+      <div id="mBar" class="flex flex-wrap gap-2 items-end"></div>
+      <div class="flex flex-wrap gap-2 items-center"><span id="mSum"></span><div class="flex-1"></div>
+        <button class="btn" id="bMClr">ล้างที่เลือก</button><button class="btn" id="bMAuto">ให้โปรแกรมหาชุดที่ตรง Cap</button><button class="btn p" id="bMrg" disabled>รวมเลท…</button><button class="btn p" id="bMCut" disabled title="ใช้ได้เมื่อยอดที่เลือกเท่ากับหรือน้อยกว่า Master Cap">ตัดยอด…</button></div>
+      <div class="sub">ติ๊กเลือก LPN เอง แล้วกด “รวมเลท” หรือกด “ให้โปรแกรมหาชุดที่ตรง Cap” เพื่อให้แบ่งชุดให้ แล้วเลือกรวมเลท/ตัดยอดอัตโนมัติทั้งหมดหรือทีละชุด (ถ้าติ๊กไว้บางส่วน โปรแกรมจะหา LPN มาเติมให้ครบ Cap เป็นชุดแรก) · รวมได้เฉพาะ LPN ในคลัง (CS) เดียวกันเท่านั้น · ระบบยังไม่รวมจนกว่าคุณจะกดยืนยัน · <b>รวมเลท/ตัดยอดได้เฉพาะ LPN ที่ Allocated = 0 และ Status (จากไฟล์) = OK</b> (LPN ที่มี Allocated จะถูกล็อกและไม่ถูกนำไปจัดชุดให้) · เมื่อยอดรวมที่เลือก<b>เท่ากับหรือน้อยกว่า Cap</b> (ไม่เกิน) กด “ตัดยอด” เพื่อตัดชุดนี้ออกจากสต็อกได้ ไม่จำเป็นต้องเต็ม Cap (ยกเลิกได้จากประวัติการตัดยอด)</div>
+    </div>
+    <div id="mPrev"></div>
+    <div class="card overflow-hidden"><div class="overflow-x-auto"><table><thead><tr><th></th><th>LPN</th><th>Location</th><th>Lot</th><th class="r">Case On Hand</th><th class="r">Allocated</th><th>Status (ไฟล์)</th><th>LPN ปลายทาง</th></tr></thead><tbody id="mTb"></tbody></table></div></div>
+    <div id="mRes"></div>
+    <div class="flex flex-wrap gap-2 items-center"><div class="font-semibold flex-1">ประวัติการรวมเลท</div><button class="btn s" id="bMHAll">Export ประวัติรวมเลททั้งหมด (Excel)</button><button class="btn s d" id="bMHClr">ล้างประวัติรวมเลท</button></div><div id="mHist" class="grid gap-2"></div>
+    <div class="flex flex-wrap gap-2 items-center"><div class="font-semibold flex-1">ประวัติการตัดยอด</div><button class="btn s" id="bCHAll">Export ประวัติตัดยอดทั้งหมด (Excel)</button><button class="btn s d" id="bCHClr">ล้างประวัติตัดยอด</button></div><div id="cHist" class="grid gap-2"></div>
+  </section>
+
+  <!-- ===== แท็บแก้เกิน Cap ===== -->
+  <section id="v-fix" class="grid gap-3 hide">
+    <div class="card p-3 grid gap-2">
+      <div class="flex flex-wrap gap-2 items-center">
+        <input class="inp" style="max-width:280px" id="fq" placeholder="ค้นหา Item / ชื่อ / LPN">
+        <label class="flex items-center gap-1"><input type="checkbox" id="fFill" checked> ยุบส่วนเกินไปเติมพาเลทอื่นก่อน</label>
+        <div class="flex-1"></div><button class="btn p" id="bFixAll">แก้ทั้งหมด…</button>
+      </div>
+      <div class="sub">วิธีแก้: เก็บยอดไว้ที่ LPN เดิมเท่ากับ Cap · ส่วนเกินย้ายไปเติมพาเลทอื่นของ Item เดียวกันที่ยังมีที่ว่าง (เติมพาเลทที่เกือบเต็มก่อน) · ที่เหลือเปิด LPN ใหม่ (ชื่อ “LPNเดิม-N1” ไม่เกิน Cap ต่อ LPN) · ดึงจากล็อตใหม่สุดก่อน · พาเลทที่ติด Allocated แก้ไม่ได้ (ต้องเคลียร์ทั้งพาเลทก่อน) · ยกเลิกได้จากประวัติ</div>
+    </div>
+    <div class="card overflow-hidden"><div class="overflow-x-auto"><table><thead><tr><th>Item</th><th>ชื่อสินค้า</th><th>LPN</th><th>Location</th><th class="r">Case On Hand</th><th class="r">Cap</th><th class="r">ส่วนเกิน</th><th>แผนแก้ไข</th><th></th></tr></thead><tbody id="fTb"></tbody></table></div></div>
+    <div class="flex flex-wrap gap-2 items-center"><div class="font-semibold flex-1">ประวัติการแก้เกิน Cap</div><button class="btn s d" id="bFHClr">ล้างประวัติแก้เกิน Cap</button></div><div id="fHist" class="grid gap-2"></div>
+  </section>
+
+  <!-- ===== แท็บ Master Cap ===== -->
+  <section id="v-cap" class="card overflow-hidden hide">
+    <div class="p-3 flex flex-wrap gap-2 items-center">
+      <input class="inp" style="max-width:320px" id="cq" placeholder="ค้นหา Item / ชื่อ">
+      <button class="btn p" id="bCapIn">นำเข้า Master Cap (เพิ่ม/อัปเดต ต่อเนื่องได้)</button>
+      <button class="btn" id="bCapOut">Export Master Cap</button>
+      <input type="file" id="fCap" accept=".xlsx,.xls,.csv" class="hide">
+      <span class="sub">ลำดับ: Master Cap (ฐานที่นำเข้า / แก้เอง) &gt; Pack &gt; ค่าเริ่มต้นคลัง (CS1 72 · CS2 64 · CS3 72) · ไฟล์นำเข้า: Item, Master Cap (+ ชื่อ, Priority ถ้ามี) · นำเข้าไฟล์ใหม่ได้เรื่อย ๆ — Item ใหม่จะเพิ่ม Item เดิมจะอัปเดต ส่วนที่ไม่อยู่ในไฟล์คงเดิม · <b id="capInfo"></b></span>
+    </div>
+    <div class="overflow-x-auto"><table><thead><tr><th>Item</th><th>ชื่อสินค้า</th><th>WH</th><th class="r">Cap ที่ใช้</th><th>ที่มา</th><th>ลำดับทำก่อน</th><th>กำหนด Master Cap</th></tr></thead><tbody id="cb"></tbody></table></div>
+  </section>
+
+  <!-- ===== แท็บประวัติ ===== -->
+  <section id="v-log" class="card overflow-hidden hide">
+    <div class="p-3 flex gap-2"><button class="btn d" id="bLogClr">ล้างประวัติ</button></div>
+    <div class="overflow-x-auto"><table><thead><tr><th>เวลา</th><th>ประเภท</th><th>Item</th><th>LPN</th><th>Lot</th><th class="r">จำนวน</th><th>WH</th><th>หมายเหตุ</th></tr></thead><tbody id="lb"></tbody></table></div>
+  </section>
+</main>
+<div id="toast"></div>
+
+<script>
+(() => {
+'use strict';
+/* ===================== ตัวช่วย ===================== */
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const CO = new Intl.Collator('th', { numeric: true, sensitivity: 'base' });   // Natural Sort: CS2 < CS10
+const r2 = x => Math.round(x * 100) / 100;
+const fmt = x => r2(x).toLocaleString('th-TH', { maximumFractionDigits: 2 });
+const N = s => String(s == null ? '' : s).toLowerCase().replace(/[\s_.\-]/g, '');
+let _u = 0; const uid = () => 'r' + Date.now().toString(36) + (_u++);
+const DEF = { CS1: 72, CS2: 64, CS3: 72 };
+function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('on'), 2600); }
+function modal(title, body, btns) {                                         // Modal กลาง (ใช้ Confirm ทุกจุด)
+  const d = document.createElement('dialog');
+  d.innerHTML = '<div class="p-4"><h3 class="font-semibold mb-2">' + esc(title) + '</h3><div class="mb-4">' + body + '</div><div class="flex gap-2 justify-end flex-wrap"></div></div>';
+  btns.forEach(([l, c, fn]) => { const b = document.createElement('button'); b.className = 'btn ' + (c || ''); b.textContent = l; b.onclick = () => { d.close(); d.remove(); fn && fn(); }; d.lastChild.lastChild.appendChild(b); });
+  d.addEventListener('cancel', () => d.remove()); document.body.appendChild(d); d.showModal();
+}
+
+/* ===================== สถานะ + บันทึกถาวร (IndexedDB) ===================== */
+let rows = [], master = {}, logs = [], merges = [], cuts = [], fixes = [], tab = 'stock', limit = 200, sortK = 'lpn', sortD = 1, pm = {}, pa = {};
+const flt = { q: '', item: '', desc: '', lot: '', loc: '', lpn: '', wh: '', locz: '', locx: '', lpnt: '', lpnx: '', alloc: '', st: '', fs: '' };
+const idb = () => new Promise((ok, no) => { const r = indexedDB.open('wms_single', 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error); });
+let svT; const save = () => { clearTimeout(svT); svT = setTimeout(async () => { try { const d = await idb(); d.transaction('kv', 'readwrite').objectStore('kv').put({ rows, master, logs, merges, cuts, fixes }, 'wms'); } catch (e) {} }, 400); };
+async function load() {
+  try { const d = await idb(); const s = await new Promise(ok => { const q = d.transaction('kv').objectStore('kv').get('wms'); q.onsuccess = () => ok(q.result); q.onerror = () => ok(null); });
+    if (s) { rows = s.rows || []; master = s.master || {}; logs = s.logs || []; merges = s.merges || []; cuts = s.cuts || []; fixes = s.fixes || []; } } catch (e) {}
+}
+function log(type, r, ref) { logs.unshift({ at: new Date().toLocaleString('th-TH'), type, item: r.item, lpn: r.lpn, lot: r.lot, qty: r.qty, wh: r.wh, ref: ref || '' }); logs = logs.slice(0, 2000); }
+
+/* ===================== Master Cap (ลำดับความสำคัญ) ===================== */
+// 1) Master Cap บริษัทราย Item  2) Cap จากคอลัมน์ Pack  3) ค่าเริ่มต้นตามคลัง
+const capOf = (it, wh) => { const m = master[it]; return m && m.cap > 0 ? m.cap : m && m.pack > 0 ? m.pack : (DEF[wh] || 72); };
+const srcOf = it => { const m = master[it]; return m && m.cap > 0 ? (m.capSrc === 'manual' ? 'Master (แก้เอง)' : m.capSrc === 'stock' ? 'ไฟล์สต็อก' : 'Master') : m && m.pack > 0 ? 'Pack' : 'ค่าเริ่มต้น'; };
+const nameOf = (it, fb) => (master[it] && master[it].name) || fb || '';
+const packCap = p => { const v = parseFloat(String(p || '').split('_').pop()); return v > 0 ? v : 0; };   // CS3_C06_12_72 -> 72
+
+/* ===================== นำเข้า Excel / CSV ===================== */
+const AL = { item: ['item', 'itemcode', 'material', 'sku'], desc: ['description', 'desc'], loc: ['location', 'loc'], lpn: ['lpn'],
+  qty: ['caseonhand', 'onhand', 'qty'], lot: ['loterp', 'lot', 'lotnumber', 'lotno'], lot2: ['lotdld', 'lotdid', 'lotid'],
+  wh: ['wh', 'warehouse'], alloc: ['allocated', 'allocatedqty', 'caseallocated', 'allocatedcase', 'allocqty', 'alloc'], cap: ['mastercap', 'cap'], pack: ['pack'], st: ['status', 'lotstatus'] };
+function parse(aoa) {
+  const h = aoa.findIndex(r => r.some(c => N(c) === 'lpn') && r.some(c => AL.item.includes(N(c))));   // หาแถวหัวตารางเอง
+  if (h < 0) throw new Error('ไม่พบหัวตาราง (ต้องมีคอลัมน์ Item และ LPN)');
+  const hn = aoa[h].map(N), col = {};
+  for (const k in AL) for (const a of AL[k]) { const x = hn.indexOf(a); if (x >= 0) { col[k] = x; break; } }   // เรียงตามลำดับความสำคัญของชื่อคอลัมน์
+  const g = (r, k) => col[k] === undefined ? '' : String(r[col[k]] == null ? '' : r[col[k]]).trim();
+  const out = [], names = {};
+  aoa.forEach((r, i) => {
+    const t = String(r[0]).trim().match(/^(\d{5,})\s+(.+)$/);            // แถวหัวข้อ "รหัส ชื่อสินค้าเต็ม"
+    if (t) { names[t[1]] = t[2]; return; }
+    if (i <= h) return;
+    const item = g(r, 'item'), lpn = g(r, 'lpn'); if (!item || !lpn) return;   // ข้ามแถวว่าง / แถวผลรวม
+    const q = parseFloat(g(r, 'qty').replace(/,/g, ''));
+    out.push({ id: uid(), item, desc: g(r, 'desc'), lot: g(r, 'lot') || '-', lot2: g(r, 'lot2'), loc: g(r, 'loc'), lpn,
+      qty: r2(isNaN(q) ? 0 : q), wh: (g(r, 'wh') || 'CS2').toUpperCase(), st: col.st === undefined ? '' : (g(r, 'st').toUpperCase() || 'N/A'),
+      alloc: Math.max(0, r2(parseFloat(g(r, 'alloc').replace(/,/g, '')) || 0)), pack: packCap(g(r, 'pack')), cap: parseFloat(g(r, 'cap')) || 0 });
+  });
+  return { out, names, hasAlloc: col.alloc !== undefined, hasSt: col.st !== undefined };
+}
+async function readFile(f) {
+  const wb = XLSX.read(await f.arrayBuffer(), { type: 'array' });
+  let best = null;
+  wb.SheetNames.forEach(n => { try { const p = parse(XLSX.utils.sheet_to_json(wb.Sheets[n], { header: 1, defval: '', blankrows: false })); if (!best || p.out.length > best.out.length) best = p; } catch (e) {} });
+  if (!best || !best.out.length) throw new Error('ไม่พบข้อมูลสต็อกในไฟล์ (ต้องมีหัวคอลัมน์ Item และ LPN)');
+  return best;
+}
+function applyImport(p, replace) {
+  if (replace) rows = [];
+  rows = rows.concat(p.out);
+  p.out.forEach(r => { const m = master[r.item] || (master[r.item] = {}); if (r.pack) m.pack = r.pack; if (r.cap > 0 && m.capSrc !== 'base' && m.capSrc !== 'manual') { m.cap = r.cap; m.capSrc = 'stock'; } if (r.desc && !m.name) m.name = r.desc; });
+  for (const k in p.names) (master[k] || (master[k] = {})).name = p.names[k];
+  log('นำเข้า', { item: '', lpn: '', lot: '', qty: r2(p.out.reduce((a, r) => a + r.qty, 0)), wh: '' }, p.out.length + ' แถว');
+  refresh(); toast('นำเข้า ' + p.out.length.toLocaleString() + ' แถว' + (p.hasAlloc ? '' : ' · ไฟล์ไม่มีคอลัมน์ Allocated (ถือเป็น 0)') + (p.hasSt ? '' : ' · ไฟล์ไม่มีคอลัมน์ Status (ไม่ใช้เป็นเงื่อนไข)'));
+}
+
+/* ===================== ตารางสต็อก ===================== */
+const COLS = [['item', 'ITEM'], ['desc', 'DESCRIPTION'], ['lot', 'LOT'], ['loc', 'LOCATION'], ['lpn', 'LPN ▲'], ['qty', 'CASE ON HAND'], ['alloc', 'ALLOCATED'], ['pt', 'รวม LPN / CAP'], ['cst', 'สถานะ Cap'], ['st', 'STATUS (ไฟล์)'], ['wh', 'WH'], ['', '']];
+/* Allocated: พาเลทที่มี Allocated > 0 ห้ามนำไปรวมเลท / ตัดยอด (ต้องเป็น 0 เท่านั้น) */
+const aOf = r => r.alloc > 0 ? r.alloc : 0;
+const palFree = (item, lpn) => !(pa[item + '|' + lpn] > 0);
+/* Status จากไฟล์: รวมเลท / ตัดยอด / จัดชุด ได้เฉพาะพาเลทที่ "ทุกแถว" มี Status = OK (ไฟล์ไม่มีคอลัมน์ Status = ไม่บังคับ) */
+const stFile = r => String(r.st == null ? '' : r.st).trim().toUpperCase();
+const fOk = r => { const s = stFile(r); return s === '' || s === 'OK'; };
+const palFok = p => !(p.bad && p.bad.size);
+const fsPass = r => !flt.fs || (flt.fs === 'ok' ? fOk(r) : !fOk(r));
+const fsChip = r => fOk(r) ? (stFile(r) ? '<span class="chip ok">OK</span>' : '<span class="sub">—</span>') : '<span class="chip bad">' + esc(stFile(r)) + '</span>';
+const palFs = p => palFok(p) ? '<span class="chip ok">OK</span>' : [...p.bad].map(s => '<span class="chip bad">' + esc(s) + '</span>').join(' ');
+function stOk(r) { const z = flt.st; if (!z) return true; const x = (PMAP[r.item + '|' + r.lpn] || {}).st; return z === 'alloc' ? (x === 'partial' || x === 'full') : x === z; }
+function allocOk(r, f = flt) { const z = f.alloc, free = palFree(r.item, r.lpn); return z === 'free' ? free : z === 'held' ? !free : true; }
+/* ตัวกรองแบบ "ไม่เอา" ของ Location และ LPN (ใช้ร่วมกับตาราง, Export และจัดชุด) */
+const terms = s => String(s).split(/[,\s]+/).map(x => x.trim().toUpperCase()).filter(Boolean);
+/* ===== แถบตัวกรองในแท็บจัดชุด (o) และรวมเลท (m): คลัง / โซน / ไม่เอา Location / ประเภท LPN ===== */
+const FS = { o: { wh: '', locz: '', locx: '', lpnt: '', lpnx: '' }, m: { wh: '', locz: '', locx: '', lpnt: '', lpnx: '' } };
+const passF = (r, f) => (!f.wh || r.wh === f.wh) && locOk(r, f) && lpnOk(r, f);
+function barHtml(k) {
+  const sel = (f, l, o) => '<div class="flex flex-col"><span class="sub">' + l + '</span><select class="inp" data-fk="' + k + '" data-ff="' + f + '">' + o.map(x => '<option value="' + x[0] + '">' + x[1] + '</option>').join('') + '</select></div>';
+  const txt = (f, l, p) => '<div class="flex flex-col"><span class="sub">' + l + '</span><input class="inp" style="width:170px" data-fk="' + k + '" data-ff="' + f + '" placeholder="' + p + '"></div>';
+  return sel('wh', 'คลัง (WH)', [['', 'ทุกคลัง']]) +
+    sel('locz', 'โซน Location', [['', 'ทุก Location'], ['nopk', 'ไม่เอา PICKTO'], ['nosg', 'ไม่เอา STAGE'], ['nopksg', 'ไม่เอา PICKTO + STAGE'], ['rack', 'เฉพาะ Rack ปกติ'], ['pk', 'เฉพาะ PICKTO'], ['sg', 'เฉพาะ STAGE']]) +
+    txt('locx', 'ไม่เอา Location', 'เช่น 02A, CS3') +
+    sel('lpnt', 'ประเภท LPN', [['', 'ทุกประเภท'], ['nonum', 'ไม่เอา LPN ตัวเลขล้วน'], ['num', 'เฉพาะ LPN ตัวเลขล้วน']]) +
+    txt('lpnx', 'ไม่เอา LPN ขึ้นต้นด้วย', 'เช่น 00001784') +
+    '<button class="btn" data-fk="' + k + '" data-fr="1">ล้างตัวกรอง</button>';
+}
+function locOk(r, f = flt) {
+  const u = String(r.loc || '').toUpperCase(), pk = u.includes('PICKTO'), sg = u.includes('STAGE'), z = f.locz;
+  if ((z === 'nopk' && pk) || (z === 'nosg' && sg) || (z === 'nopksg' && (pk || sg)) || (z === 'pk' && !pk) || (z === 'sg' && !sg) || (z === 'rack' && (pk || sg))) return false;
+  const x = terms(f.locx); return !x.length || !x.some(t => u.includes(t));       // ไม่เอา Location ที่มีคำเหล่านี้
+}
+function lpnOk(r, f = flt) {
+  const u = String(r.lpn || '').toUpperCase(), isNum = /^\d+$/.test(u), z = f.lpnt;   // LPN ตัวเลขล้วน เช่น 0000178433
+  if ((z === 'nonum' && isNum) || (z === 'num' && !isNum)) return false;
+  const x = terms(f.lpnx); return !x.length || !x.some(t => u.startsWith(t));          // ไม่เอา LPN ที่ขึ้นต้นด้วยคำเหล่านี้
+}
+function viewRows() {
+  const q = flt.q.toLowerCase(), has = (v, f) => !f || String(v || '').toLowerCase().includes(f.toLowerCase());
+  const out = rows.filter(r => (!q || [r.item, r.desc, r.lot, r.lot2, r.loc, r.lpn].some(v => String(v || '').toLowerCase().includes(q))) &&
+    has(r.item, flt.item) && has(nameOf(r.item, r.desc), flt.desc) && has(r.lot + ' ' + r.lot2, flt.lot) && has(r.loc, flt.loc) && has(r.lpn, flt.lpn) && (!flt.wh || r.wh === flt.wh) && locOk(r) && lpnOk(r) && allocOk(r) && stOk(r) && fsPass(r));
+  return out.sort((a, b) => (sortK === 'qty' || sortK === 'alloc' ? (sortK === 'alloc' ? aOf(a) - aOf(b) : a.qty - b.qty) : CO.compare(String(a[sortK] || ''), String(b[sortK] || ''))) * sortD || CO.compare(a.lpn, b.lpn));
+}
+/* ===================== Status OK + ลำดับ Item ที่ควรทำก่อน ===================== */
+let PAL = [], PMAP = {}, GRP = {}, _prio = null;
+const ST = { ok: ['ok', 'OK'], merge: ['wn', 'รอรวม'], over: ['bad', 'เกิน Cap'], partial: ['bad', 'จองบางล็อต'], full: ['bad', 'จองทั้งพาเลท'], hold: ['wn', 'Status ≠ OK'] };
+function calcStatus() {                                           // สถานะรายพาเลท: OK = เต็ม Cap หรือรวมต่อไม่ได้แล้ว
+  const P = {}; _prio = null;
+  rows.forEach(r => { const k = r.item + '|' + r.lpn, o = P[k] || (P[k] = { item: r.item, wh: r.wh, lpn: r.lpn, loc: r.loc || '', qty: 0, alloc: 0, bad: new Set() }); if (!fOk(r)) o.bad.add(stFile(r)); o.qty = r2(o.qty + r.qty); o.alloc = r2(o.alloc + aOf(r)); });
+  PAL = Object.values(P); PMAP = P; GRP = {};
+  PAL.forEach(p => { const g = p.item + '|' + p.wh; (GRP[g] || (GRP[g] = { item: p.item, wh: p.wh, cap: capOf(p.item, p.wh), pals: [] })).pals.push(p); p.cap = GRP[g].cap; });
+  Object.values(GRP).forEach(g => {
+    const el = g.pals.filter(p => palFok(p) && p.alloc <= 0 && p.qty > 0 && p.qty <= g.cap + 1e-9).map(p => p.qty).sort((a, b) => a - b), m1 = el[0], m2 = el[1];
+    g.pals.forEach(p => {
+      if (!palFok(p)) p.st = 'hold';
+      else if (p.alloc > 0) p.st = p.qty - p.alloc > 1e-9 ? 'partial' : 'full';
+      else if (p.qty > g.cap + 1e-9) p.st = 'over';
+      else if (Math.abs(p.qty - g.cap) < 1e-9) p.st = 'ok';
+      else { const o = p.qty === m1 ? m2 : m1; p.st = o !== undefined && o <= r2(g.cap - p.qty) + 1e-9 ? 'merge' : 'ok'; }
+    });
+    g.ok = g.pals.every(p => p.st === 'ok' || p.st === 'hold');
+  });
+}
+function stHtml(item, lpn) {
+  const p = PMAP[item + '|' + lpn]; if (!p) return '';
+  const c = ST[p.st];
+  let h = '<span class="chip ' + c[0] + '">' + c[1] + (p.st === 'ok' && p.qty < p.cap - 1e-9 ? ' · รวมต่อไม่ได้' : '') + '</span>';
+  if (p.st === 'partial') h += '<div class="sub" style="color:var(--bad)">ต้องเคลียร์ทั้งพาเลท · ไม่ถูกจองอีก ' + fmt(p.qty - p.alloc) + '</div>';
+  else if (p.st === 'full') h += '<div class="sub" style="color:var(--bad)">รอหยิบจนหมด</div>';
+  else if (p.st === 'hold') h += '<div class="sub" style="color:var(--wn)">Status ไฟล์ไม่ใช่ OK · ไม่นำไปรวม/ตัดยอด</div>';
+  else if (p.st === 'over') h += '<div class="sub" style="color:var(--bad)">เกิน ' + fmt(p.qty - p.cap) + ' · แก้ที่แท็บ “แก้เกิน Cap”</div>';
+  return h;
+}
+function getPrio() {                                              // ลำดับทำก่อน: ที่ตั้งเอง > พาเลทที่ว่างได้มากสุด > ติดปัญหามากสุด · OK อยู่ท้าย
+  if (_prio) return _prio;
+  const list = Object.values(GRP).map(g => {
+    const el = g.pals.filter(p => palFok(p) && p.alloc <= 0 && p.qty > 0 && p.qty <= g.cap + 1e-9), sets = el.length ? pack(el, g.cap, 'bal').length : 0;
+    return { key: g.item + '|' + g.wh, item: g.item, wh: g.wh, name: nameOf(g.item), cap: g.cap, pals: g.pals.length, freed: Math.max(0, el.length - sets),
+      over: g.pals.filter(p => p.st === 'over').length, held: g.pals.filter(p => p.st === 'partial' || p.st === 'full').length, ok: g.ok, manual: (master[g.item] || {}).prio || 0 };
+  });
+  list.sort((a, b) => (a.ok - b.ok) || ((a.manual || 1e9) - (b.manual || 1e9)) || (b.freed - a.freed) || ((b.over + b.held) - (a.over + a.held)) || CO.compare(a.item, b.item) || CO.compare(a.wh, b.wh));
+  let n = 0; const rank = {}, byItem = {};
+  list.forEach(x => { if (!x.ok) { x.rank = ++n; rank[x.key] = n; if (!byItem[x.item]) byItem[x.item] = n; } else x.rank = 0; });
+  return (_prio = { list, rank, byItem, todo: list.filter(x => !x.ok) });
+}
+function renderPrio() {
+  const pr = getPrio(), top = pr.todo.slice(0, 10);
+  $('#mPrioSub').textContent = '— รอดำเนินการ ' + pr.todo.length + ' Item · OK แล้ว ' + (pr.list.length - pr.todo.length) + ' Item';
+  $('#mPrio').innerHTML = top.length ? '<table><thead><tr><th>#</th><th>Item</th><th>WH</th><th class="r">ว่างได้ (พาเลท)</th><th class="r">เกิน Cap</th><th class="r">ติด Allocated</th><th>ลำดับ</th><th></th></tr></thead><tbody>' +
+    top.map(x => '<tr><td class="mono"><b>' + x.rank + '</b></td><td><span class="mono">' + esc(x.item) + '</span> ' + esc(x.name) + '</td><td>' + esc(x.wh) + '</td><td class="r mono">' + (x.freed || '—') + '</td><td class="r mono">' + (x.over || '—') + '</td><td class="r mono">' + (x.held || '—') + '</td><td>' +
+      (x.manual ? '<span class="chip wn">ตั้งเอง ' + x.manual + '</span>' : '<span class="sub">อัตโนมัติ</span>') + '</td><td><button class="btn s p" data-go="' + esc(x.key) + '">ทำ</button></td></tr>').join('') + '</tbody></table>'
+    : '<div class="sub">ทุก Item เป็น OK แล้ว</div>';
+}
+function refresh() {
+  pm = {}; pa = {}; rows.forEach(r => { const k = r.item + '|' + r.lpn; pm[k] = r2((pm[k] || 0) + r.qty); pa[k] = r2((pa[k] || 0) + aOf(r)); });   // ยอดรวมรายพาเลท (Item + LPN)
+  calcStatus();
+  const whs = [...new Set(rows.map(r => r.wh))].sort(CO.compare), opt = '<option value="">ทุกคลัง</option>' + whs.map(w => '<option>' + esc(w) + '</option>').join('');
+  ['#fWh', '#cWh'].forEach(s => { const e = $(s), v = e.value; e.innerHTML = opt; e.value = whs.includes(v) ? v : ''; });
+  $$('[data-ff="wh"]').forEach(e => { const v = e.value; e.innerHTML = opt; e.value = whs.includes(v) ? v : ''; FS[e.dataset.fk].wh = e.value; });
+  $('#kpi').innerHTML = [['SKU', new Set(rows.map(r => r.item)).size], ['พาเลท (LPN)', Object.keys(pm).length], ['แถวสต็อก', rows.length], ['Case On Hand รวม', fmt(rows.reduce((a, r) => a + r.qty, 0))],
+    ['พาเลท OK', PAL.filter(p => p.st === 'ok').length.toLocaleString() + ' / ' + PAL.length.toLocaleString()], ['ต้องจัดการ', PAL.filter(p => p.st !== 'ok' && p.st !== 'hold').length.toLocaleString() + ' พาเลท'], ['Status ≠ OK (ข้าม)', PAL.filter(p => p.st === 'hold').length.toLocaleString() + ' พาเลท']]
+    .map(([l, v]) => '<div class="card p-3"><div class="sub">' + l + '</div><div class="text-xl font-semibold mono">' + (typeof v === 'number' ? v.toLocaleString() : v) + '</div></div>').join('');
+  const ov = PAL.filter(p => p.qty > p.cap + 1e-9).length; $('[data-t="fix"]').textContent = 'แก้เกิน Cap' + (ov ? ' (' + ov + ')' : '');
+  render(); save();
+}
+function render() {
+  if (tab === 'stock') {
+    $('#hSort').innerHTML = COLS.map(([k, l]) => '<th class="' + (k && k !== 'pt' && k !== 'cst' ? 'so' : '') + '" data-s="' + k + '">' + l + '</th>').join('');
+    const v = viewRows(), shown = v.slice(0, limit);
+    $('#cnt').textContent = v.length.toLocaleString() + ' แถว';
+    $('#bMore').classList.toggle('hide', v.length <= limit);
+    $('#tb').innerHTML = shown.length ? shown.map(r => {
+      const cap = capOf(r.item, r.wh), t = pm[r.item + '|' + r.lpn] || 0, cl = t > cap ? 'bad' : t === cap ? 'ok' : 'wn', col = t > cap ? 'var(--bad)' : t === cap ? 'var(--ok)' : 'var(--wn)';
+      return '<tr><td class="mono">' + esc(r.item) + '</td><td>' + esc(nameOf(r.item, r.desc)) + '</td><td class="mono">' + esc(r.lot) + '<div class="sub">' + esc(r.lot2) + '</div></td><td>' + esc(r.loc || '—') + '</td>' +
+        '<td class="mono"><b>' + esc(r.lpn) + '</b>' + (r.from ? '<div class="sub">รวมจาก ' + esc(r.from) + '</div>' : '') + '</td><td class="r mono"><b>' + fmt(r.qty) + '</b></td>' +
+        '<td class="r mono">' + (aOf(r) > 0 ? '<span class="chip bad">' + fmt(aOf(r)) + '</span>' : palFree(r.item, r.lpn) ? '<span class="sub">0</span>' : '<span class="sub">0</span><div class="sub" style="color:var(--bad)">พาเลทนี้มี Alloc ' + fmt(pa[r.item + '|' + r.lpn]) + '</div>') + '</td>' +
+        '<td class="mono"><span class="chip ' + cl + '">' + fmt(t) + ' / ' + fmt(cap) + '</span><div class="bar"><i style="width:' + Math.min(100, t / cap * 100) + '%;background:' + col + '"></i></div></td>' +
+        '<td>' + stHtml(r.item, r.lpn) + '</td><td>' + fsChip(r) + '</td><td>' + esc(r.wh) + '</td><td style="white-space:nowrap"><button class="btn s" data-o="' + esc(r.item) + '">จัดชุด</button> <button class="btn s" data-g="' + esc(r.item) + '|' + esc(r.wh) + '">รวมเลท</button> <button class="btn s d" data-d="' + r.id + '">ลบ</button></td></tr>';
+    }).join('') : '<tr><td colspan="12" class="sub" style="text-align:center;padding:40px">' + (rows.length ? 'ไม่พบรายการตามตัวกรอง' : 'ยังไม่มีข้อมูล — กด “นำเข้า Excel / CSV”') + '</td></tr>';
+  }
+  if (tab === 'opt') renderOpt();
+  if (tab === 'mrg') renderMrg();
+  if (tab === 'fix') renderFix();
+  if (tab === 'cap') renderCap();
+  if (tab === 'log') $('#lb').innerHTML = logs.length ? logs.slice(0, 500).map(l => '<tr><td>' + esc(l.at) + '</td><td><span class="chip ' + (l.type === 'ลบ' || l.type === 'ตัดยอด' ? 'bad' : '') + '">' + esc(l.type) + '</span></td><td class="mono">' + esc(l.item) + '</td><td class="mono">' + esc(l.lpn) + '</td><td>' + esc(l.lot) + '</td><td class="r mono">' + fmt(l.qty) + '</td><td>' + esc(l.wh) + '</td><td>' + esc(l.ref) + '</td></tr>').join('') : '<tr><td colspan="8" class="sub" style="text-align:center;padding:30px">ยังไม่มีประวัติ</td></tr>';
+}
+
+/* ===================== ลบแถวสต็อก (Confirm + Log) ===================== */
+function delRow(id) {
+  const r = rows.find(x => x.id === id); if (!r) return;
+  modal('ยืนยันการลบรายการ', '<div>Item <b>' + esc(r.item) + '</b> · LPN <b>' + esc(r.lpn) + '</b><br>Lot ' + esc(r.lot) + ' · จำนวน <b>' + fmt(r.qty) + '</b> CS<br><span class="sub">การลบไม่สามารถย้อนกลับได้ (บันทึกไว้ในประวัติ)</span></div>',
+    [['ยกเลิก'], ['ลบรายการ', 'd', () => { rows = rows.filter(x => x.id !== id); log('ลบ', r, 'ลบแถวสต็อก'); refresh(); toast('ลบรายการแล้ว'); }]]);
+}
+
+/* ===================== Batch Optimizer (Pallet Bucketing) ===================== */
+function palletsOf(item, wh, f, all) {                                                   // รวมทุกแถวของ LPN เดียวกันเป็น 1 พาเลท
+  const m = {};
+  rows.forEach(r => { if (r.item !== item || r.wh !== wh || !passF(r, f)) return; const o = m[r.lpn] || (m[r.lpn] = { lpn: r.lpn, qty: 0, alloc: 0, locs: new Set(), wh: r.wh }); o.qty = r2(o.qty + r.qty); o.alloc = r2(o.alloc + aOf(r)); if (!fOk(r)) (o.bad || (o.bad = new Set())).add(stFile(r)); if (r.loc) o.locs.add(r.loc); });
+  return Object.values(m).filter(p => p.qty > 0 && (all || (p.alloc <= 0 && palFok(p))));
+}
+function pack(ps, cap, mode) {                                               // ชุดละไม่เกิน Cap · ไม่แยก LPN
+  const over = ps.filter(p => p.qty > cap).map(p => ({ ps: [p], t: p.qty, over: true }));
+  const ok = ps.filter(p => p.qty <= cap).sort((a, b) => b.qty - a.qty);
+  let bins = [];
+  if (mode === 'bal') {                                                      // กระจายให้เท่า ๆ กัน ใช้จำนวนพาเลทน้อยสุด
+    let n = ok.length ? Math.max(1, Math.ceil(ok.reduce((a, p) => a + p.qty, 0) / cap - 1e-9)) : 0;
+    for (;; n++) {
+      bins = Array.from({ length: n }, () => ({ ps: [], t: 0 })); let f = true;
+      for (const p of ok) { bins.sort((a, b) => a.t - b.t); const b = bins.find(x => x.t + p.qty <= cap + 1e-9); if (!b) { f = false; break; } b.ps.push(p); b.t = r2(b.t + p.qty); }
+      if (f) break;
+    }
+  } else {                                                                   // Best-Fit: เติมชุดให้เต็ม Cap ก่อน เหลือเศษท้ายสุด
+    for (const p of ok) { let b = null; for (const x of bins) if (x.t + p.qty <= cap + 1e-9 && (!b || x.t > b.t)) b = x; if (!b) { b = { ps: [], t: 0 }; bins.push(b); } b.ps.push(p); b.t = r2(b.t + p.qty); }
+  }
+  return over.concat(bins.filter(b => b.ps.length)).map(b => (b.ps.sort((a, c) => CO.compare(a.lpn, c.lpn)), b));
+}
+function renderOpt() {
+  const q = $('#oq').value.toLowerCase(), agg = {};
+  rows.forEach(r => { if (!passF(r, FS.o)) return; const k = r.item + '|' + r.wh, a = agg[k] || (agg[k] = { item: r.item, wh: r.wh, hit: !q }); if (q && (r.item + ' ' + nameOf(r.item, r.desc) + ' ' + r.lpn).toLowerCase().includes(q)) a.hit = true; });
+  const list = Object.values(agg).filter(a => a.hit).sort((a, b) => { const pr = getPrio(), ra = pr.rank[a.item + '|' + a.wh] || 1e6, rb = pr.rank[b.item + '|' + b.wh] || 1e6; return ra - rb || CO.compare(a.item, b.item) || CO.compare(a.wh, b.wh); }), mode = $('#om').value;
+  $('#oList').innerHTML = list.slice(0, 30).map(a => {
+    const cap = capOf(a.item, a.wh), ps = palletsOf(a.item, a.wh, FS.o), held = palletsOf(a.item, a.wh, FS.o, true).length - ps.length, sets = pack(ps, cap, mode), tot = r2(ps.reduce((s, p) => s + p.qty, 0));
+    return '<details class="card p-3"' + (q ? ' open' : '') + '><summary class="cursor-pointer">' + (getPrio().rank[a.item + '|' + a.wh] ? '<span class="chip wn">#' + getPrio().rank[a.item + '|' + a.wh] + '</span> ' : '<span class="chip ok">OK</span> ') + '<b class="mono">' + esc(a.item) + '</b> ' + esc(nameOf(a.item)) +
+      ' <span class="chip">' + esc(a.wh) + '</span> <span class="chip">Cap ' + fmt(cap) + ' · ' + srcOf(a.item) + '</span> <span class="chip">' + ps.length + ' พาเลท → ' + sets.length + ' ชุด</span>' + (held ? ' <span class="chip bad">ข้าม ' + held + ' พาเลทที่มี Allocated / Status ไม่ใช่ OK</span>' : '') + ' <span class="chip">รวม ' + fmt(tot) + '</span></summary><div class="grid gap-2 mt-2">' +
+      sets.map((s, i) => { const keep = s.ps.reduce((m, p) => p.qty > m.qty ? p : m, s.ps[0]);
+        return '<div class="card p-2"><b>ชุดที่ ' + (i + 1) + '</b> <span class="chip ' + (s.over ? 'bad' : s.t === cap ? 'ok' : 'wn') + '">' + fmt(s.t) + ' / ' + fmt(cap) + (s.over ? ' เกิน Cap' : '') + '</span> <span class="sub">เก็บที่ ' + esc(keep.lpn) + '</span><div class="mt-1 flex flex-wrap gap-1">' +
+          s.ps.map(p => '<span class="chip mono' + (p === keep ? ' ok' : '') + '">' + esc(p.lpn) + ' · ' + fmt(p.qty) + (p.locs.size ? ' · ' + esc([...p.locs].join(', ')) : '') + '</span>').join('') + '</div></div>'; }).join('') + '</div></details>';
+  }).join('') || '<div class="sub p-6" style="text-align:center">ไม่มีข้อมูล</div>';
+}
+
+/* ===================== รวมเลท (เลือกเอง / ให้โปรแกรมหาชุดที่ตรง Cap) ===================== */
+const mOk = p => !(p.alloc > 0) && palFok(p);                          // รวมเลท/ตัดยอดได้เฉพาะพาเลทที่ Allocated = 0
+const mSel = new Set();                                   // LPN ที่ติ๊กเลือกไว้
+let mDest = '', mLast = null, mPrev = '', mPick = '';
+function mCur() { const k = $('#mi').value, i = k.lastIndexOf('|'); return { item: i < 0 ? '' : k.slice(0, i), wh: i < 0 ? '' : k.slice(i + 1) }; }   // คีย์ = Item|WH (ไม่รวมข้ามคลัง)
+function mPallets(item, wh) {                                 // พาเลทของ Item (รวมทุกแถวใน LPN เดียวกัน)
+  const m = {};
+  rows.forEach(r => {
+    if (r.item !== item || r.wh !== wh || !passF(r, FS.m)) return;
+    const o = m[r.lpn] || (m[r.lpn] = { lpn: r.lpn, qty: 0, alloc: 0, loc: new Set(), rows: [], wh: r.wh });
+    o.qty = r2(o.qty + r.qty); o.alloc = r2(o.alloc + aOf(r)); if (!fOk(r)) (o.bad || (o.bad = new Set())).add(stFile(r)); if (r.loc) o.loc.add(r.loc); o.rows.push(r);
+  });
+  return Object.values(m).filter(p => p.qty > 0).sort((a, b) => CO.compare(a.lpn, b.lpn));
+}
+function exactSubset(ps, target) {                        // หาชุด LPN ที่รวมได้ตรง target (ไม่มีตรง = ใกล้สุดแต่ไม่เกิน)
+  const S = 100, T = Math.round(target * S);
+  const a = ps.map(p => ({ p, w: Math.round(p.qty * S) })).filter(x => x.w > 0 && x.w <= T).sort((x, y) => y.w - x.w);
+  const reach = new Int32Array(T + 1).fill(-1); reach[0] = -2;
+  a.forEach((x, i) => { for (let s = T; s >= x.w; s--) if (reach[s] < 0 && reach[s - x.w] !== -1) reach[s] = i; });
+  let b = T; while (b > 0 && reach[b] < 0) b--;
+  const out = []; let s = b; while (s > 0) { const i = reach[s]; out.push(a[i].p); s -= a[i].w; }
+  return { picked: out, sum: b / S, exact: b === T };
+}
+/* ===== ให้โปรแกรมหาชุดที่ตรง Cap: แบ่งพาเลทที่ Allocated = 0 เป็นชุด แล้วเลือกรวมเลท/ตัดยอด อัตโนมัติทั้งหมด หรือทีละชุด ===== */
+function autoPlan(ps, cap, seed) {
+  let rem = ps.slice(); const sets = [], take = a => { const s = new Set(a); rem = rem.filter(p => !s.has(p)); };
+  if (seed.length) {                                                // LPN ที่ติ๊กไว้ = ชุดแรก (โปรแกรมหามาเติมให้ครบ Cap)
+    const base = r2(seed.reduce((a, p) => a + p.qty, 0));
+    if (base <= cap + 1e-9) { take(seed); const add = base < cap - 1e-9 ? exactSubset(rem, r2(cap - base)).picked : []; take(add); sets.push(seed.concat(add)); }
+  }
+  for (let g = 0; rem.length && g < 500; g++) { const r = exactSubset(rem, cap); if (!r.picked.length) break; take(r.picked); sets.push(r.picked); }   // เต็ม Cap ก่อน แล้วค่อยลดหลั่น
+  return { left: rem, sets: sets.map(a => { const pals = a.slice().sort((x, y) => CO.compare(x.lpn, y.lpn)); return { pals, total: r2(pals.reduce((s, p) => s + p.qty, 0)), on: true, state: '', dest: '' }; }) };
+}
+const bigPal = pals => pals.reduce((m, p) => p.qty > m.qty ? p : m, pals[0]);
+function mAuto() {
+  const { item, wh } = mCur(); if (!item) return;
+  const allP = mPallets(item, wh), ps = allP.filter(mOk), cap = capOf(item, wh), heldA = allP.length - ps.length;
+  if (!ps.length) return toast('ไม่มี LPN ที่ Allocated = 0 และ Status = OK ให้จัดชุด');
+  const plan = autoPlan(ps, cap, ps.filter(p => mSel.has(p.lpn)));
+  if (!plan.sets.length) return toast('ไม่พบ LPN ที่จัดชุดได้โดยไม่เกิน Cap');
+  const S = plan.sets, d = document.createElement('dialog'); d.style.width = 'min(800px,96vw)'; d.style.maxHeight = '90vh'; d.style.overflow = 'auto';
+  const todo = () => S.filter(s => s.on && !s.state);
+  const view = () => {
+    const ex = S.filter(s => Math.abs(s.total - cap) < 1e-9).length, t = todo(), tm = t.filter(s => s.pals.length >= 2).length;
+    d.innerHTML = '<div class="p-4"><h3 class="font-semibold mb-1">หาชุดที่ตรง Cap · <span class="mono">' + esc(item) + '</span> ' + esc(nameOf(item)) + ' <span class="chip">' + esc(wh) + '</span></h3>' +
+      '<div class="sub mb-3">Cap ' + fmt(cap) + ' · พบ ' + S.length + ' ชุด (เต็ม Cap พอดี ' + ex + ' ชุด)' + (plan.left.length ? ' · ข้าม ' + plan.left.length + ' พาเลทที่เกิน Cap' : '') + (heldA ? ' · ข้าม ' + heldA + ' พาเลทที่ติด Allocated หรือ Status ไม่ใช่ OK' : '') + ' · เลือก “ทำทั้งหมดอัตโนมัติ” หรือกดรวมเลท/ตัดยอดทีละชุด (ยกเลิกได้จากประวัติ)</div>' +
+      '<div class="flex flex-wrap gap-2 mb-3"><button class="btn p" data-a="mrgAll"' + (tm ? '' : ' disabled') + '>รวมเลททั้งหมดที่เลือก (' + tm + ' ชุด)</button><button class="btn p" data-a="cutAll"' + (t.length ? '' : ' disabled') + '>ตัดยอดทั้งหมดที่เลือก (' + t.length + ' ชุด)</button>' +
+      '<button class="btn" data-a="all">เลือกทุกชุด</button><button class="btn" data-a="none">ไม่เลือกเลย</button><div class="flex-1"></div><button class="btn" data-a="close">ปิด</button></div>' +
+      '<div class="grid gap-2">' + S.map((s, i) => {
+        const full = Math.abs(s.total - cap) < 1e-9, done = !!s.state;
+        return '<div class="card p-2"' + (done ? ' style="opacity:.75"' : '') + '><div class="flex flex-wrap items-center gap-2"><label class="flex items-center gap-2"><input type="checkbox" data-sel="' + i + '"' + (s.on && !done ? ' checked' : '') + (done ? ' disabled' : '') + '><b>ชุดที่ ' + (i + 1) + '</b></label>' +
+          '<span class="chip ' + (full ? 'ok' : 'wn') + '">' + fmt(s.total) + ' / ' + fmt(cap) + (full ? ' ตรง Cap' : ' · ขาด ' + fmt(cap - s.total)) + '</span><span class="sub">' + s.pals.length + ' LPN</span><div class="flex-1"></div>' +
+          (done ? (s.state === 'merge' ? '<span class="chip ok">รวมเลทแล้ว → ' + esc(s.dest) + '</span>' : '<span class="chip bad">ตัดยอดแล้ว</span>')
+            : '<button class="btn s" data-v="' + i + '">เลือกในตาราง</button><button class="btn s p" data-m="' + i + '"' + (s.pals.length < 2 ? ' disabled title="มี LPN เดียว — ไม่มีอะไรให้รวม"' : '') + '>รวมเลท</button><button class="btn s p" data-c="' + i + '">ตัดยอด</button>') + '</div>' +
+          '<div class="mt-1 flex flex-wrap gap-1">' + s.pals.map(p => '<span class="chip mono">' + esc(p.lpn) + ' · ' + fmt(p.qty) + (p.loc.size ? ' · ' + esc([...p.loc].join(', ')) : '') + '</span>').join('') + '</div></div>';
+      }).join('') + '</div></div>';
+  };
+  const mergeOne = s => { const dest = bigPal(s.pals).lpn; mergeSet(s.pals, dest, true); s.state = 'merge'; s.dest = dest; };
+  const cutOne = s => { const r = doCut(item, wh, s.pals.flatMap(p => p.rows.map(x => x.id)), true); if (r) s.state = 'cut'; return !!r; };
+  const bulk = kind => {
+    const t = todo().filter(s => kind === 'cut' || s.pals.length >= 2); if (!t.length) return;
+    const skip = todo().length - t.length, np = t.reduce((a, s) => a + s.pals.length, 0), tot = r2(t.reduce((a, s) => a + s.total, 0));
+    modal(kind === 'cut' ? 'ยืนยันตัดยอดทั้งหมดที่เลือก' : 'ยืนยันรวมเลททั้งหมดที่เลือก',
+      '<div>' + (kind === 'cut' ? 'ตัดยอด' : 'รวมเลท') + ' <b>' + t.length + '</b> ชุด (' + np + ' LPN · รวม ' + fmt(tot) + ' CS)' + (skip ? '<br><span class="sub">ข้าม ' + skip + ' ชุดที่มี LPN เดียว (ไม่มีอะไรให้รวม)</span>' : '') +
+      '<br><span class="sub">แต่ละชุดไม่เกิน Cap · ยกเลิกทีละรายการได้จากประวัติ</span></div>',
+      [['ยกเลิก'], ['ยืนยัน', 'p', () => {
+        let n = 0; t.forEach(s => { if (kind === 'cut' ? cutOne(s) : (mergeOne(s), true)) n++; });
+        mSel.clear(); mDest = ''; refresh(); toast((kind === 'cut' ? 'ตัดยอด ' : 'รวมเลท ') + n + ' ชุดเรียบร้อย'); view();
+      }]]);
+  };
+  d.addEventListener('click', e => {
+    const b = e.target.closest('button'), a = b && b.dataset.a;
+    if (a === 'close') return d.close();
+    if (a === 'all' || a === 'none') { S.forEach(s => { if (!s.state) s.on = a === 'all'; }); return view(); }
+    if (a === 'mrgAll') return bulk('merge');
+    if (a === 'cutAll') return bulk('cut');
+    if (b && b.dataset.m !== undefined) { const s = S[+b.dataset.m]; mergeOne(s); refresh(); toast('รวมเลทเข้า ' + s.dest + ' แล้ว'); return view(); }
+    if (b && b.dataset.c !== undefined) { const s = S[+b.dataset.c]; if (cutOne(s)) { refresh(); toast('ตัดยอด ' + fmt(s.total) + ' CS เรียบร้อย'); } return view(); }
+    if (b && b.dataset.v !== undefined) { const s = S[+b.dataset.v]; mSel.clear(); s.pals.forEach(p => mSel.add(p.lpn)); mDest = bigPal(s.pals).lpn; d.close(); renderMrg(); toast('เลือก ' + s.pals.length + ' LPN ในตารางแล้ว'); }
+  });
+  d.addEventListener('change', e => { const c = e.target.closest('[data-sel]'); if (c) { S[+c.dataset.sel].on = c.checked; view(); } });
+  d.addEventListener('close', () => d.remove());
+  view(); document.body.appendChild(d); d.showModal();
+}
+function recHtml(m) {                                     // แสดงว่ารวมมาจาก LPN ไหน / Case On Hand เท่าไร
+  return '<div><b>รวมเข้า LPN ' + esc(m.dest) + '</b> @ ' + esc(m.destLoc || '—') + ' · Item <span class="mono">' + esc(m.item) + '</span> ' + esc(m.name) +
+    ' · <span class="chip ' + (m.total === m.cap ? 'ok' : 'wn') + '">' + fmt(m.total) + ' / ' + fmt(m.cap) + '</span> <span class="sub">' + esc(m.at) + '</span></div>' +
+    '<div class="overflow-x-auto mt-2"><table><thead><tr><th>LPN ต้นทาง</th><th>Location</th><th>Lot (ERP / DLD)</th><th class="r">Case On Hand</th><th>สถานะ</th></tr></thead><tbody>' +
+    m.src.map(s => s.lots.map((l, i) => '<tr>' + (i ? '<td></td><td></td>' : '<td class="mono"><b>' + esc(s.lpn) + '</b></td><td>' + esc(s.loc || '—') + '</td>') +
+      '<td class="mono">' + esc(l.lot) + (l.lot2 ? ' / ' + esc(l.lot2) : '') + '</td><td class="r mono">' + fmt(l.qty) + '</td><td>' +
+      (i ? '' : s.lpn === m.dest ? '<span class="chip ok">เก็บ (ปลายทาง)</span>' : '<span class="chip">ย้ายเข้า ' + esc(m.dest) + '</span>') + '</td></tr>').join('')).join('') +
+    '</tbody></table></div><div class="sub mt-1">สูตร: ' + esc(m.src.map(s => s.lpn + ' (' + fmt(s.qty) + ')').join(' + ')) + ' = ' + fmt(m.total) + '</div>';
+}
+function renderMrg() {
+  const q = $('#mq').value.toLowerCase(), set = {};
+  rows.forEach(r => { const k = r.item + '|' + r.wh; if (!set[k] && passF(r, FS.m) && (!q || (r.item + ' ' + nameOf(r.item, r.desc)).toLowerCase().includes(q))) set[k] = 1; });
+  renderPrio(); const pr = getPrio(), rk = k => pr.rank[k] || 1e6, keys = Object.keys(set).sort((a, b) => rk(a) - rk(b) || CO.compare(a, b)).slice(0, 300), sel = $('#mi'), want = mPick || sel.value; mPick = '';
+  sel.innerHTML = keys.map(k => { const i = k.lastIndexOf('|'); return '<option value="' + esc(k) + '">' + (pr.rank[k] ? '#' + pr.rank[k] + ' · ' : 'OK · ') + esc(k.slice(0, i)) + ' · ' + esc(k.slice(i + 1)) + ' · ' + esc(nameOf(k.slice(0, i))) + '</option>'; }).join('');
+  sel.value = keys.includes(want) ? want : (keys[0] || '');
+  if (sel.value !== mPrev) { mSel.clear(); mDest = ''; mPrev = sel.value; }
+  const key = sel.value, ix = key.lastIndexOf('|'), item = ix < 0 ? '' : key.slice(0, ix), mwh = ix < 0 ? '' : key.slice(ix + 1), ps = item ? mPallets(item, mwh) : [], cap = item ? capOf(item, mwh) : 0;
+  [...mSel].forEach(l => { if (!ps.some(p => p.lpn === l && mOk(p))) mSel.delete(l); });
+  const ch = ps.filter(p => mSel.has(p.lpn)), tot = r2(ch.reduce((a, p) => a + p.qty, 0));
+  if (!mSel.has(mDest)) mDest = ch.length ? ch.reduce((m, p) => p.qty > m.qty ? p : m).lpn : '';
+  const st = tot === cap ? ['ok', 'ตรง Cap พอดี'] : tot > cap ? ['bad', 'เกิน Cap ' + fmt(tot - cap)] : ['wn', 'ขาดอีก ' + fmt(cap - tot)];
+  const heldN = ps.filter(p => !mOk(p)).length;
+  $('#mSum').innerHTML = item ? '<b>เลือก ' + ch.length + ' LPN</b> · รวม <b class="mono">' + fmt(tot) + '</b> / Cap ' + fmt(cap) + ' (' + srcOf(item) + ') <span class="chip ' + st[0] + '">' + st[1] + '</span>' + ((GRP[key] || {}).ok ? ' <span class="chip ok">Item OK</span>' : '') + (heldN ? ' <span class="chip bad">ข้าม ' + heldN + ' LPN ที่มี Allocated / Status ไม่ใช่ OK</span>' : '') : '';
+  const full = Math.abs(tot - cap) < 1e-9, pct = cap ? Math.min(100, tot / cap * 100) : 0, pc = tot > cap + 1e-9 ? 'var(--bad)' : full ? 'var(--ok)' : 'var(--wn)';
+  $('#mPrev').innerHTML = ch.length ? '<div class="card p-3" style="border-color:' + pc + '"><div class="flex flex-wrap gap-4 items-center">' +
+    '<div><div class="sub">ยอด Case On Hand หลังรวม (ตัวอย่าง ยังไม่รวมจริง)</div><div class="text-xl font-semibold mono">' + fmt(tot) + ' <span class="sub">/ Cap ' + fmt(cap) + '</span></div></div>' +
+    '<div><span class="chip ' + st[0] + '">' + (full ? 'เต็ม Cap พอดี' : tot > cap ? 'เกิน Cap ' + fmt(tot - cap) + ' (รวมไม่ได้)' : 'น้อยกว่า Cap · ขาดอีก ' + fmt(cap - tot)) + '</span><div class="bar" style="width:180px"><i style="width:' + pct + '%;background:' + pc + '"></i></div></div>' +
+    '<div class="sub">เก็บที่ LPN <b class="mono">' + esc(mDest || '—') + '</b> · ' + ch.length + ' LPN</div></div>' +
+    '<div class="sub mt-2">สูตร: ' + esc(ch.map(p => p.lpn + ' (' + fmt(p.qty) + ')').join(' + ')) + ' = ' + fmt(tot) + '</div>' +
+    (!full && tot < cap && !ps.some(p => mOk(p) && !mSel.has(p.lpn) && p.qty <= cap - tot + 1e-9) ? '<div class="mt-1"><span class="chip wn">รวมต่อไม่ได้แล้ว — ไม่มี LPN ที่เติมได้โดยไม่เกิน Cap</span> <span class="sub">กด “ตัดยอด…” ได้เลย</span></div>' : '') + '</div>' : '';
+  $('#bMrg').disabled = !(ch.length >= 2 && tot <= cap + 1e-9 && ch.every(mOk));
+  $('#bMCut').disabled = !(ch.length >= 1 && tot > 0 && tot <= cap + 1e-9 && ch.every(mOk));          // ตัดยอดได้เมื่อยอดเท่ากับหรือน้อยกว่า Cap (ไม่เกิน)
+  $('#mTb').innerHTML = ps.map(p => {
+    const on = mSel.has(p.lpn), ok = mOk(p), lots = [...new Set(p.rows.map(r => r.lot))];
+    return '<tr' + (ok ? '' : ' style="opacity:.6"') + '><td><input type="checkbox" data-m="' + esc(p.lpn) + '"' + (on ? ' checked' : '') + (ok ? '' : ' disabled title="' + (p.alloc > 0 ? 'มี Allocated' : 'Status ไม่ใช่ OK') + ' — รวมเลทไม่ได้"') + '></td><td class="mono"><b>' + esc(p.lpn) + '</b></td><td>' + esc([...p.loc].join(', ') || '—') + '</td>' +
+      '<td class="mono">' + esc(lots.slice(0, 3).join(', ')) + (lots.length > 3 ? ' +' + (lots.length - 3) : '') + '</td><td class="r mono"><b>' + fmt(p.qty) + '</b></td>' +
+      '<td class="r mono">' + (p.alloc <= 0 ? '<span class="sub">0</span>' : '<span class="chip bad">' + fmt(p.alloc) + '</span>' + (p.qty - p.alloc > 1e-9 ? '<div class="sub" style="color:var(--bad)">จองบางล็อต · ต้องเคลียร์ทั้งพาเลท</div>' : '<div class="sub" style="color:var(--bad)">จองทั้งพาเลท</div>')) + '</td>' +
+      '<td>' + palFs(p) + '</td><td><label class="flex items-center gap-1"><input type="radio" name="md" data-md="' + esc(p.lpn) + '"' + (mDest === p.lpn ? ' checked' : '') + (on ? '' : ' disabled') + '> เก็บที่ LPN นี้</label></td></tr>';
+  }).join('') || '<tr><td colspan="8" class="sub" style="text-align:center;padding:30px">ไม่มีพาเลทของ Item นี้</td></tr>';
+  const lastFull = mLast && mLast.total <= mLast.cap + 1e-9 && !rows.some(r => r.item === mLast.item && r.wh === mLast.wh && r.lpn === mLast.dest && aOf(r) > 0) && rows.some(r => r.item === mLast.item && r.wh === mLast.wh && r.lpn === mLast.dest);
+  $('#mRes').innerHTML = mLast ? '<div class="card p-3" style="border-color:var(--ok)"><div class="font-semibold mb-1">ผลการรวมเลทล่าสุด</div>' + recHtml(mLast) +
+    (lastFull ? '<div class="flex gap-2 items-center mt-2"><span class="chip ' + (Math.abs(mLast.total - mLast.cap) < 1e-9 ? 'ok">เต็ม Cap พอดี' : 'wn">น้อยกว่า Cap') + '</span><button class="btn s p" data-cl="' + mLast.id + '">ตัดยอด LPN ' + esc(mLast.dest) + '</button></div>' : '') + '</div>' : '';
+  $('#cHist').innerHTML = cuts.slice(0, 30).map(c => '<details class="card p-3"><summary class="cursor-pointer flex flex-wrap items-center gap-2"><span class="tg sub">▸</span><span class="chip bad">ตัดยอด</span> <b class="mono">' + esc(c.item) + '</b> ' + esc(c.name) + ' · ' + byOrig(c.removed).length + ' LPN เดิม · ' + fmt(c.total) + ' / ' + fmt(c.cap) + ' <span class="chip">' + esc(c.wh) + '</span> <span class="sub">' + esc(c.at) + '</span><button class="btn s d" style="margin-left:auto" data-cu="' + c.id + '">ยกเลิกการตัดยอด</button></summary><div class="mt-2">' +
+    '<div class="overflow-x-auto"><table><thead><tr><th>LPN เดิม (ก่อนรวม)</th><th>รวมเข้า LPN</th><th>Location</th><th>Lot (ERP / DLD)</th><th class="r">Case On Hand</th></tr></thead><tbody>' +
+    c.removed.map(r => '<tr><td class="mono"><b>' + esc(origOf(r)) + '</b></td><td class="mono">' + (origOf(r) !== r.lpn ? esc(r.lpn) : '<span class="sub">—</span>') + '</td><td>' + esc(r.loc || '—') + '</td><td class="mono">' + esc(r.lot) + (r.lot2 ? ' / ' + esc(r.lot2) : '') + '</td><td class="r mono">' + fmt(r.qty) + '</td></tr>').join('') +
+    '</tbody></table></div><div class="sub mt-1">สูตร: ' + esc(byOrig(c.removed).map(o => o.lpn + ' (' + fmt(o.qty) + ')').join(' + ')) + ' = ' + fmt(c.total) + '</div>' +
+    '<div class="flex gap-2 mt-2"><button class="btn s" data-ce="' + c.id + '">Export Excel</button></div></div></details>').join('') || '<div class="sub">ยังไม่มีประวัติการตัดยอด</div>';
+  $('#mHist').innerHTML = merges.slice(0, 20).map(m => '<details class="card p-3"><summary class="cursor-pointer"><b class="mono">' + esc(m.dest) + '</b> ← ' + m.src.length + ' LPN · ' + esc(m.item) + ' · ' + fmt(m.total) + ' / ' + fmt(m.cap) + ' <span class="sub">' + esc(m.at) + '</span></summary><div class="mt-2">' + recHtml(m) +
+    '<div class="flex gap-2 mt-2"><button class="btn s" data-me="' + m.id + '">Export Excel</button><button class="btn s d" data-mu="' + m.id + '">ยกเลิกการรวม (คืน LPN เดิม)</button></div></div></details>').join('') || '<div class="sub">ยังไม่มีประวัติการรวมเลท</div>';
+}
+function doMerge() {
+  const { item, wh } = mCur(), ch = mPallets(item, wh).filter(p => mSel.has(p.lpn));
+  if (ch.length < 2 || !mSel.has(mDest)) return;
+  mergeSet(ch, mDest);
+}
+function mergeSet(ch, mDest, quiet) {                          // รวมพาเลท ch เข้า LPN ปลายทาง (quiet = ไม่รีเฟรช/ไม่แจ้งเตือน ใช้กับโหมดอัตโนมัติ)
+  if (ch.some(p => !mOk(p))) return toast('มี LPN ที่ Allocated > 0 หรือ Status ไม่ใช่ OK — รวมเลทไม่ได้');
+  const item = ch[0].rows[0].item, tot = r2(ch.reduce((a, p) => a + p.qty, 0)), dp = ch.find(p => p.lpn === mDest), destLoc = [...dp.loc][0] || '';
+  const rec = { id: uid(), ts: Date.now(), at: new Date().toLocaleString('th-TH'), item, name: nameOf(item), wh: dp.wh, cap: capOf(item, dp.wh), dest: mDest, destLoc, total: tot, moved: [],
+    src: ch.map(p => ({ lpn: p.lpn, loc: [...p.loc].join(', '), qty: p.qty, lots: p.rows.map(r => ({ lot: r.lot, lot2: r.lot2, qty: r.qty })) })) };
+  ch.forEach(p => {
+    if (p.lpn === mDest) return;
+    p.rows.forEach(r => { rec.moved.push({ id: r.id, lpn: r.lpn, loc: r.loc, from: r.from || '', orig: r.orig || '' }); r.orig = r.orig || r.lpn; r.from = r.lpn; r.lpn = mDest; r.loc = destLoc; });   // ย้ายสต็อกเข้า LPN ปลายทาง (Lot เดิมคงไว้)
+    log('รวมเลท', { item, lpn: p.lpn, lot: p.rows.map(r => r.lot).join(', '), qty: p.qty, wh: p.wh }, '→ ' + mDest + ' (รวม ' + fmt(tot) + '/' + fmt(rec.cap) + ')');
+  });
+  merges.unshift(rec); mLast = rec;
+  if (!quiet) { mSel.clear(); refresh(); toast('รวมเลทเข้า ' + rec.dest + ' แล้ว'); }
+  return rec;
+}
+function undoMerge(id, quiet) {
+  const rec = merges.find(m => m.id === id); if (!rec) return;
+  const mp = {}; rows.forEach(r => mp[r.id] = r);
+  rec.moved.forEach(x => { const r = mp[x.id]; if (r) { r.lpn = x.lpn; r.loc = x.loc; if (x.from) r.from = x.from; else delete r.from; if (x.orig) r.orig = x.orig; else delete r.orig; } });
+  merges = merges.filter(m => m !== rec); if (mLast === rec) mLast = null;
+  log('ยกเลิกรวมเลท', { item: rec.item, lpn: rec.dest, lot: '', qty: rec.total, wh: rec.wh }, 'คืน LPN ต้นทาง');
+  if (!quiet) { refresh(); toast('ยกเลิกการรวมเลทแล้ว'); }
+}
+function undoAllMerges() {                                      // ย้อนจากรายการใหม่สุดไปเก่าสุด (กันกรณีรวมซ้อนกัน)
+  const n = merges.length; merges.slice().forEach(m => undoMerge(m.id, true)); refresh(); toast('ยกเลิกการรวมเลททั้งหมด ' + n + ' รายการแล้ว');
+}
+
+/* ===================== ตัดยอด (ครบ Cap พอดี → ตัดออกจากสต็อก) ===================== */
+const origOf = r => r.orig || r.from || r.lpn;                               // เลขพาเลทเดิมก่อนรวม
+function byOrig(rs) {                                              // จัดกลุ่มตามพาเลทเดิม (ไม่ยึดตัวใดเป็นหลัก)
+  const m = new Map(); rs.forEach(r => { const k = origOf(r); const o = m.get(k) || { lpn: k, qty: 0, rows: [] }; o.qty = r2(o.qty + r.qty); o.rows.push(r); m.set(k, o); });
+  return [...m.values()].sort((a, b) => CO.compare(a.lpn, b.lpn));
+}
+function cutPrompt(item, wh, rs) {                                  // rs = แถวสต็อกที่จะตัด (ของ LPN ที่เลือก)
+  const tot = r2(rs.reduce((a, r) => a + r.qty, 0)), cap = capOf(item, wh), lpns = byOrig(rs).map(o => o.lpn + ' (' + fmt(o.qty) + ')');
+  if (rs.some(r => !fOk(r))) return toast('ตัดยอดไม่ได้ — Status ไม่ใช่ OK');
+  if (rs.some(r => aOf(r) > 0)) return toast('ตัดยอดไม่ได้ — มี Allocated > 0 (ต้องเป็น 0 ก่อน)');
+  if (tot <= 0 || tot > cap + 1e-9) return toast('ตัดยอดได้เฉพาะเมื่อยอดรวมไม่เกิน Cap (' + fmt(tot) + ' / ' + fmt(cap) + ')');
+  modal('ยืนยันการตัดยอด', '<div>Item <b class="mono">' + esc(item) + '</b> ' + esc(nameOf(item)) + ' · ' + esc(wh) + '<br>พาเลทเดิม: ' + lpns.map(l => '<span class="mono">' + esc(l) + '</span>').join(' + ') +
+    '<br>ยอดตัด <b>' + fmt(tot) + '</b> / Cap ' + fmt(cap) + ' ' + (Math.abs(tot - cap) < 1e-9 ? '<span class="chip ok">เต็ม Cap พอดี</span>' : '<span class="chip wn">น้อยกว่า Cap · ขาดอีก ' + fmt(cap - tot) + '</span>') +
+    '<br><span class="sub">สต็อก ' + rs.length + ' แถวจะถูกตัดออกจากระบบ · ยกเลิกได้จากประวัติการตัดยอด</span></div>',
+    [['ยกเลิก'], ['ยืนยันตัดยอด', 'p', () => doCut(item, wh, rs.map(r => r.id))]]);
+}
+function doCut(item, wh, ids, quiet) {
+  const set = new Set(ids), rs = rows.filter(r => set.has(r.id)); if (!rs.length) return;
+  const tot = r2(rs.reduce((a, r) => a + r.qty, 0)), cap = capOf(item, wh);
+  if (rs.some(r => aOf(r) > 0)) return toast('ตัดยอดไม่ได้ — มี Allocated > 0');
+  if (tot <= 0 || tot > cap + 1e-9) return toast('ยอดเกิน Cap — ยกเลิกการตัดยอด');
+  const rec = { id: uid(), ts: Date.now(), at: new Date().toLocaleString('th-TH'), item, name: nameOf(item), wh, cap, total: tot, lpns: byOrig(rs).map(o => o.lpn), removed: rs.map(r => ({ ...r })) };
+  rows = rows.filter(r => !set.has(r.id));
+  cuts.unshift(rec);
+  byOrig(rs).forEach(o => { const l = o.lpn, x = o.rows; log('ตัดยอด', { item, lpn: l, lot: x.map(r => r.lot).join(', '), qty: r2(x.reduce((a, r) => a + r.qty, 0)), wh }, (Math.abs(tot - cap) < 1e-9 ? 'เต็ม Cap ' : 'น้อยกว่า Cap ') + fmt(tot) + '/' + fmt(cap)); });
+  if (!quiet) { mSel.clear(); mDest = ''; refresh(); toast('ตัดยอด ' + fmt(tot) + ' CS เรียบร้อย'); }
+  return rec;
+}
+function undoCut(id, quiet) {
+  const rec = cuts.find(c => c.id === id); if (!rec) return;
+  rows = rows.concat(rec.removed.map(r => ({ ...r })));
+  cuts = cuts.filter(c => c !== rec);
+  log('ยกเลิกตัดยอด', { item: rec.item, lpn: rec.lpns.join(', '), lot: '', qty: rec.total, wh: rec.wh }, 'คืนสต็อก');
+  if (!quiet) { refresh(); toast('ยกเลิกการตัดยอดแล้ว คืนสต็อกแล้ว'); }
+}
+function undoAllCuts() {
+  const n = cuts.length; cuts.slice().forEach(c => undoCut(c.id, true)); refresh(); toast('ยกเลิกการตัดยอดทั้งหมด ' + n + ' รายการ คืนสต็อกแล้ว');
+}
+
+/* ===================== Export ใบงาน รวมเลท / ตัดยอด (.xlsx · มีเส้นขอบ/สี ตามแบบที่กำหนด) ===================== */
+/* เขียนไฟล์ .xlsx เองโดยไม่พึ่งไลบรารี (ไลบรารี SheetJS ฟรีเขียนสี/เส้นขอบไม่ได้) */
+const XL = (() => {
+  const enc = new TextEncoder();
+  const crcT = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+  const crc32 = b => { let c = 0xFFFFFFFF; for (let i = 0; i < b.length; i++) c = crcT[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+  const u16 = v => [v & 255, (v >>> 8) & 255], u32 = v => [v & 255, (v >>> 8) & 255, (v >>> 16) & 255, (v >>> 24) & 255];
+  function zip(files) {                                              // ZIP แบบไม่บีบอัด (store)
+    const parts = [], cen = []; let off = 0;
+    files.forEach(f => {
+      const nm = enc.encode(f.name), data = enc.encode(f.text), crc = crc32(data), sz = data.length;
+      const lh = Uint8Array.from([0x50, 0x4b, 3, 4, ...u16(20), ...u16(0x0800), ...u16(0), ...u16(0), ...u16(0x21), ...u32(crc), ...u32(sz), ...u32(sz), ...u16(nm.length), ...u16(0)]);
+      parts.push(lh, nm, data);
+      cen.push(Uint8Array.from([0x50, 0x4b, 1, 2, ...u16(20), ...u16(20), ...u16(0x0800), ...u16(0), ...u16(0), ...u16(0x21), ...u32(crc), ...u32(sz), ...u32(sz), ...u16(nm.length), ...u16(0), ...u16(0), ...u16(0), ...u16(0), ...u32(0), ...u32(off)]), nm);
+      off += lh.length + nm.length + sz;
+    });
+    const cs = cen.reduce((a, x) => a + x.length, 0);
+    const end = Uint8Array.from([0x50, 0x4b, 5, 6, 0, 0, 0, 0, ...u16(files.length), ...u16(files.length), ...u32(cs), ...u32(off), 0, 0]);
+    return new Blob([...parts, ...cen, end], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  }
+  const x = v => String(v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '');
+  const colL = c => String.fromCharCode(64 + c);                      // 1..26 -> A..Z
+  /* สไตล์: f 0=Tahoma11 / 1=Arial10หนา · fill 0=ไม่มี / 1=เหลือง · b บิตเส้นขอบหนา L1 R2 T4 B8 · h แนวนอน · v แนวตั้ง */
+  function build(sheets) {
+    const xfs = [], xmap = {}, bds = [0], bmap = { 0: 0 };
+    const sid = s => { const k = (s.f || 0) + '|' + (s.fill || 0) + '|' + (s.b || 0) + '|' + (s.h || '') + '|' + (s.v || ''); if (!(k in xmap)) { xmap[k] = xfs.length; xfs.push(s); if (s.b && !(s.b in bmap)) { bmap[s.b] = bds.length; bds.push(s.b); } } return xmap[k]; };
+    sid({});
+    const sx = sheets.map(sh => {
+      const rows = {};
+      sh.cells.forEach(c => { (rows[c.r] || (rows[c.r] = [])).push(c); });
+      const body = Object.keys(rows).map(Number).sort((a, b) => a - b).map(r => {
+        const cs = rows[r].sort((a, b) => a.c - b.c).map(c => {
+          const ref = colL(c.c) + r, st = sid(c.s || {});
+          if (c.v === undefined || c.v === null || c.v === '') return '<c r="' + ref + '" s="' + st + '"/>';
+          if (typeof c.v === 'number') return '<c r="' + ref + '" s="' + st + '"><v>' + c.v + '</v></c>';
+          return '<c r="' + ref + '" s="' + st + '" t="inlineStr"><is><t xml:space="preserve">' + x(c.v) + '</t></is></c>';
+        }).join('');
+        return '<row r="' + r + '"' + (sh.rowH[r] ? ' ht="' + sh.rowH[r] + '" customHeight="1"' : '') + '>' + cs + '</row>';
+      }).join('');
+      const brk = sh.breaks.length ? '<rowBreaks count="' + sh.breaks.length + '" manualBreakCount="' + sh.breaks.length + '">' + sh.breaks.map(b => '<brk id="' + b + '" max="16383" man="1"/>').join('') + '</rowBreaks>' : '';
+      return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><dimension ref="A1:F' + sh.last + '"/><sheetViews><sheetView workbookViewId="0"/></sheetViews><sheetFormatPr defaultRowHeight="13.8"/>' +
+        '<cols>' + sh.cols.map((w, i) => '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + w + '" customWidth="1"/>').join('') + '</cols><sheetData>' + body + '</sheetData>' +
+        '<pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/><pageSetup paperSize="9" orientation="portrait"/>' + brk + '</worksheet>';
+    });
+    const side = (on, n) => on ? '<' + n + ' style="medium"><color indexed="64"/></' + n + '>' : '<' + n + '/>';
+    const styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
+      '<fonts count="2"><font><sz val="11"/><name val="Tahoma"/><family val="2"/></font><font><b/><sz val="10"/><color rgb="FF000000"/><name val="Arial"/><family val="2"/></font></fonts>' +
+      '<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFFFF00"/><bgColor indexed="64"/></patternFill></fill></fills>' +
+      '<borders count="' + bds.length + '">' + bds.map(m => '<border>' + side(m & 1, 'left') + side(m & 2, 'right') + side(m & 4, 'top') + side(m & 8, 'bottom') + '<diagonal/></border>').join('') + '</borders>' +
+      '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
+      '<cellXfs count="' + xfs.length + '">' + xfs.map(s => '<xf numFmtId="0" fontId="' + (s.f || 0) + '" fillId="' + (s.fill ? 2 : 0) + '" borderId="' + bmap[s.b || 0] + '" xfId="0" applyFont="1" applyFill="1" applyBorder="1"' + (s.h || s.v ? ' applyAlignment="1"><alignment' + (s.h ? ' horizontal="' + s.h + '"' : '') + (s.v ? ' vertical="' + s.v + '"' : '') + '/></xf>' : '/>')).join('') + '</cellXfs>' +
+      '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
+    const files = [
+      { name: '[Content_Types].xml', text: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' + sheets.map((s, i) => '<Override PartName="/xl/worksheets/sheet' + (i + 1) + '.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>').join('') + '</Types>' },
+      { name: '_rels/.rels', text: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>' },
+      { name: 'xl/workbook.xml', text: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>' + sheets.map((s, i) => '<sheet name="' + x(s.name) + '" sheetId="' + (i + 1) + '" r:id="rId' + (i + 1) + '"/>').join('') + '</sheets></workbook>' },
+      { name: 'xl/_rels/workbook.xml.rels', text: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' + sheets.map((s, i) => '<Relationship Id="rId' + (i + 1) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet' + (i + 1) + '.xml"/>').join('') + '<Relationship Id="rId' + (sheets.length + 1) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>' },
+      { name: 'xl/styles.xml', text: styles }
+    ].concat(sx.map((t, i) => ({ name: 'xl/worksheets/sheet' + (i + 1) + '.xml', text: t })));
+    return zip(files);
+  }
+  /* จัดหน้าใบงาน: หัวตารางซ้ำทุกหน้า (หน้าละ 50 แถว) · ไม่ตัดกลุ่มข้ามหน้า · กลุ่ม = LPN ที่รวมเข้าด้วยกัน */
+  function sheet(name, title, itemLine, cap, groups) {
+    const cells = [], rowH = {}, breaks = [], put = (r, c, v, s) => cells.push({ r, c, v, s });
+    put(1, 1, title);
+    ['A', 'B', 'C', 'D'].forEach((_, i) => put(2, i + 1, i ? '' : itemLine, { fill: 1, h: i ? '' : 'left' }));
+    const head = r => { rowH[r] = 15; ['LPN', 'LotERP', 'LotDld', 'CTN'].forEach((t, i) => put(r, i + 1, t, { f: 1, h: 'center', v: 'center' })); put(r, 5, 'CAP ' + cap, { f: 1, fill: 1, h: 'center', v: 'center' }); };
+    head(4);
+    let r = 5, pageEnd = 51, top = 5;                                  // หน้าแรกถึงแถว 51 · หน้าถัดไปละ 50 แถว
+    groups.forEach(g => {
+      const n = g.pals.reduce((a, p) => a + Math.max(1, p.lots.length), 0);
+      if (r + n - 1 > pageEnd && r > top) { breaks.push(pageEnd); r = pageEnd + 1; head(r); top = ++r; pageEnd += 50; }
+      while (r + n - 1 > pageEnd) pageEnd += 50;                       // กลุ่มใหญ่กว่าหนึ่งหน้า: ปล่อยให้ Excel ตัดเอง
+      const g0 = r, g1 = r + n - 1;
+      g.pals.forEach(p => {
+        const lots = p.lots.length ? p.lots : [{ lot: '', lot2: '', qty: 0 }], p0 = r, p1 = r + lots.length - 1;
+        lots.forEach((l, i) => {
+          const f = r === p0, e = r === p1, T = f ? 4 : 0, B = e ? 8 : 0;
+          put(r, 1, p.lpn, { b: 1 | T | B }); put(r, 2, l.lot, { b: T | B }); put(r, 3, l.lot2 || '', { b: T | B });
+          put(r, 4, l.qty, { b: 2 | T | B, h: 'center' });
+          put(r, 5, e ? p.total : '', { b: 3 | T | B, h: 'center' });
+          put(r, 6, r === g1 ? g.total : '', { b: 3 | (r === g0 ? 4 : 0) | (r === g1 ? 8 : 0), h: 'center' });
+          r++;
+        });
+      });
+    });
+    return { name, cells, rowH, breaks, cols: [12, 12.1, 13.2, 9, 7.2, 6.7], last: r - 1 };
+  }
+  return { build, sheet };
+})();
+const recDM = rec => {                                              // วันที่ของรายการ (ใช้ ts ถ้ามี ไม่งั้นแกะจากข้อความเวลา)
+  if (rec.ts) { const d = new Date(rec.ts); return { d: d.getDate(), m: d.getMonth() + 1, t: d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate() }; }
+  const k = String(rec.at || '').match(/(\d+)\/(\d+)\/(\d+)/);
+  return k ? { d: +k[1], m: +k[2], t: ((+k[3] > 2400 ? +k[3] - 543 : +k[3]) * 10000) + (+k[2]) * 100 + (+k[1]) } : { d: '', m: '', t: 0 };
+};
+function exportSheets(kind, recs, fname) {                          // kind: 'merge' | 'cut'
+  if (!recs.length) return toast(kind === 'merge' ? 'ยังไม่มีประวัติการรวมเลทให้ Export' : 'ยังไม่มีประวัติการตัดยอดให้ Export');
+  const lab = kind === 'merge' ? 'รวมเลท' : 'ตัดยอด', list = recs.slice().sort((a, b) => recDM(a).t - recDM(b).t || (a.ts || 0) - (b.ts || 0));
+  const now = new Date(), dtxt = now.getDate() + '/' + (now.getMonth() + 1);                  // หัวเรื่อง = วันที่ Export (วันปัจจุบัน)
+  const by = {}; list.forEach(rec => (by[rec.item + '|' + rec.wh] || (by[rec.item + '|' + rec.wh] = [])).push(rec));
+  const keys = Object.keys(by).sort(CO.compare), used = new Set(), multiWh = it => keys.filter(k => k.slice(0, k.lastIndexOf('|')) === it).length > 1;
+  const sheets = keys.map(k => {
+    const rs = by[k], it = rs[0].item, wh = rs[0].wh;
+    let nm = (multiWh(it) ? it + '_' + wh : it).replace(/[\[\]:*?\/\\]/g, '-').slice(0, 31) || 'Sheet', q = nm, n = 2; while (used.has(q.toLowerCase())) q = nm.slice(0, 28) + '_' + n++; used.add(q.toLowerCase());
+    const groups = rs.map(rec => kind === 'merge'
+      ? { total: rec.total, pals: rec.src.map(s => ({ lpn: s.lpn, total: s.qty, lots: s.lots.map(l => ({ lot: l.lot, lot2: l.lot2, qty: l.qty })) })) }
+      : { total: rec.total, pals: byOrig(rec.removed).map(o => ({ lpn: o.lpn, total: o.qty, lots: o.rows.map(r => ({ lot: r.lot, lot2: r.lot2, qty: r.qty })) })) });
+    return XL.sheet(q, lab + ' ' + dtxt, it + ' ' + (rs[0].name || ''), r2(rs[rs.length - 1].cap), groups);
+  });
+  try {
+    const blob = XL.build(sheets), a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = fname; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  } catch (e) { toast('ดาวน์โหลดไม่ได้ในหน้านี้ — เปิดไฟล์ในเครื่องแล้วลองใหม่'); }
+}
+const dstamp = () => new Date().toISOString().slice(0, 10);
+function exportMerge(id) { const m = merges.find(x => x.id === id); if (m) exportSheets('merge', [m], 'รวมเลท_' + m.dest + '_' + dstamp() + '.xlsx'); }
+function exportMergeAll() { exportSheets('merge', merges, 'รวมเลท_' + dstamp() + '.xlsx'); }
+function exportCut(id) { const c = cuts.find(x => x.id === id); if (c) exportSheets('cut', [c], 'ตัดยอด_' + c.item + '_' + dstamp() + '.xlsx'); }
+function exportCutAll() { exportSheets('cut', cuts, 'ตัดยอด_' + dstamp() + '.xlsx'); }
+
+/* ===================== แก้ไขพาเลทที่เกิน Cap: ย้ายส่วนเกินไปเติมพาเลทอื่นก่อน แล้วเปิด LPN ใหม่ ===================== */
+function pallets2(item, wh) {                                    // พาเลทของ Item+WH จากสต็อกปัจจุบัน
+  const m = {}; rows.forEach(r => { if (r.item !== item || r.wh !== wh) return; const o = m[r.lpn] || (m[r.lpn] = { lpn: r.lpn, qty: 0, alloc: 0, loc: r.loc || '', bad: new Set() }); if (!fOk(r)) o.bad.add(stFile(r)); o.qty = r2(o.qty + r.qty); o.alloc = r2(o.alloc + aOf(r)); });
+  return Object.values(m);
+}
+function planFix(item, wh, lpn, fill) {
+  const ps = pallets2(item, wh), cap = capOf(item, wh), src = ps.find(p => p.lpn === lpn);
+  if (!src || src.qty <= cap + 1e-9) return null;
+  const excess = r2(src.qty - cap), moves = []; let rem = excess;
+  if (fill) ps.filter(p => p.lpn !== lpn && p.alloc <= 0 && palFok(p) && p.qty < cap - 1e-9).map(p => ({ p, room: r2(cap - p.qty) })).sort((a, b) => a.room - b.room || CO.compare(a.p.lpn, b.p.lpn))
+    .forEach(({ p, room }) => { if (rem <= 1e-9) return; const t = Math.min(room, rem); moves.push({ to: p.lpn, isNew: false, qty: r2(t), loc: p.loc }); rem = r2(rem - t); });   // เติมพาเลทที่เกือบเต็มก่อน
+  while (rem > 1e-9) { const t = Math.min(cap, rem); moves.push({ to: '', isNew: true, qty: r2(t), loc: src.loc }); rem = r2(rem - t); }                                    // ที่เหลือเปิด LPN ใหม่ (ไม่เกิน Cap)
+  return { src, cap, excess, moves, blocked: src.alloc > 0 || !palFok(src) };
+}
+function applyFix(item, wh, lpn, fill, quiet) {
+  const pl = planFix(item, wh, lpn, fill); if (!pl || pl.blocked) return null;
+  const srcRows = rows.filter(r => r.item === item && r.wh === wh && r.lpn === lpn).sort((a, b) => CO.compare(String(b.lot), String(a.lot)));   // ดึงล็อตใหม่สุดก่อน
+  const used = new Set(rows.map(r => r.lpn)), parts = [], mvs = []; let ri = 0, k = 1;
+  pl.moves.forEach(mv => {
+    let dest = mv.to; if (mv.isNew) { while (used.has(lpn + '-N' + k)) k++; dest = lpn + '-N' + k; used.add(dest); }
+    mvs.push({ to: dest, isNew: mv.isNew, qty: mv.qty });
+    let need = mv.qty;
+    while (need > 1e-9 && ri < srcRows.length) {
+      const r = srcRows[ri], take = Math.min(r.qty, need), snap = { ...r };
+      const c = { ...r, id: uid(), qty: r2(take), lpn: dest, loc: mv.loc || r.loc, from: lpn, orig: r.orig || lpn, alloc: 0 };
+      rows.push(c); r.qty = r2(r.qty - take);
+      parts.push({ srcId: r.id, newId: c.id, qty: r2(take), snap, to: dest, lot: r.lot, lot2: r.lot2 });
+      need = r2(need - take);
+      if (r.qty <= 1e-9) { rows = rows.filter(x => x !== r); ri++; }
+    }
+  });
+  const rec = { id: uid(), ts: Date.now(), at: new Date().toLocaleString('th-TH'), item, name: nameOf(item), wh, cap: pl.cap, lpn, before: pl.src.qty, excess: pl.excess, moves: mvs, parts };
+  fixes.unshift(rec);
+  log('แก้เกิน Cap', { item, lpn, lot: '', qty: pl.excess, wh }, mvs.map(m => (m.isNew ? 'LPN ใหม่ ' : 'เติม ') + m.to + ' (+' + fmt(m.qty) + ')').join(', '));
+  if (!quiet) { refresh(); toast('แก้เกิน Cap แล้ว — ย้ายส่วนเกิน ' + fmt(pl.excess) + ' CS'); }
+  return rec;
+}
+function undoFix(id, quiet) {
+  const rec = fixes.find(f => f.id === id); if (!rec) return;
+  for (let i = rec.parts.length - 1; i >= 0; i--) {
+    const p = rec.parts[i], nr = rows.find(r => r.id === p.newId); if (!nr) continue;     // แถวที่ย้ายไปถูกตัดยอด/ลบแล้ว → ไม่คืนซ้ำ
+    rows = rows.filter(r => r !== nr);
+    const sr = rows.find(r => r.id === p.srcId);
+    if (sr) sr.qty = r2(sr.qty + nr.qty); else rows.push({ ...p.snap, qty: nr.qty });
+  }
+  fixes = fixes.filter(f => f !== rec);
+  log('ยกเลิกแก้เกิน Cap', { item: rec.item, lpn: rec.lpn, lot: '', qty: rec.excess, wh: rec.wh }, 'คืนส่วนเกินกลับ LPN เดิม');
+  if (!quiet) { refresh(); toast('ยกเลิกการแก้เกิน Cap แล้ว'); }
+}
+function undoAllFixes() { const n = fixes.length; fixes.slice().forEach(f => undoFix(f.id, true)); refresh(); toast('ยกเลิกการแก้เกิน Cap ทั้งหมด ' + n + ' รายการแล้ว'); }
+let fixList = [];
+const planTxt = pl => pl.moves.map(m => (m.isNew ? 'เปิด LPN ใหม่' : 'เติม <b class="mono">' + esc(m.to) + '</b>') + ' <span class="chip">+' + fmt(m.qty) + '</span>').join(' · ');
+function renderFix() {
+  const q = $('#fq').value.toLowerCase(), fill = $('#fFill').checked;
+  const over = PAL.filter(p => p.qty > p.cap + 1e-9 && (!q || (p.item + ' ' + nameOf(p.item) + ' ' + p.lpn).toLowerCase().includes(q))).sort((a, b) => CO.compare(a.item, b.item) || CO.compare(a.lpn, b.lpn));
+  fixList = over.map(p => ({ p, pl: planFix(p.item, p.wh, p.lpn, fill) }));
+  $('#bFixAll').disabled = !fixList.some(x => x.pl && !x.pl.blocked);
+  $('#fTb').innerHTML = fixList.slice(0, 300).map((x, i) => { const p = x.p, pl = x.pl; if (!pl) return '';
+    return '<tr><td class="mono">' + esc(p.item) + '</td><td>' + esc(nameOf(p.item)) + '</td><td class="mono"><b>' + esc(p.lpn) + '</b></td><td>' + esc(p.loc || '—') + '</td><td class="r mono"><b>' + fmt(p.qty) + '</b></td><td class="r mono">' + fmt(pl.cap) + '</td><td class="r mono"><span class="chip bad">+' + fmt(pl.excess) + '</span></td>' +
+      '<td>' + (pl.blocked ? (pl.src.alloc > 0 ? '<span class="chip bad">ติด Allocated ' + fmt(p.alloc) + '</span> <span class="sub">ต้องเคลียร์ทั้งพาเลทก่อน</span>' : '<span class="chip bad">Status ไม่ใช่ OK</span> ' + palFs(pl.src)) : planTxt(pl)) + '</td>' +
+      '<td><button class="btn s p" data-fx="' + i + '"' + (pl.blocked ? ' disabled' : '') + '>แก้ไข</button></td></tr>'; }).join('') || '<tr><td colspan="9" class="sub" style="text-align:center;padding:30px">ไม่มีพาเลทที่เกิน Cap</td></tr>';
+  $('#fHist').innerHTML = fixes.slice(0, 30).map(f => {
+    const newL = new Set(f.moves.filter(m => m.isNew).map(m => m.to));
+    return '<details class="card p-3"><summary class="cursor-pointer flex flex-wrap items-center gap-2"><span class="tg sub">▸</span><span class="chip wn">แก้เกิน Cap</span><b class="mono">' + esc(f.item) + '</b> ' + esc(f.name) + ' · LPN <b class="mono">' + esc(f.lpn) + '</b> ' + fmt(f.before) + ' → ' + fmt(f.cap) + ' <span class="chip">' + esc(f.wh) + '</span><span class="sub">' + esc(f.at) + '</span>' +
+      '<button class="btn s d" style="margin-left:auto" data-fu="' + f.id + '">ยกเลิกการแก้ไข</button></summary><div class="mt-2"><div class="overflow-x-auto"><table><thead><tr><th>Lot (ERP / DLD)</th><th class="r">จำนวนที่ย้าย</th><th>ไปยัง LPN</th></tr></thead><tbody>' +
+      f.parts.map(p => '<tr><td class="mono">' + esc(p.lot) + (p.lot2 ? ' / ' + esc(p.lot2) : '') + '</td><td class="r mono">' + fmt(p.qty) + '</td><td class="mono"><b>' + esc(p.to) + '</b> ' + (newL.has(p.to) ? '<span class="chip wn">LPN ใหม่</span>' : '<span class="chip">เติมพาเลทเดิม</span>') + '</td></tr>').join('') +
+      '</tbody></table></div><div class="sub mt-1">ส่วนเกิน ' + fmt(f.excess) + ' CS · ' + esc(f.moves.map(m => m.to + ' (+' + fmt(m.qty) + ')').join(' · ')) + '</div></div></details>';
+  }).join('') || '<div class="sub">ยังไม่มีประวัติการแก้เกิน Cap</div>';
+}
+/* ===================== หน้า Master Cap ===================== */
+function renderCap() {
+  const q = $('#cq').value.toLowerCase(), agg = {}, pr = getPrio();
+  rows.forEach(r => { if (!agg[r.item]) agg[r.item] = { item: r.item, wh: r.wh }; });
+  for (const it in master) if (!agg[it] && (master[it].cap > 0 || master[it].prio > 0)) agg[it] = { item: it, wh: '' };      // Master ฐานที่ยังไม่มีในสต็อกก็แสดง
+  const list = Object.values(agg).filter(a => !q || (a.item + ' ' + nameOf(a.item)).toLowerCase().includes(q)).sort((a, b) => CO.compare(a.item, b.item));
+  const nb = Object.values(master).filter(m => m.capSrc === 'base' && m.cap > 0).length;
+  $('#capInfo').textContent = 'Master ฐานที่นำเข้า ' + nb.toLocaleString() + ' Item · แสดง ' + Math.min(list.length, 600).toLocaleString() + '/' + list.length.toLocaleString();
+  $('#cb').innerHTML = list.slice(0, 600).map(a => {
+    const m = master[a.item] || {}, sc = srcOf(a.item), rk = pr.byItem[a.item], okIt = Object.values(GRP).some(g => g.item === a.item) && !rk;
+    return '<tr><td class="mono">' + esc(a.item) + '</td><td>' + esc(nameOf(a.item)) + '</td><td>' + (a.wh ? esc(a.wh) : '<span class="chip">ไม่มีในสต็อก</span>') + '</td><td class="r mono"><b>' + fmt(capOf(a.item, a.wh)) + '</b></td>' +
+      '<td><span class="chip ' + (m.cap > 0 && m.capSrc !== 'stock' ? 'ok' : '') + '">' + esc(sc) + '</span>' + (m.capSrc === 'manual' && m.base > 0 ? '<div class="sub">ฐาน ' + fmt(m.base) + '</div>' : '') + '</td>' +
+      '<td>' + (rk ? '<span class="chip wn">#' + rk + '</span>' : okIt ? '<span class="chip ok">OK</span>' : '<span class="sub">—</span>') + ' <input class="inp" style="width:64px" type="number" min="0" data-p="' + esc(a.item) + '" value="' + (m.prio || '') + '" placeholder="ตั้งเอง"></td>' +
+      '<td><div class="flex gap-1"><input class="inp" style="width:90px" type="number" min="0" data-c="' + esc(a.item) + '" value="' + (m.cap || '') + '" placeholder="Cap"><button class="btn s p" data-cs="' + esc(a.item) + '">บันทึก</button>' +
+      (m.capSrc === 'manual' && m.base > 0 ? '<button class="btn s" data-cr="' + esc(a.item) + '" title="คืนค่า Master ฐาน">คืนค่าฐาน</button>' : '') + '</div></td></tr>';
+  }).join('') || '<tr><td colspan="7" class="sub" style="text-align:center;padding:30px">ไม่มีข้อมูล</td></tr>';
+}
+const ALM = { item: AL.item, cap: AL.cap, desc: AL.desc.concat(['ชื่อสินค้า', 'ชื่อ']), prio: ['priority', 'prio', 'ลำดับ', 'ลำดับความสำคัญ', 'ความสำคัญ', 'ลำดับทำก่อน'] };
+async function importCaps(f) {                                               // ไฟล์: Item, Master Cap (+ ชื่อ, Priority) · นำเข้าซ้ำได้เรื่อย ๆ: เพิ่ม/อัปเดต ไม่ลบของเดิม
+  const wb = XLSX.read(await f.arrayBuffer(), { type: 'array' });
+  let aoa = null, h = -1;
+  for (const n of wb.SheetNames) { const a = XLSX.utils.sheet_to_json(wb.Sheets[n], { header: 1, defval: '' }), i = a.findIndex(r => r.some(c => ALM.item.includes(N(c))) && r.some(c => ALM.cap.includes(N(c)))); if (i >= 0) { aoa = a; h = i; break; } }
+  if (!aoa) return toast('ต้องมีหัวคอลัมน์ Item และ Master Cap');
+  const hn = aoa[h].map(N), ix = k => hn.findIndex(x => ALM[k].includes(x)), ci = ix('item'), cc = ix('cap'), cd = ix('desc'), cp = ix('prio');
+  const add = [], chg = []; let same = 0, bad = 0;
+  aoa.slice(h + 1).forEach(r => {
+    const it = String(r[ci] == null ? '' : r[ci]).trim(), v = parseFloat(String(r[cc]).replace(/,/g, '')); if (!it) return;
+    if (!(v > 0)) { bad++; return; }
+    const m = master[it] || (master[it] = {}), old = m.cap > 0 ? m.cap : 0;
+    if (!old) add.push(it); else if (old !== v) chg.push([it, old, v]); else same++;
+    m.cap = v; m.base = v; m.capSrc = 'base';                                  // ยึดไฟล์ที่นำเข้าเป็นฐาน
+    if (cd >= 0 && String(r[cd]).trim() && !m.name) m.name = String(r[cd]).trim();
+    if (cp >= 0) { const pv = parseFloat(r[cp]); if (pv > 0) m.prio = pv; }
+  });
+  log('นำเข้า Master Cap', { item: '', lpn: '', lot: '', qty: 0, wh: '' }, 'ใหม่ ' + add.length + ' · เปลี่ยน ' + chg.length + ' · เท่าเดิม ' + same + (bad ? ' · ข้าม ' + bad : ''));
+  refresh();
+  modal('นำเข้า Master Cap แล้ว', '<div>เพิ่มใหม่ <b>' + add.length + '</b> Item · อัปเดตค่า <b>' + chg.length + '</b> Item · เท่าเดิม <b>' + same + '</b>' + (bad ? ' · ข้ามแถวที่ Cap ไม่ถูกต้อง ' + bad : '') +
+    (chg.length ? '<div class="sub mt-2">ที่เปลี่ยนค่า: ' + chg.slice(0, 12).map(c => esc(c[0]) + ' ' + fmt(c[1]) + '→' + fmt(c[2])).join(' · ') + (chg.length > 12 ? ' …' : '') + '</div>' : '') +
+    '<div class="sub mt-2">ไฟล์ที่นำเข้าเป็นค่าฐาน — ไฟล์สต็อกที่นำเข้าทีหลังจะไม่เขียนทับ · Item ที่ไม่อยู่ในไฟล์คงเดิม · นำเข้าไฟล์ใหม่ต่อได้เรื่อย ๆ</div></div>', [['ปิด', 'p']]);
+}
+
+/* ===================== Export Excel ===================== */
+function dl(aoa, name, sheet) {
+  try { const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), sheet); XLSX.writeFile(wb, name); }
+  catch (e) { toast('ดาวน์โหลดไม่ได้ในหน้านี้ — เปิดไฟล์ในเครื่องแล้วลองใหม่'); }
+}
+function exportStock() {
+  const v = viewRows(); if (!v.length) return toast('ไม่มีข้อมูลให้ Export');
+  dl([['Item', 'Description', 'Lot', 'Lot DLD', 'Location', 'LPN', 'Case On Hand', 'Allocated', 'รวม LPN', 'Master Cap', 'ที่มา Cap', 'สถานะ Cap', 'WH', 'Status (ไฟล์)']]
+    .concat(v.map(r => [r.item, nameOf(r.item, r.desc), r.lot, r.lot2, r.loc, r.lpn, r.qty, aOf(r), pm[r.item + '|' + r.lpn], capOf(r.item, r.wh), srcOf(r.item), (ST[(PMAP[r.item + '|' + r.lpn] || {}).st] || ['', ''])[1], r.wh, r.st])), 'WMS_Stock_' + new Date().toISOString().slice(0, 10) + '.xlsx', 'Stock');
+}
+
+/* ===================== เหตุการณ์ (Event Wiring) ===================== */
+$('#bImp').onclick = () => $('#fIn').click();
+$('#fIn').onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  try { const p = await readFile(f);
+    if (rows.length) modal('มีสต็อกเดิมอยู่', 'ไฟล์นี้มี ' + p.out.length.toLocaleString() + ' แถว · ต้องการทำอย่างไร?', [['ยกเลิก'], ['เพิ่มต่อท้าย', '', () => applyImport(p, false)], ['แทนที่ทั้งหมด', 'p', () => applyImport(p, true)]]);
+    else applyImport(p, true);
+  } catch (err) { toast(err.message || 'อ่านไฟล์ไม่ได้'); }
+};
+$('#bExp').onclick = exportStock;
+
+/* ===== ล้างข้อมูลเพื่อนำเข้าชุดใหม่ ===== */
+function clearData(thenImport, o) {
+  const n = rows.length;
+  rows = []; merges = []; cuts = []; fixes = []; mLast = null; mSel.clear(); mDest = ''; pm = {}; limit = 200;       // ล้างสต็อก + ประวัติรวมเลท (ผูกกับแถวเดิม)
+  if (o.logs) logs = [];
+  if (o.caps) master = {};
+  else { const k = {}; for (const i in master) { const m = master[i]; if (m.cap > 0 || m.prio > 0) k[i] = { cap: m.cap, capSrc: m.capSrc, base: m.base, prio: m.prio, name: m.name }; } master = k; }   // เก็บ Master Cap ฐาน / ที่กำหนดเอง / ลำดับความสำคัญ
+  log('ล้างข้อมูล', { item: '', lpn: '', lot: '', qty: 0, wh: '' }, 'ล้างสต็อก ' + n.toLocaleString() + ' แถว');
+  refresh(); toast('ล้างข้อมูลแล้ว');
+  if (thenImport) $('#fIn').click();
+}
+$('#bClr').onclick = () => {
+  if (!rows.length && !merges.length && !logs.length) return toast('ยังไม่มีข้อมูลให้ล้าง');
+  const o = { logs: false, caps: false };
+  modal('ล้างข้อมูล', '<div>จะลบสต็อกทั้งหมด <b>' + rows.length.toLocaleString() + '</b> แถว (' + Object.keys(pm).length.toLocaleString() + ' พาเลท) และประวัติการรวมเลท ' + merges.length + ' รายการ<br><span class="sub">ลบแล้วย้อนกลับไม่ได้ — ควร Export สำรองก่อน</span></div>' +
+    '<label class="flex items-center gap-1 mt-2"><input type="checkbox" data-co="caps"> ล้าง Master Cap ที่กำหนดเองด้วย (ปกติเก็บไว้)</label>' +
+    '<label class="flex items-center gap-1 mt-1"><input type="checkbox" data-co="logs"> ล้างประวัติการทำรายการด้วย</label>',
+    [['ยกเลิก'], ['ล้างอย่างเดียว', 'd', () => clearData(false, o)], ['ล้างแล้วนำเข้าไฟล์ใหม่', 'p', () => clearData(true, o)]]);
+  document.body.lastElementChild.querySelectorAll('[data-co]').forEach(c => c.onchange = () => { o[c.dataset.co] = c.checked; });
+};
+$('#bCapIn').onclick = () => $('#fCap').click();
+$('#fCap').onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (f) importCaps(f).catch(() => toast('อ่านไฟล์ไม่ได้')); };
+$('#bCapOut').onclick = () => {
+  const seen = {}; rows.forEach(r => seen[r.item] = r.wh); for (const i in master) if (!(i in seen) && (master[i].cap > 0 || master[i].prio > 0)) seen[i] = '';
+  dl([['Item', 'ชื่อสินค้า', 'Master Cap', 'Cap ที่ใช้', 'ที่มา', 'ลำดับความสำคัญ', 'Master ฐาน']].concat(Object.keys(seen).sort(CO.compare).map(i => { const m = master[i] || {}; return [i, nameOf(i), m.cap || '', capOf(i, seen[i]), srcOf(i), m.prio || '', m.base || '']; })), 'WMS_MasterCap.xlsx', 'Master Cap');
+};
+$('#bLogClr').onclick = () => modal('ล้างประวัติ', 'ลบประวัติทั้งหมด?', [['ยกเลิก'], ['ล้าง', 'd', () => { logs = []; refresh(); }]]);
+$('#bMore').onclick = () => { limit += 200; render(); };
+$('#bReset').onclick = () => { for (const k in flt) flt[k] = ''; $$('[data-f]').forEach(i => i.value = ''); $('#q').value = ''; $('#fWh').value = ''; limit = 200; render(); };
+$('#q').oninput = e => { flt.q = e.target.value; limit = 200; render(); };
+$('#fWh').onchange = e => { flt.wh = e.target.value; $('#cWh').value = flt.wh; limit = 200; render(); };
+$$('[data-f]').forEach(i => i.addEventListener('input', () => { flt[i.dataset.f] = i.value; if (i.dataset.f === 'wh') $('#fWh').value = i.value; limit = 200; render(); }));
+$('#hSort').onclick = e => { const k = e.target.closest('[data-s]'); if (!k || !k.dataset.s || k.dataset.s === 'pt' || k.dataset.s === 'st') return; sortD = sortK === k.dataset.s ? -sortD : 1; sortK = k.dataset.s; render(); };
+$('#tb').onclick = e => {
+  const d = e.target.closest('[data-d]'), o = e.target.closest('[data-o]');
+  if (d) delRow(d.dataset.d);
+  if (o) { $('#oq').value = o.dataset.o; setTab('opt'); }
+  const g = e.target.closest('[data-g]'); if (g) { const gg = g.dataset.g; $('#mq').value = gg.slice(0, gg.lastIndexOf('|')); mPick = gg; setTab('mrg'); }
+};
+$('#oq').oninput = renderOpt; $('#om').onchange = renderOpt;
+/* รวมเลท: เหตุการณ์ */
+$('#mq').oninput = renderMrg; $('#mi').onchange = renderMrg;
+$('#mTb').onchange = e => {
+  const c = e.target.closest('[data-m]'), d = e.target.closest('[data-md]');
+  if (c) { if (c.checked) mSel.add(c.dataset.m); else mSel.delete(c.dataset.m); }
+  if (d) mDest = d.dataset.md;
+  renderMrg();
+};
+/* ล้างประวัติ: เลือกล้างทีละรายการ หรือล้างทั้งหมด (ลบแค่ตัวบันทึก ไม่แตะสต็อก) */
+function clearHistDlg(kind) {
+  const C = {
+    merge: { lab: 'รวมเลท', get: () => merges, set: v => { merges = v; }, line: r => '<b class="mono">' + esc(r.dest) + '</b> ← ' + r.src.length + ' LPN', sum: r => fmt(r.total) + ' / ' + fmt(r.cap), lpn: r => r.dest, qty: r => r.total, warn: 'ล้างแล้วจะยกเลิกการรวม (คืน LPN เดิม) ของรายการนั้นไม่ได้อีก' },
+    cut: { lab: 'ตัดยอด', get: () => cuts, set: v => { cuts = v; }, line: r => '<span class="chip bad">ตัดยอด</span> ' + byOrig(r.removed).length + ' LPN เดิม', sum: r => fmt(r.total) + ' / ' + fmt(r.cap), lpn: r => r.lpns.join(', '), qty: r => r.total, warn: 'ล้างแล้วจะยกเลิกการตัดยอด (คืนสต็อก) ของรายการนั้นไม่ได้อีก' },
+    fix: { lab: 'แก้เกิน Cap', get: () => fixes, set: v => { fixes = v; }, line: r => '<span class="chip wn">แก้เกิน Cap</span> LPN <b class="mono">' + esc(r.lpn) + '</b>', sum: r => fmt(r.before) + ' → ' + fmt(r.cap), lpn: r => r.lpn, qty: r => r.excess, warn: 'ล้างแล้วจะยกเลิกการแก้เกิน Cap ของรายการนั้นไม่ได้อีก' }
+  }[kind], lab = C.lab;
+  if (!C.get().length) return toast('ยังไม่มีประวัติการ' + lab + 'ให้ล้าง');
+  const d = document.createElement('dialog'); d.style.width = 'min(720px,96vw)'; d.style.maxHeight = '90vh'; d.style.overflow = 'auto';
+  const view = () => {
+    const L = C.get();
+    d.innerHTML = '<div class="p-4"><h3 class="font-semibold mb-1">ล้างประวัติการ' + lab + '</h3>' +
+      '<div class="sub mb-3">ลบเฉพาะตัวบันทึก <b>สต็อกไม่เปลี่ยน</b> · ' + C.warn + ' · ควร Export สำรองก่อน</div>' +
+      '<div class="flex flex-wrap gap-2 mb-3"><button class="btn d" data-a="all"' + (L.length ? '' : ' disabled') + '>ล้างทั้งหมด (' + L.length + ' รายการ)</button><div class="flex-1"></div><button class="btn" data-a="close">ปิด</button></div>' +
+      '<div class="grid gap-2">' + (L.map((r, i) => '<div class="card p-2 flex flex-wrap items-center gap-2"><div class="flex-1" style="min-width:220px">' + C.line(r) +
+        ' · <span class="mono">' + esc(r.item) + '</span> ' + esc(r.name) + ' · ' + C.sum(r) + ' <span class="chip">' + esc(r.wh) + '</span> <span class="sub">' + esc(r.at) + '</span></div>' +
+        '<button class="btn s d" data-one="' + i + '">ล้างรายการนี้</button></div>').join('') || '<div class="sub" style="text-align:center;padding:20px">ไม่มีประวัติเหลือแล้ว</div>') + '</div></div>';
+  };
+  d.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.a === 'close') return d.close();
+    if (b.dataset.one !== undefined) {                              // ล้างทีละรายการ
+      const rec = C.get()[+b.dataset.one]; if (!rec) return;
+      C.set(C.get().filter(m => m !== rec)); if (kind === 'merge' && mLast === rec) mLast = null;
+      log('ล้างประวัติ', { item: rec.item, lpn: C.lpn(rec), lot: '', qty: C.qty(rec), wh: rec.wh }, 'ล้างประวัติ' + lab + ' 1 รายการ');
+      refresh(); toast('ล้างประวัติ 1 รายการแล้ว'); return view();
+    }
+    if (b.dataset.a === 'all') {                                    // ล้างทั้งหมด (ยืนยันอีกครั้ง)
+      const n = C.get().length;
+      modal('ล้างประวัติการ' + lab + 'ทั้งหมด', '<div>จะลบประวัติ <b>' + n + '</b> รายการ<br><span class="sub">สต็อกคงเดิม · ย้อนกลับไม่ได้ — ควร Export สำรองก่อน</span></div>',
+        [['ยกเลิก'], ['ล้างทั้งหมด', 'd', () => { C.set([]); if (kind === 'merge') mLast = null; log('ล้างประวัติ', { item: '', lpn: '', lot: '', qty: 0, wh: '' }, 'ล้างประวัติ' + lab + ' ' + n + ' รายการ'); refresh(); toast('ล้างประวัติการ' + lab + 'แล้ว'); d.close(); }]]);
+    }
+  });
+  d.addEventListener('close', () => d.remove());
+  view(); document.body.appendChild(d); d.showModal();
+}
+$('#bMHClr').onclick = () => clearHistDlg('merge');
+$('#bCHClr').onclick = () => clearHistDlg('cut');
+$('#bFHClr').onclick = () => clearHistDlg('fix');
+$('#bCHAll').onclick = exportCutAll; $('#bMHAll').onclick = exportMergeAll;
+$('#bMClr').onclick = () => { mSel.clear(); mDest = ''; renderMrg(); };
+$('#bMAuto').onclick = mAuto;
+$('#bMrg').onclick = () => {
+  const { item, wh } = mCur(), ch = mPallets(item, wh).filter(p => mSel.has(p.lpn)); if (ch.length < 2 || ch.some(p => !mOk(p))) return;
+  const tot = r2(ch.reduce((a, p) => a + p.qty, 0)), cap = capOf(item, ch[0].wh);
+  modal('ยืนยันการรวมเลท', '<div>รวมเข้า LPN <b>' + esc(mDest) + '</b><br>' + ch.map(p => '<span class="mono">' + esc(p.lpn) + '</span> (' + fmt(p.qty) + ' CS)').join(' + ') + ' = <b>' + fmt(tot) + '</b> / Cap ' + fmt(cap) +
+    '<br>ยอดหลังรวม: ' + (Math.abs(tot - cap) < 1e-9 ? '<span class="chip ok">เต็ม Cap พอดี</span>' : '<span class="chip wn">น้อยกว่า Cap · ขาดอีก ' + fmt(cap - tot) + '</span>') +
+    '<br><span class="sub">ย้ายสต็อกของ LPN อื่นเข้า LPN ปลายทาง · Lot เดิมคงไว้ · ยกเลิกได้จากประวัติการรวมเลท</span></div>', [['ยกเลิก'], ['ยืนยันรวมเลท', 'p', doMerge]]);
+};
+$('#bMCut').onclick = () => {
+  const { item, wh } = mCur(), ch = mPallets(item, wh).filter(p => mSel.has(p.lpn)); if (!ch.length) return;
+  cutPrompt(item, wh, ch.flatMap(p => p.rows));
+};
+$('#mRes').onclick = e => {
+  const b = e.target.closest('[data-cl]'); if (!b || !mLast) return;
+  cutPrompt(mLast.item, mLast.wh, rows.filter(r => r.item === mLast.item && r.wh === mLast.wh && r.lpn === mLast.dest));
+};
+$('#cHist').onclick = e => {
+  const u = e.target.closest('[data-cu]'), x = e.target.closest('[data-ce]');
+  if (u) {
+    e.preventDefault();                                           // ปุ่มอยู่ในแถวสรุป: กดแล้วไม่ต้องขยาย/ยุบรายการ
+    const id = u.dataset.cu, n = cuts.length;
+    modal('ยกเลิกการตัดยอด', '<div>คืนสต็อกที่ตัดไว้กลับเข้าระบบ — เลือกว่าจะยกเลิก<b>เฉพาะรายการนี้</b> หรือ<b>ทั้งหมด ' + n + ' รายการ</b></div>',
+      [['ไม่ใช่'], ['ยกเลิกเฉพาะรายการนี้', 'd', () => undoCut(id)]].concat(n > 1 ? [['ยกเลิกทั้งหมด (' + n + ')', 'd', undoAllCuts]] : []));
+  }
+  if (x) exportCut(x.dataset.ce);
+};
+$('#mHist').onclick = e => {
+  const u = e.target.closest('[data-mu]'), x = e.target.closest('[data-me]');
+  if (u) {
+    const id = u.dataset.mu, n = merges.length;
+    modal('ยกเลิกการรวมเลท', '<div>คืนสต็อกกลับไปยัง LPN และ Location เดิม — เลือกว่าจะยกเลิก<b>เฉพาะรายการนี้</b> หรือ<b>ทั้งหมด ' + n + ' รายการ</b></div>',
+      [['ไม่ใช่'], ['ยกเลิกเฉพาะรายการนี้', 'd', () => undoMerge(id)]].concat(n > 1 ? [['ยกเลิกทั้งหมด (' + n + ')', 'd', undoAllMerges]] : []));
+  }
+  if (x) exportMerge(x.dataset.me);
+}; $('#cq').oninput = renderCap;
+$('#cb').onclick = e => {
+  const b = e.target.closest('[data-cs]'), rb = e.target.closest('[data-cr]');
+  if (rb) { const m = master[rb.dataset.cr]; if (m && m.base > 0) { m.cap = m.base; m.capSrc = 'base'; refresh(); toast('คืนค่า Master ฐานแล้ว'); } return; }
+  if (!b) return;
+  const it = b.dataset.cs, inp = $('#cb').querySelector('[data-c="' + CSS.escape(it) + '"]'), pin = $('#cb').querySelector('[data-p="' + CSS.escape(it) + '"]'), v = parseFloat(inp.value), pv = parseFloat(pin.value);
+  const m = master[it] || (master[it] = {});
+  if (v > 0) { if (m.cap !== v) { m.cap = v; m.capSrc = m.base === v ? 'base' : 'manual'; } }
+  else if (m.base > 0) { m.cap = m.base; m.capSrc = 'base'; }                // เว้นว่าง = กลับไปใช้ค่าฐาน (ถ้ามี) ไม่งั้น Pack / ค่าเริ่มต้น
+  else { delete m.cap; delete m.capSrc; }
+  if (pv > 0) m.prio = pv; else delete m.prio;
+  refresh(); toast('บันทึกแล้ว');
+};
+/* ลำดับ Item ที่ควรทำก่อน */
+$('#mPrioBox').addEventListener('click', e => { const g = e.target.closest('[data-go]'); if (g) { $('#mq').value = ''; mPick = g.dataset.go; renderMrg(); } });
+$('#bNext').onclick = () => {
+  const t = getPrio().todo; if (!t.length) return toast('ทุก Item เป็น OK แล้ว');
+  const i = t.findIndex(x => x.key === $('#mi').value), nx = t[(i + 1) % t.length]; $('#mq').value = ''; mPick = nx.key; renderMrg();
+};
+/* แก้เกิน Cap */
+$('#fq').oninput = renderFix; $('#fFill').onchange = renderFix;
+$('#fTb').onclick = e => {
+  const b = e.target.closest('[data-fx]'); if (!b) return; const x = fixList[+b.dataset.fx]; if (!x || !x.pl || x.pl.blocked) return;
+  const { p, pl } = x, fill = $('#fFill').checked;
+  modal('ยืนยันแก้เกิน Cap', '<div>Item <b class="mono">' + esc(p.item) + '</b> · LPN <b class="mono">' + esc(p.lpn) + '</b> ' + fmt(p.qty) + ' → <b>' + fmt(pl.cap) + '</b> (ส่วนเกิน ' + fmt(pl.excess) + ' CS)<br>' + planTxt(pl) + '<br><span class="sub">ดึงจากล็อตใหม่สุดก่อน · ยกเลิกได้จากประวัติ</span></div>',
+    [['ยกเลิก'], ['ยืนยันแก้ไข', 'p', () => applyFix(p.item, p.wh, p.lpn, fill)]]);
+};
+$('#bFixAll').onclick = () => {
+  const todo = fixList.filter(x => x.pl && !x.pl.blocked), fill = $('#fFill').checked; if (!todo.length) return;
+  const ex = r2(todo.reduce((a, x) => a + x.pl.excess, 0)), skip = fixList.length - todo.length;
+  modal('ยืนยันแก้เกิน Cap ทั้งหมด', '<div>แก้ <b>' + todo.length + '</b> พาเลท · ย้ายส่วนเกินรวม <b>' + fmt(ex) + '</b> CS' + (fill ? ' (เติมพาเลทอื่นก่อน แล้วเปิด LPN ใหม่)' : ' (เปิด LPN ใหม่ทั้งหมด)') + (skip ? '<br><span class="sub">ข้าม ' + skip + ' พาเลทที่ติด Allocated</span>' : '') + '<br><span class="sub">ยกเลิกทีละรายการได้จากประวัติ</span></div>',
+    [['ยกเลิก'], ['ยืนยัน', 'p', () => { let n = 0; todo.forEach(x => { if (applyFix(x.p.item, x.p.wh, x.p.lpn, fill, true)) n++; }); refresh(); toast('แก้เกิน Cap ' + n + ' พาเลทเรียบร้อย'); }]]);
+};
+$('#fHist').onclick = e => {
+  const u = e.target.closest('[data-fu]'); if (!u) return; e.preventDefault();
+  const id = u.dataset.fu, n = fixes.length;
+  modal('ยกเลิกการแก้เกิน Cap', '<div>คืนส่วนเกินกลับ LPN เดิม — เลือกว่าจะยกเลิก<b>เฉพาะรายการนี้</b> หรือ<b>ทั้งหมด ' + n + ' รายการ</b></div>',
+    [['ไม่ใช่'], ['ยกเลิกเฉพาะรายการนี้', 'd', () => undoFix(id)]].concat(n > 1 ? [['ยกเลิกทั้งหมด (' + n + ')', 'd', undoAllFixes]] : []));
+};
+function setTab(t) { tab = t; $$('.tab').forEach(b => b.classList.toggle('on', b.dataset.t === t)); ['stock', 'opt', 'mrg', 'fix', 'cap', 'log'].forEach(x => $('#v-' + x).classList.toggle('hide', x !== t)); render(); }
+$('#tabs').onclick = e => { const b = e.target.closest('.tab'); if (b) setTab(b.dataset.t); };
+document.addEventListener('keydown', e => { if (e.key === '/' && !/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) { e.preventDefault(); setTab('stock'); $('#q').focus(); } });
+
+/* ธีม: ตามระบบ → สว่าง → มืด */
+const TH = ['', 'light', 'dark'];
+function setTheme(i) { const t = TH[i]; t ? document.documentElement.dataset.theme = t : delete document.documentElement.dataset.theme; $('#bTheme').textContent = ['ธีม: ตามระบบ', 'ธีม: สว่าง', 'ธีม: มืด'][i]; try { localStorage.setItem('wms_th', i); } catch (e) {} }
+let ti = 0; try { ti = +localStorage.getItem('wms_th') || 0; } catch (e) {}
+setTheme(ti); $('#bTheme').onclick = () => setTheme(ti = (ti + 1) % 3);
+
+/* แถบตัวกรองของแท็บจัดชุด / รวมเลท */
+$('#oBar').innerHTML = barHtml('o'); $('#mBar').innerHTML = barHtml('m');
+function barEvt(e) {
+  const t = e.target.closest('[data-fk]'); if (!t) return;
+  const k = t.dataset.fk, f = FS[k];
+  if (t.dataset.fr) { Object.keys(f).forEach(x => f[x] = ''); $$('[data-fk="' + k + '"][data-ff]').forEach(i => i.value = ''); }
+  else f[t.dataset.ff] = t.value;
+  if (k === 'o') renderOpt(); else renderMrg();
+}
+['#oBar', '#mBar'].forEach(s => { $(s).addEventListener('input', barEvt); $(s).addEventListener('click', e => { if (e.target.closest('[data-fr]')) barEvt(e); }); });
+
+/* ===== โลโก้บริษัท (ใช้ไฟล์ข้าง HTML ใน GitHub / หรืออัปโหลดเอง) ===== */
+const DEFAULT_LOGO = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMDAgQDAwMEBAQFBgoGBgUFBgwICQcKDgwPDg4MDQ0PERYTDxAVEQ0NExoTFRcYGRkZDxIbHRsYHRYYGRj/2wBDAQQEBAYFBgsGBgsYEA0QGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBj/wAARCACMAU4DASIAAhEBAxEB/8QAHQABAAICAwEBAAAAAAAAAAAAAAcIBgkBBAUCA//EAFkQAAAFAwEDBAkOCAsHBQAAAAABAgMEBQYRBwgSIRMYMdIUOEFVVmGUlbMVFiI2UVdxdHWBo7LR0yMyN3aCkZOxJDVCVGJyc4SSocImNERIUlPDhqK0wcT/xAAcAQEAAgIDAQAAAAAAAAAAAAAABAYFBwECCAP/xABBEQACAQIDAggKBwgDAAAAAAAAAQIDBAUGESExBxITQVFhkdEXIlJTcYGSobHwFBUWcoLB0jI0NkJUsuHxVcLT/9oADAMBAAIRAxEAPwC/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAZIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB1KlU6dR6W9UqrOjwobCd92RIcJtCC901HwIY5qLqNbumdnuV2vvmZmZojRG8crKcxkkIL95nwIunuZoJqXq1duqFbOTXJZswG1GcamMKMmGC93H8tXuqPj7mC4DFYjitOzXF3y6O8vuTMg3uZJ8rrydBPbNrf1RXO/cvcWWvna9tmkvOwbIpLtdfSZp7MkGbEbPupLG+svmT8IgyvbTOr1bcVyVwtUlkzzyVNjIbx+kolK/zEQgKjcYxdVntnouhbD0ThHB1gOGRSjbqpLyp+M+x7F6kjMH9V9TZLvKO3/chq8VQdT/AJEY79P1u1apjiVxr+rSt3oKQ9y6f1OEZDAAENXVZPVTfayxTwHDJx4kram19yPcWMtXa/vamvIauqkU+tx8lvOMl2K/8OSyg/g3S+EWT081tsHUlKY9GqZxqmacqpk4iaf8e6WTJZeNJn48DXAPtl56PIQ/HdW062olocbUaVJUXQZGXEj8YylrjtxRelR8Zde/tKNj/BRg2IwcrWPIVOZx/Z9cd2no0NsICp+hm0y8/Kj2hqVNJSnDJqJW3OB56CQ+fj6Cc/xe6LYEeS4C42l5Su4cem+9Hm7MWW73ALp2t7HR8zW6S6U/lrnAAAlGBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPOr9cpttWzOr9YkFHgwmVPvOH3EkXcLumfQRd0zIh6Iqhtg3842imadwHjJLhFUKgST6SyZNIP5yUoy8SREvrpWtGVV8270lhytgM8dxOlYR2KT8Z9EVtb7N3XoV91P1GrGpt/SLgqaltxyM24UPeymMzngkv6R9Kj7p+IiIsMABrepUlVk5zerZ7TsrKhY0IW1tHiwitEl0fPaAAB0JQAAAAAAABczZb1jer9PLTu5JZu1GG1vU2Q6rKn2UlxaM+6pBdHup/q8aZj0rfrtRtm6afcFJeNqbBfTIZV40nnB+IyyRl3SMxOw+9laVlNbuf0FVzhlmjmHDp2s1462wfRLm9T3Pq69DakA8e1LhhXZZNLuWnn/AAaoRkSEFnJp3i4pPxkeSPxkPYGx4yUkmtx4vq0p0pyp1FpJPRroa3gAAcnzAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH0DWprFcS7p10uerKWa2znLjs5/7bX4NGPmRn5xsnkOG1FcdIsmhJq/UQ1SSnlyJzz7hma3HFLUZ90zMzMVjM1RqFOHS2+z/AGbz4ELSM7q7uWtsYxivxNt/2o/IAAVA9FgAAAAAAAAAAAAAAXi2Q7hXU9GJlDeWZrpM9aGyM84acInC/wDdygsEKibFkp0qteELP4M2oruPGSnS/wDsW7GxMHqOdnTb9HY9DxvwjWkbXMd3CG5tS9qKk/e2AABkikgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAfDqCdYW2roUk0n8/AaqKnEcgVqZBdLDkd9bKi9w0qMj/cNrQ10bQFsKtbaDuCMTW5HmveqLBkWCNL3sjx8C98vmFazLSbpQqLmfx/0bu4Er6NO+ubST2zimvwt/qIyAAFOPSAAAAAAAAAAAAAAAFsNi2nr5S8Kof4hlFjl4z/CKP8AeX6xbQQjsr2wugaBR6g+1uP1mS5O49PJ8EN/MZI3v0hNw2LhNJ07SnF9GvbtPGXCBfRvcw3dWD2KXF9lKPxQAAGRKcAAAAAAAAAAAAAAAAAAAAAAAERbQup1Y0x03jTbeQz6pT5ZRWnnkb6WU7qlKVu9BnwIizw4544FUz2mNZzMz9d6S/uMfqDFXmMULWpyc02+ov2XODnFMftPpttKEYatLjNpvTfuTNhIDXrzmNZ/DBHkUfqBzmNZ/DBHkUfqCL9o7byZdi7zP+BjG/O0val+g2FANeh7TGs+6f8AtgnyKP1Bb7Wm7K9aWz1UbmoE4otTZTGND/JpXjfdQlXsVEZcSUfcEu2xajcQnOCekVq/f19RXMa4PsRwi5tbW4nByry4sdG9E9YrbrFbPGW7Uk0BWrZl1UvrUK6a9Du2tFPZixGnGU9jttbqjWZGeUJLPD3RZUS7S6hdUlVhufSV7H8DuMDvZ2Fy05x014urW1J86XT0AAFVdo/WHUKwtWYlFtWvFBhOU1uQprsZpzKzccIzytJn0JLh4hxeXcLWnys93UfTLuXrnH7xWNq0pNN+M2ls9CfwLVAItod33BM2Rk3pIn79b9QHZvZXJJL8MltRkrdIt3pIuGMCo/OX1n8Ly8hj9QRbrF6NsouafjLVaf7M9gPB7iWNyrwtpwXIy4r1bW3bu0i9mzqNhQDXrzmNZ/DBHkUfqBzmNZ/DBHkUfqCJ9o7byZdi7yxeBjG/O0val+g2FCF9edD39WG6TOo8+HAqsE1NKdlErcdZVx3T3SM8kosl/WUKwNbTWs7byVndjbhEeTSqCwZH4jwgXL0ev97UnSaBc0uKiNMUpceS23nc5RB4M0547p8Dx3M444H2o31rialQafr/AMGLxHKuO5HnSxZTjqnonF66Np7Gmlsa16fgVp5mt8eFNvfTdQOZrfHhTb303UHU1J2mtS2dTq1TLZqUalUyDMdiMtpiNurWTajQa1qWR8TMjPBYIix8IxDnO6zeGbHkMbqDn6hs/J97OPCxmTzy9iPcZ1zNb48Kbe+m6gczW+PCm3vpuoMF5zus3hmx5DG6gc53WbwzY8hjdQPqGz8n3seFjMnnl7Ee4zrma3x4U299N1A5mt8eFNvfTdQZ/sxarXxqLX7jjXbXG6i3DjMOMJTHaa3DUtZGfsElngkukRtqlr/qxbms9zUGj3OiPAhTlssNHCYXuIIiwWTQZn090PqGz8n3seFjMnnl7Ee47XM1vjwpt76bqBzNb48Kbe+m6gwXnO6zeGbHkMbqBzndZvDNjyGN1A+obPyfex4WMyeeXsR7jOuZrfHhTb303UH6xdjS7uzmOzbqohReUTyxsk6a9zPst3KcZxnGRgJbTms5ngryZM/cKDGP/QLA7N2uFyai1Wp2vd/Y8mfFjlMYmstE0biN4kKStJcMkakmRkRZIzz0AsCs1/L72cS4V8yNNcsvYj3FgadT4lKpEWmQGUsxYrSWGW09CEJIkpL9REOyKy7SGud42Fe0C1LOfjQVnDTMky3GEvLVvqUlKEkrKSIiQZmeDPiXRjjBx7Tms5Hg7yZI/cODG6gy6WmxGuZScm5SerZsLAa8+c7rN4ZseQxuoOec7rNnBXmx5DG6g5ODYWAqDoZtD6g3HrBTLUu2bGqcKpco0lwoqGXGVkhS0mRoIiMj3TIyMu7nuDINpbVu/wDT7UOjUy0q4mBFk0433WzjNO7y+VUnOVpMy4EQAs8AwPRe46xduhNu3FX5ZSqlMYWt94m0o3zJ1aS9ikiIuBF0EM8AAAFJrE191XrOu9Dt2pXMh6myqymI8z2Ewneb5Qy3d4k5LgXT0gC7ICt205qpfWnletyNaFaTAamR31vpOM27vmlaCSfs0njgo+gQKe05rOR4O8mSP3Dgxy/0ADYWA15853WbwzY8hjdQOc7rN4ZseQxuoANhgClmlW01qFI1QpFGu+bHq9MqUlENf8FQy4wpxRJStJoIs4UZZIyPhnGDF0wBWnbM/Jtbnyor0Khiuy9U9MIVhVpu85dsMVE6gSkeq5spWbXJpxum50p3t/o7uRLW0bppc2pdkUmBa6YjkmJO5dxEh7ksoNtSckeMZyZcBW7mpavfzCk+Xp+wVe9hcU7916dPjLT8je+WLrCL3KkcKvb1UJ8Zvek142q2PmZa31f0D766eftIger+gffXTz9pEFUualq93vpPl6fsDmpavfzCk+Xp+wd/p95/TEX7KZb/AOb967y3NMkaL1uoIgUdyxp8pf4rEbsVxavgSXExj202RJ2YbgSkiIiVGIiL4w2KJ1mk1uxr3kUueXYdXpcgt42nCPk3E4UlSVF8xkYvNtIuKd2U6y6s8qWURRn4zfbMd6N+7q3rxlDiuKfwZGxLKUcBxnCqtG5danVqRab6pQ2ra0000Q7sY+3e6fiLPpDFxxTjYx9u90/EWfSGLjiVgX7nH1/EwHCr/Elf0Q/sQFHNr/8ALxA+R2fSui8Yo5tf/l4gfI7PpXR0zB+6P0olcEP8Qx+5L8idba7QhP5qv+iWK17MdLptW2g4MaqQI01kokhZNSWkuJ3iRwPCiMslkxZS2u0IT+ar/oliu2yn2xsL4jJ+oQgXSTuLRPoX5FswCUoYRmCUXo+NP/sXa9ZdneClD8ga6o59ZdneCdD8ga6o9wBZ+Th0Gjfplx5x9rKebYVAodHkWk9SaPBgLeTKS4qKwlrfJPJmRHukWcZPHwmJR2T+14Z+UZH70iP9tTps3++f+ISBsn9rwz8oyP3pFfoJLFqiXR+SNvYrUlU4PbSU3q+Ue/71QqRJjsTNpx6JKZQ8w9dam3G1llK0nNMjIy7pGR4Gw0rMtDHtVonkLXVGvb/mo/8AV3/7hslLoFjNMGOTLYsWnU5+fPt6340VhtTrz70NlKG0EWTUozTgiIu6MV9cugPffT7/ABxRlV/0ebcOldx0KmpbVMn02RGYS4rdSa1tmlOT7hZPpFC7y0D1EsK0H7luKJTG4DCkIWpiYTisrUSU4Tgs8TIAXttOqadVCRKTZE23JDyEJOQVIUyaiSZnu7/J9zOcZ8YoLrTjnI3fvYx6rKzn4EiYdi/203fw/wCDjfXcEOa2JNW0beKS6TqiyL9SQBdtqvaEcijeq2nud0s/hYnuD79XtBu+2nv7WIKnFsp6vKSRlT6Lgyz/ABinqjnmo6v976L5wT1QBOOttY0akaDXGxRKhZb1TXHIoqIC46nzc3043Nz2Weno8YijY7/LjVsd5XPTNCE7utSs2Nd8y2rhjtsVCISTcS0vfSZKSSiNKi6SMjL/ADFxdmnReXYsZ+9azUokmZVYaG4rUJZrbbjqMnN41mRbylYT0cCIuk8gCGtrrtg2PkeP6R0WV0atG1X9AbRfftqkOuu0xlxxxyG2tS1KTk1GZlkzMzFatrrtgmPkeP6R0Wv0V7XqzPkiP9QgB7/rMtDwVonkLXVHTq1lWeqgzUqtSiGRsOEZdgtf9J/0RlA6lU/iOZ/YL+qYA14bPXbK2h8YX6BwSNtk/lZt35IP06hHOz12ytofGF+gcEjbZP5Wbd+SD9OoAWE2dO1htH4s56ZwSgIv2dO1htH4s56ZwSgAA1uaYdtBbX5wp9KobIxrc0w7aC2vzhT6VQAmDbR9tNofFJX12xlmz9VtKIuglJYumoWezU0uyOVRUlxyeIuWXu72/wCy6MYz3MDE9tH202h8UlfXbEWWdoDqLfdoRrmt+JTHIEhS0tqfmE2vKFGk8pweOJGALner2g3fbT39rEHCq9oNunmrae47v4WIKoc1HV/vfRfOCeqHNR1f730XzgnqgDCbeVAVtHUtVL5PsA7mbONyRYRyXZZbm74t3GPENlxdAp7pZstXlTdSqZXrzfp0Sn02QiWTMWRyzkhxB7yE8CIkp3iIzPOeGCLjkrhACLtbtWZOklsUyrRqI1VVTJZxjbckGySCJBqzkknnoEI89Ore99D85L+7Fkb+03tfUmkxKddMaQ+xFeN9omX1NGSjSaeJl08DGBc1XSDvVUvODgw95SxCVVu3mlH56mbHy3iGUKNjGGMW051tXq1rpprs3TjzdRFfPTq3vfQ/OS/uw56VW976H5yX92JU5qukHeqpecHA5qukHeqpecHBF+j4t5xfP4TPfW/B5/RVO1/+pSe9bllX3qJVLmdgojyKm/ynYzKjWSDwSSSRnxPoL4TF39o1pwtlGsoNtW8hETeLHRh9vOR6Fs7O+lVq3HHrlPoDj0yMolsKmSVvJbUXQokmeMl3DMjx0kJIqtJptcokqkVeG1MgymzaeYdLKVpPpIx9LLC6tKnWVWS40/8APeQ80Z7w+9vMOlh9KSpWrT0eibScdi2vco72+c13aQ6uTdI69UqjFojFVKcwlhbTr5s7u6reIyMiP3T4YEvc9Ore99D85L+7ErObK+jy3FKTRqg2RnkkJqDuC+DJmPnmq6Qd6ql5wcEWhYYnbw5OnUSXz1GdxXNuR8WuHd3tpUlUemr3blot1RLcRXz06t730Pzkv7sQpqtqXL1Uvpu5JdKZpptxURUMNOm77FKlKyajIsmZqPue4Lf81XSDvVUvODg7EHZf0fhVBqWdAkyuTVvE1JmuLbUf9JOeJeI+AV8OxK4jydWomvnqO2FZxyTg1b6XYWlSNTRrXfv9NRr3HWt1txrYLSlxCkK9ajysKLHA2VmR/qMjFdNlPtjYXxGT9Qheep0WnVa15dvSmN2BKjKiONMnyeG1J3TSnH4vA8FjoGCWXoTp7YV1t3FbsGazObbW0lTstbid1RYP2J8BOr4dUnWoTi1pDTX1FSwnOVnb4bidtXjLj3Lk46JNLVPe9V09BJYAAzRrQqbtqdNm/wB8/wDEJA2T+14Z+UZH70jPNQNKbP1MOAd1RZL/AGBynIchIU1jf3d7OOn8Uh6dlWRQLAtZNv24y81BJ1bxJedN1W8rGeJ8e4MTTsakb+Vy9OK1p183cbBu80WdbKlDBIqXKwm5N6Li6azex66/zLmNdlzT5FC16rNVbZSp+BcL8lLbmSI1IlKWRH4jwJ5LbTqWPyeRPOavuhN12bPult53I/XqvQHEVCSrffeiSnGOWVjG8pKTwavHjJ90eDzUtHu9VU85vfaMsa+Iv56dS97yJ50V90MP1O2lpupWnEu0n7Pj05Ehxpw5KJynTTuLJeN00FnOMdIsBzUtHu9VU85vfaHNS0e71VTzm99oAinYv9tN3/E4313BD+tHbJ3d8rK/0i8+n+kFlaZzJ0q1Icthyc2ht435S3skkzMsbx8PxjHhXBs5aX3Nds65KrTag5PmvnIeWie6hJr4cSSR4LoLgAJVY/3Zv+qX7h+g4SkkoJJdBFghyAKdbZNq9i3VQLzYbIkTGVU+Qoi/ltnvtmfjNKll+iJP2Ury9ceiSaDId3plAeOIZHxM2FezaP5iNSf0BKF82FbeotsJoN0RHZENL6ZCSadU0pK05IjJSePQZl848awNHLJ00qsuoWpHnR3ZbRMvJemOPIURK3iPdUeMkeePjMAVV2vELTtARlKSZJVR4+DPu/hHR3rK2r6nZ+n1Itf1lRJpU2MiKmR2epo3EpLBGaeTPB4x3Rae/NKbG1IKMu7KMUp+Mk0syWnVsuoSZ5NO8kyMyzxweSGDc1LR7vVVPOb32gCL+enUve8iedFfdD8Ju2ZVZVOkRm7AhtrdbUhK1VJaiSZkZZMuTLPwZISvzUtHu9VU85vfaHNS0e71VTzm99oAqps8oUraXtFKSNRlIcM8F3CYcyYkTbKJRarW6vB4OkKIj+B5X2kLJWPolpzp5WVVi26GpFQNBtlKkyFvrQk+kk7xmSc90yLI9S+tMrL1HhR4920dMw4xqNh5DimnWt7Gd1aTI8Hgsl0cCAFSNO9qOo2BprTLQTZsWoIp6FNoknOU0ayNalcU7iuPssdIyjnp1L3vInnRX3QlDmpaPd6qp5ze+0Oalo93qqnnN77QBFq9tOqm2okafQyVjgaqmsyI/GXJCF9IFPTdo+0Xib3nHK028okF0eyNaj+AiyfwELdc1LR7vVVPOb32jK7H0T0509q6qtblC3KgaTQmXKfW+42k+kkGsz3c93HEwBX7bR9tFofFJX12xMGy72s1D/tpX/yFjKNQNIbK1MmQZV1w5b7kJC22TYlLZwSzIzzunx/FIe7Z1n0SxLQj21bzLzVPjqWptDrqnVEa1Go/ZK4nxMwB7wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//2Q==';   // โลโก้ SUNGROUP ค่าเริ่มต้น (ฝังในไฟล์)
+const LOGO_FILES = ['Logo sungroup.jpg', 'Logo sungroup.png', 'Logo sungroup.jpeg', 'logo.png', 'logo.jpg', 'logo.jpeg', 'logo.svg'];
+function showLogo(src) {                               // แสดงโลโก้ในหัวเว็บ + ตั้งเป็น favicon
+  const im = $('#logoImg'); im.src = src; im.classList.remove('hide'); $('#logoMk').classList.add('hide');
+  const fav = $('#fav'); if (fav) { fav.removeAttribute('type'); fav.href = src; }
+  const ap = document.querySelector('link[rel="apple-touch-icon"]'); if (ap) ap.href = src;
+}
+function findLogo(i) {                                 // ลองหาไฟล์โลโก้ตามลำดับ
+  if (i >= LOGO_FILES.length) return showLogo(DEFAULT_LOGO);        // ไม่มีไฟล์โลโก้ข้าง HTML → ใช้โลโก้ที่ฝังไว้
+  const t = new Image(); t.onload = () => showLogo(encodeURI(LOGO_FILES[i])); t.onerror = () => findLogo(i + 1); t.src = encodeURI(LOGO_FILES[i]);
+}
+(function initLogo() {
+  let saved = null; try { saved = localStorage.getItem('wms_logo'); } catch (e) {}
+  if (saved) showLogo(saved); else findLogo(0);       // รูปที่อัปโหลดเองมาก่อน ถ้าไม่มีใช้ไฟล์ในโฟลเดอร์เดียวกับ HTML
+  $('#logoBox').onclick = e => {
+    if (e.shiftKey) { try { localStorage.removeItem('wms_logo'); } catch (x) {} location.reload(); return; }
+    $('#logoFile').click();
+  };
+  $('#logoFile').onchange = e => {
+    const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+    const fr = new FileReader();
+    fr.onload = () => { const im = new Image(); im.onload = () => {            // ย่อรูปไม่เกิน 256px เพื่อเก็บในเบราว์เซอร์
+      const k = Math.min(1, 256 / Math.max(im.width, im.height)), c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(im.width * k)); c.height = Math.max(1, Math.round(im.height * k));
+      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+      const d = c.toDataURL('image/png'); try { localStorage.setItem('wms_logo', d); } catch (x) {}
+      showLogo(d); toast('ตั้งโลโก้แล้ว');
+    }; im.src = fr.result; };
+    fr.readAsDataURL(f);
+  };
+})();
+
+load().then(refresh);
+})();
+</script>
+</body>
+</html>
