@@ -73,6 +73,22 @@ dialog::backdrop{background:rgba(8,12,24,.55)}
 tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--s2) 60%,transparent)}
 tbody tr:hover td{background:var(--ac2)}
 tr.lk td:first-child{box-shadow:inset 3px 0 0 var(--bad)}tr.lk td{color:var(--mu)}
+/* ===== UI รอบ 2 ===== */
+.fp{margin:0 12px 10px;border:1px solid var(--bd);border-radius:12px;background:var(--sf)}
+.fp>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:9px 14px;font-weight:600;user-select:none}
+.fp>summary::-webkit-details-marker{display:none}
+.fp>summary::after{content:'▾';margin-left:auto;color:var(--mu);transition:transform .2s}
+.fp[open]>summary::after{transform:rotate(180deg)}
+.fp[open]>summary{border-bottom:1px solid var(--bd)}
+.fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;padding:12px 14px 14px}
+.fgrp{display:flex;flex-direction:column;gap:8px;padding:12px;border:1px solid var(--bd);border-radius:10px;background:var(--s2)}
+.fgt{font-size:11px;font-weight:700;color:var(--ac);letter-spacing:.05em}
+.ff{display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--mu)}.ff .inp{background:var(--sf);color:var(--tx)}
+#v-stock{border-radius:14px}
+#q{padding:8px 14px;border-radius:999px;max-width:380px!important}
+#v-stock th{text-transform:uppercase;letter-spacing:.03em;font-weight:600;border-bottom:2px solid var(--bd)}
+#v-stock td{padding:6px 9px;vertical-align:middle}
+#v-stock .overflow-x-auto{max-height:calc(100vh - 150px);min-height:380px}
 </style>
 </head>
 <body>
@@ -106,16 +122,15 @@ tr.lk td:first-child{box-shadow:inset 3px 0 0 var(--bad)}tr.lk td{color:var(--mu
       <span class="sub" id="cnt"></span>
     </div>
     <div class="ruleBar"></div>
+    <details class="fp" id="fp"><summary><span>⚙ ตัวกรองคอลัมน์</span><span class="chip wn" id="fpCnt" style="display:none"></span><span class="sub">สินค้า · Location · LPN · สถานะ</span></summary><div class="fg">
+<div class="fgrp"><div class="fgt">สินค้า</div><label class="ff"><span>Item</span><input class="inp" data-f="item" placeholder="เช่น 1234"></label><label class="ff"><span>ชื่อสินค้า</span><input class="inp" data-f="desc" placeholder="กรองชื่อ"></label><label class="ff"><span>Lot</span><input class="inp" data-f="lot" placeholder="กรอง Lot"></label></div>
+<div class="fgrp"><div class="fgt">Location</div><label class="ff"><span>ประเภท</span><select class="inp" data-f="locz"><option value="">ทุก Location</option><option value="nopk">ไม่เอา PICKTO</option><option value="nosg">ไม่เอา STAGE</option><option value="nopksg">ไม่เอา PICKTO + STAGE</option><option value="rack">เฉพาะ Rack ปกติ</option><option value="pk">เฉพาะ PICKTO</option><option value="sg">เฉพาะ STAGE</option></select></label><label class="ff"><span>มีคำว่า</span><input class="inp" data-f="loc" placeholder="กรอง Location"></label><label class="ff"><span>ไม่เอา</span><input class="inp" data-f="locx" placeholder="เช่น 02A, CS3"></label></div>
+<div class="fgrp"><div class="fgt">LPN</div><label class="ff"><span>ประเภท</span><select class="inp" data-f="lpnt"><option value="">ทุกประเภท LPN</option><option value="nonum">ไม่เอา LPN ตัวเลขล้วน</option><option value="num">เฉพาะ LPN ตัวเลขล้วน</option></select></label><label class="ff"><span>มีคำว่า</span><input class="inp" data-f="lpn" placeholder="กรอง LPN"></label><label class="ff"><span>ไม่เอาขึ้นต้นด้วย</span><input class="inp" data-f="lpnx" placeholder="เช่น 00001784"></label></div>
+<div class="fgrp"><div class="fgt">สถานะ</div><label class="ff"><span>Allocated</span><select class="inp" data-f="alloc"><option value="">ทุก Allocated</option><option value="free">Allocated = 0 (พร้อมรวม/ตัด)</option><option value="held">มี Allocated &gt; 0</option></select></label><label class="ff"><span>สถานะ Cap</span><select class="inp" data-f="st"><option value="">ทุกสถานะ</option><option value="ok">OK</option><option value="merge">รอรวม</option><option value="over">เกิน Cap</option><option value="alloc">ติด Allocated (ทั้งหมด)</option><option value="partial">จองบางล็อต (ต้องเคลียร์ทั้งพาเลท)</option></select></label><label class="ff"><span>Status / เงื่อนไขรวมเลท</span><select class="inp" data-f="fs"><option value="">ทุก Status</option><option value="ok">ผ่านเงื่อนไข</option><option value="not">ไม่ผ่าน (ไม่นำไปรวม)</option></select></label><label class="ff"><span>Lot Status</span><input class="inp" data-f="ls" placeholder="เช่น HOLD"></label><label class="ff"><span>คลัง (WH)</span><select class="inp" data-f="wh" id="cWh"></select></label></div>
+</div></details>
     <div class="overflow-x-auto"><table style="min-width:1500px"><thead>
       <tr id="hSort"></tr>
-      <!-- Inline Column Filter -->
-      <tr id="hFilt">
-        <th><input class="inp" data-f="item" placeholder="กรอง Item"></th><th><input class="inp" data-f="desc" placeholder="กรองชื่อ"></th>
-        <th><input class="inp" data-f="lot" placeholder="กรอง Lot"></th><th style="min-width:190px"><div class="flex flex-col gap-1"><select class="inp" data-f="locz"><option value="">ทุก Location</option><option value="nopk">ไม่เอา PICKTO</option><option value="nosg">ไม่เอา STAGE</option><option value="nopksg">ไม่เอา PICKTO + STAGE</option><option value="rack">เฉพาะ Rack ปกติ</option><option value="pk">เฉพาะ PICKTO</option><option value="sg">เฉพาะ STAGE</option></select><input class="inp" data-f="loc" placeholder="กรอง Location"><input class="inp" data-f="locx" placeholder="ไม่เอา เช่น 02A, CS3"></div></th>
-        <th style="min-width:210px"><div class="flex flex-col gap-1"><select class="inp" data-f="lpnt"><option value="">ทุกประเภท LPN</option><option value="nonum">ไม่เอา LPN ตัวเลขล้วน (0000178433)</option><option value="num">เฉพาะ LPN ตัวเลขล้วน</option></select><input class="inp" data-f="lpn" placeholder="กรอง LPN"><input class="inp" data-f="lpnx" placeholder="ไม่เอาขึ้นต้นด้วย เช่น 00001784"></div></th><th></th><th><select class="inp" data-f="alloc"><option value="">ทุก Allocated</option><option value="free">Allocated = 0 (พร้อมรวม/ตัด)</option><option value="held">มี Allocated &gt; 0</option></select></th><th></th>
-        <th><select class="inp" data-f="st"><option value="">ทุกสถานะ</option><option value="ok">OK</option><option value="merge">รอรวม</option><option value="over">เกิน Cap</option><option value="alloc">ติด Allocated (ทั้งหมด)</option><option value="partial">จองบางล็อต (ต้องเคลียร์ทั้งพาเลท)</option></select></th><th><select class="inp" data-f="fs"><option value="">ทุก Status</option><option value="ok">ผ่านเงื่อนไข</option><option value="not">ไม่ผ่าน (ไม่นำไปรวม)</option></select></th><th><input class="inp" data-f="ls" placeholder="กรอง Lot Status"></th>
-        <th><select class="inp" data-f="wh" id="cWh"></select></th><th></th>
-      </tr></thead><tbody id="tb"></tbody></table></div>
+    </thead><tbody id="tb"></tbody></table></div>
     <div class="p-3 flex gap-2 items-center"><button class="btn hide" id="bMore">แสดงเพิ่ม 200 แถว</button></div>
   </section>
 
@@ -891,6 +906,7 @@ function exportStock() {
 
 /* ===================== แถบเงื่อนไข + ตั้งค่า Lot Status ที่อนุญาต ===================== */
 function renderRule() {
+  { const nf = Object.keys(flt).filter(k => flt[k]).length, fc = $('#fpCnt'); fc.style.display = nf ? '' : 'none'; fc.textContent = nf + ' ตัวกรองใช้งาน'; }
   const n = PAL.filter(p => p.st === 'hold').length;
   const h = '<div class="rb"><span class="rbt">เงื่อนไขรวมเลท / ตัดยอด</span><span class="chip ok">Status = OK</span><span class="chip ok">Lot Status: ' + (lsAllow.map(esc).join(', ') || '—') + '</span><span class="chip ok">Allocated = 0</span><span style="flex:1"></span>' +
     (n ? '<span class="chip bad">ถูกล็อก ' + n.toLocaleString() + ' พาเลท</span>' : '') + '<button class="btn s" data-lsdlg="1">ตั้งค่า Lot Status</button></div>';
