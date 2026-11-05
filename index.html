@@ -152,8 +152,8 @@ tr.lk td:first-child{box-shadow:inset 3px 0 0 var(--bad)}tr.lk td{color:var(--mu
     <div id="mPrev"></div>
     <div class="card overflow-hidden"><div class="overflow-x-auto"><table><thead><tr><th></th><th>LPN</th><th>Location</th><th>Lot</th><th class="r">Case On Hand</th><th class="r">Allocated</th><th>Status (ไฟล์)</th><th>LPN ปลายทาง</th></tr></thead><tbody id="mTb"></tbody></table></div></div>
     <div id="mRes"></div>
-    <div class="flex flex-wrap gap-2 items-center"><div class="font-semibold flex-1">ประวัติการรวมเลท</div><button class="btn s" id="bMHAll">Export ประวัติรวมเลททั้งหมด (Excel)</button><button class="btn s d" id="bMHClr">ล้างประวัติรวมเลท</button></div><div id="mHist" class="grid gap-2"></div>
-    <div class="flex flex-wrap gap-2 items-center"><div class="font-semibold flex-1">ประวัติการตัดยอด</div><button class="btn s" id="bCHAll">Export ประวัติตัดยอดทั้งหมด (Excel)</button><button class="btn s d" id="bCHClr">ล้างประวัติตัดยอด</button></div><div id="cHist" class="grid gap-2"></div>
+    <div class="flex flex-wrap gap-2 items-center"><div class="font-semibold">ประวัติการรวมเลท</div><input class="inp" style="max-width:300px" id="mhq" placeholder="ค้นหา Item / ชื่อ / LPN"><span class="sub" id="mhInfo"></span><div class="flex-1"></div><button class="btn s d hide" id="mhDelF"></button><button class="btn s" id="bMHAll">Export ประวัติรวมเลททั้งหมด (Excel)</button><button class="btn s d" id="bMHClr">ล้างประวัติรวมเลท</button></div><div id="mHist" class="grid gap-2"></div>
+    <div class="flex flex-wrap gap-2 items-center"><div class="font-semibold">ประวัติการตัดยอด</div><input class="inp" style="max-width:300px" id="chq" placeholder="ค้นหา Item / ชื่อ / LPN"><span class="sub" id="chInfo"></span><div class="flex-1"></div><button class="btn s d hide" id="chDelF"></button><button class="btn s" id="bCHAll">Export ประวัติตัดยอดทั้งหมด (Excel)</button><button class="btn s d" id="bCHClr">ล้างประวัติตัดยอด</button></div><div id="cHist" class="grid gap-2"></div>
   </section>
 
   <!-- ===== แท็บแก้เกิน Cap ===== -->
@@ -184,8 +184,8 @@ tr.lk td:first-child{box-shadow:inset 3px 0 0 var(--bad)}tr.lk td{color:var(--mu
 
   <!-- ===== แท็บประวัติ ===== -->
   <section id="v-log" class="card overflow-hidden hide">
-    <div class="p-3 flex gap-2"><button class="btn d" id="bLogClr">ล้างประวัติ</button></div>
-    <div class="overflow-x-auto"><table><thead><tr><th>เวลา</th><th>ประเภท</th><th>Item</th><th>LPN</th><th>Lot</th><th class="r">จำนวน</th><th>WH</th><th>หมายเหตุ</th></tr></thead><tbody id="lb"></tbody></table></div>
+    <div class="p-3 flex flex-wrap gap-2 items-center"><input class="inp" style="max-width:340px" id="lq" placeholder="ค้นหา Item / LPN / Lot / ประเภท / หมายเหตุ"><span class="sub" id="lInfo"></span><div class="flex-1"></div><button class="btn d hide" id="bLogDelF"></button><button class="btn d" id="bLogClr">ล้างประวัติทั้งหมด</button></div>
+    <div class="overflow-x-auto"><table><thead><tr><th>เวลา</th><th>ประเภท</th><th>Item</th><th>LPN</th><th>Lot</th><th class="r">จำนวน</th><th>WH</th><th>หมายเหตุ</th><th></th></tr></thead><tbody id="lb"></tbody></table></div>
   </section>
 </main>
 <div id="toast"></div>
@@ -398,7 +398,7 @@ function render() {
   if (tab === 'mrg') renderMrg();
   if (tab === 'fix') renderFix();
   if (tab === 'cap') renderCap();
-  if (tab === 'log') $('#lb').innerHTML = logs.length ? logs.slice(0, 500).map(l => '<tr><td>' + esc(l.at) + '</td><td><span class="chip ' + (l.type === 'ลบ' || l.type === 'ตัดยอด' ? 'bad' : '') + '">' + esc(l.type) + '</span></td><td class="mono">' + esc(l.item) + '</td><td class="mono">' + esc(l.lpn) + '</td><td>' + esc(l.lot) + '</td><td class="r mono">' + fmt(l.qty) + '</td><td>' + esc(l.wh) + '</td><td>' + esc(l.ref) + '</td></tr>').join('') : '<tr><td colspan="8" class="sub" style="text-align:center;padding:30px">ยังไม่มีประวัติ</td></tr>';
+  if (tab === 'log') renderLog();
 }
 
 /* ===================== ลบแถวสต็อก (Confirm + Log) ===================== */
@@ -570,13 +570,13 @@ function renderMrg() {
   const lastFull = mLast && mLast.total <= mLast.cap + 1e-9 && !rows.some(r => r.item === mLast.item && r.wh === mLast.wh && r.lpn === mLast.dest && aOf(r) > 0) && rows.some(r => r.item === mLast.item && r.wh === mLast.wh && r.lpn === mLast.dest);
   $('#mRes').innerHTML = mLast ? '<div class="card p-3" style="border-color:var(--ok)"><div class="font-semibold mb-1">ผลการรวมเลทล่าสุด</div>' + recHtml(mLast) +
     (lastFull ? '<div class="flex gap-2 items-center mt-2"><span class="chip ' + (Math.abs(mLast.total - mLast.cap) < 1e-9 ? 'ok">เต็ม Cap พอดี' : 'wn">น้อยกว่า Cap') + '</span><button class="btn s p" data-cl="' + mLast.id + '">ตัดยอด LPN ' + esc(mLast.dest) + '</button></div>' : '') + '</div>' : '';
-  $('#cHist').innerHTML = cuts.slice(0, 30).map(c => '<details class="card p-3"><summary class="cursor-pointer flex flex-wrap items-center gap-2"><span class="tg sub">▸</span><span class="chip bad">ตัดยอด</span> <b class="mono">' + esc(c.item) + '</b> ' + esc(c.name) + ' · ' + byOrig(c.removed).length + ' LPN เดิม · ' + fmt(c.total) + ' / ' + fmt(c.cap) + ' <span class="chip">' + esc(c.wh) + '</span> <span class="sub">' + esc(c.at) + '</span><button class="btn s d" style="margin-left:auto" data-cu="' + c.id + '">ยกเลิกการตัดยอด</button></summary><div class="mt-2">' +
+  $('#cHist').innerHTML = histF(cuts, cKey, '#chq', '#chInfo', '#chDelF', 30).map(c => '<details class="card p-3"><summary class="cursor-pointer flex flex-wrap items-center gap-2"><span class="tg sub">▸</span><span class="chip bad">ตัดยอด</span> <b class="mono">' + esc(c.item) + '</b> ' + esc(c.name) + ' · ' + byOrig(c.removed).length + ' LPN เดิม · ' + fmt(c.total) + ' / ' + fmt(c.cap) + ' <span class="chip">' + esc(c.wh) + '</span> <span class="sub">' + esc(c.at) + '</span><button class="btn s d" style="margin-left:auto" data-cu="' + c.id + '">ยกเลิกการตัดยอด</button></summary><div class="mt-2">' +
     '<div class="overflow-x-auto"><table><thead><tr><th>LPN เดิม (ก่อนรวม)</th><th>รวมเข้า LPN</th><th>Location</th><th>Lot (ERP / DLD)</th><th class="r">Case On Hand</th></tr></thead><tbody>' +
     c.removed.map(r => '<tr><td class="mono"><b>' + esc(origOf(r)) + '</b></td><td class="mono">' + (origOf(r) !== r.lpn ? esc(r.lpn) : '<span class="sub">—</span>') + '</td><td>' + esc(r.loc || '—') + '</td><td class="mono">' + esc(r.lot) + (r.lot2 ? ' / ' + esc(r.lot2) : '') + '</td><td class="r mono">' + fmt(r.qty) + '</td></tr>').join('') +
     '</tbody></table></div><div class="sub mt-1">สูตร: ' + esc(byOrig(c.removed).map(o => o.lpn + ' (' + fmt(o.qty) + ')').join(' + ')) + ' = ' + fmt(c.total) + '</div>' +
-    '<div class="flex gap-2 mt-2"><button class="btn s" data-ce="' + c.id + '">Export Excel</button></div></div></details>').join('') || '<div class="sub">ยังไม่มีประวัติการตัดยอด</div>';
-  $('#mHist').innerHTML = merges.slice(0, 20).map(m => '<details class="card p-3"><summary class="cursor-pointer"><b class="mono">' + esc(m.dest) + '</b> ← ' + m.src.length + ' LPN · ' + esc(m.item) + ' · ' + fmt(m.total) + ' / ' + fmt(m.cap) + ' <span class="sub">' + esc(m.at) + '</span></summary><div class="mt-2">' + recHtml(m) +
-    '<div class="flex gap-2 mt-2"><button class="btn s" data-me="' + m.id + '">Export Excel</button><button class="btn s d" data-mu="' + m.id + '">ยกเลิกการรวม (คืน LPN เดิม)</button></div></div></details>').join('') || '<div class="sub">ยังไม่มีประวัติการรวมเลท</div>';
+    '<div class="flex gap-2 mt-2"><button class="btn s" data-ce="' + c.id + '">Export Excel</button><button class="btn s d" data-cdel="' + c.id + '">ลบประวัติ (สต็อกคงเดิม)</button></div></div></details>').join('') || '<div class="sub">' + (cuts.length ? 'ไม่พบรายการที่ค้นหา' : 'ยังไม่มีประวัติการตัดยอด') + '</div>';
+  $('#mHist').innerHTML = histF(merges, mKey, '#mhq', '#mhInfo', '#mhDelF', 20).map(m => '<details class="card p-3"><summary class="cursor-pointer"><b class="mono">' + esc(m.dest) + '</b> ← ' + m.src.length + ' LPN · ' + esc(m.item) + ' · ' + fmt(m.total) + ' / ' + fmt(m.cap) + ' <span class="sub">' + esc(m.at) + '</span></summary><div class="mt-2">' + recHtml(m) +
+    '<div class="flex gap-2 mt-2"><button class="btn s" data-me="' + m.id + '">Export Excel</button><button class="btn s d" data-mu="' + m.id + '">ยกเลิกการรวม (คืน LPN เดิม)</button><button class="btn s d" data-mdel="' + m.id + '">ลบประวัติ (สต็อกคงเดิม)</button></div></div></details>').join('') || '<div class="sub">' + (merges.length ? 'ไม่พบรายการที่ค้นหา' : 'ยังไม่มีประวัติการรวมเลท') + '</div>';
 }
 function doMerge() {
   const { item, wh } = mCur(), ch = mPallets(item, wh).filter(p => mSel.has(p.lpn));
@@ -911,6 +911,41 @@ function lsDlg() {
 }
 document.addEventListener('click', e => { if (e.target.closest('[data-lsdlg]')) lsDlg(); });
 
+/* ===================== ค้นหา / ลบประวัติ ===================== */
+const logHit = (l, q) => [l.at, l.type, l.item, l.lpn, l.lot, l.wh, l.ref].join(' ').toLowerCase().includes(q);
+const lqv = () => ($('#lq').value || '').trim().toLowerCase();
+function renderLog() {
+  const q = lqv(), all = logs.map((l, i) => [l, i]).filter(([l]) => !q || logHit(l, q));
+  $('#lInfo').textContent = q ? 'พบ ' + all.length.toLocaleString() + ' จาก ' + logs.length.toLocaleString() + ' รายการ' : logs.length.toLocaleString() + ' รายการ';
+  const b = $('#bLogDelF'); b.classList.toggle('hide', !(q && all.length)); b.textContent = 'ลบที่ค้นเจอ (' + all.length.toLocaleString() + ')';
+  $('#lb').innerHTML = all.length ? all.slice(0, 500).map(([l, i]) => '<tr><td>' + esc(l.at) + '</td><td><span class="chip ' + (l.type === 'ลบ' || l.type === 'ตัดยอด' ? 'bad' : '') + '">' + esc(l.type) + '</span></td><td class="mono">' + esc(l.item) + '</td><td class="mono">' + esc(l.lpn) + '</td><td>' + esc(l.lot) + '</td><td class="r mono">' + fmt(l.qty) + '</td><td>' + esc(l.wh) + '</td><td>' + esc(l.ref) + '</td><td><button class="btn s d" data-ld="' + i + '">ลบ</button></td></tr>').join('')
+    : '<tr><td colspan="9" class="sub" style="text-align:center;padding:30px">' + (logs.length ? 'ไม่พบรายการที่ค้นหา' : 'ยังไม่มีประวัติ') + '</td></tr>';
+}
+const mKey = m => [m.item, m.name, m.dest, m.wh, m.at].concat((m.src || []).map(s => typeof s === 'string' ? s : [s && s.lpn, s && s.orig, s && s.from].filter(Boolean).join(' '))).join(' ');
+const cKey = c => [c.item, c.name, c.wh, c.at].concat(c.lpns || [], (c.removed || []).map(r => (r.lpn || '') + ' ' + (r.orig || ''))).join(' ');
+function histF(arr, key, qs, infoS, btnS, n) {                      // กรองตามคำค้น (พิมพ์รหัส Item / LPN) + ปุ่มลบที่ค้นเจอ
+  const q = ($(qs).value || '').trim().toLowerCase(), out = q ? arr.filter(x => key(x).toLowerCase().includes(q)) : arr;
+  $(infoS).textContent = q ? 'พบ ' + out.length + ' จาก ' + arr.length + ' รายการ' : (arr.length ? arr.length + ' รายการ' : '');
+  const b = $(btnS); b.classList.toggle('hide', !(q && out.length)); b.textContent = 'ลบที่ค้นเจอ (' + out.length + ')'; b._recs = out;
+  return q ? out.slice(0, 100) : out.slice(0, n);
+}
+function delHist(kind, recs) {                                       // ลบเฉพาะตัวบันทึกประวัติ สต็อกไม่เปลี่ยน
+  const lab = kind === 'merge' ? 'รวมเลท' : 'ตัดยอด', n = recs.length, items = [...new Set(recs.map(x => x.item))];
+  modal('ลบประวัติการ' + lab, '<div>จะลบประวัติ <b>' + n + '</b> รายการ' + (items.length <= 5 ? ' · Item <span class="mono">' + items.map(esc).join(', ') + '</span>' : '') +
+    '<br><span class="sub">ลบเฉพาะตัวบันทึก สต็อกคงเดิม · ' + (kind === 'merge' ? 'ยกเลิกการรวม (คืน LPN เดิม)' : 'ยกเลิกการตัดยอด (คืนสต็อก)') + 'ของรายการเหล่านี้จะทำไม่ได้อีก · ควร Export สำรองก่อน</span></div>',
+    [['ยกเลิก'], ['ลบประวัติ', 'd', () => { const s = new Set(recs);
+      if (kind === 'merge') { merges = merges.filter(x => !s.has(x)); if (mLast && s.has(mLast)) mLast = null; } else cuts = cuts.filter(x => !s.has(x));
+      log('ล้างประวัติ', { item: items.length === 1 ? items[0] : '', lpn: '', lot: '', qty: 0, wh: '' }, 'ล้างประวัติ' + lab + ' ' + n + ' รายการ'); refresh(); toast('ลบประวัติ ' + n + ' รายการแล้ว'); }]]);
+}
+$('#lq').oninput = renderLog;
+$('#lb').onclick = e => { const b = e.target.closest('[data-ld]'); if (!b) return; const l = logs[+b.dataset.ld]; if (!l) return; logs = logs.filter(x => x !== l); refresh(); toast('ลบประวัติ 1 รายการแล้ว'); };
+$('#bLogDelF').onclick = () => { const q = lqv(), hit = logs.filter(l => logHit(l, q)); if (!q || !hit.length) return;
+  modal('ลบประวัติที่ค้นเจอ', '<div>ค้นหา “<b>' + esc($('#lq').value.trim()) + '</b>” · จะลบ <b>' + hit.length.toLocaleString() + '</b> รายการ<br><span class="sub">ย้อนกลับไม่ได้</span></div>',
+    [['ยกเลิก'], ['ลบ', 'd', () => { const s = new Set(hit); logs = logs.filter(x => !s.has(x)); refresh(); toast('ลบประวัติ ' + hit.length.toLocaleString() + ' รายการแล้ว'); }]]); };
+$('#mhq').oninput = () => render(); $('#chq').oninput = () => render();
+$('#mhDelF').onclick = () => delHist('merge', $('#mhDelF')._recs || []);
+$('#chDelF').onclick = () => delHist('cut', $('#chDelF')._recs || []);
+
 /* ===================== เหตุการณ์ (Event Wiring) ===================== */
 $('#bImp').onclick = () => $('#fIn').click();
 $('#fIn').onchange = async e => {
@@ -1028,6 +1063,7 @@ $('#mRes').onclick = e => {
   cutPrompt(mLast.item, mLast.wh, rows.filter(r => r.item === mLast.item && r.wh === mLast.wh && r.lpn === mLast.dest));
 };
 $('#cHist').onclick = e => {
+  const dl = e.target.closest('[data-cdel]'); if (dl) { e.preventDefault(); const c = cuts.find(x => String(x.id) === dl.dataset.cdel); if (c) delHist('cut', [c]); return; }
   const u = e.target.closest('[data-cu]'), x = e.target.closest('[data-ce]');
   if (u) {
     e.preventDefault();                                           // ปุ่มอยู่ในแถวสรุป: กดแล้วไม่ต้องขยาย/ยุบรายการ
@@ -1038,6 +1074,7 @@ $('#cHist').onclick = e => {
   if (x) exportCut(x.dataset.ce);
 };
 $('#mHist').onclick = e => {
+  const dl = e.target.closest('[data-mdel]'); if (dl) { e.preventDefault(); const m = merges.find(x => String(x.id) === dl.dataset.mdel); if (m) delHist('merge', [m]); return; }
   const u = e.target.closest('[data-mu]'), x = e.target.closest('[data-me]');
   if (u) {
     const id = u.dataset.mu, n = merges.length;
