@@ -60,6 +60,19 @@ dialog::backdrop{background:rgba(8,12,24,.55)}
 .mb-1{margin-bottom:.25rem}.mb-2{margin-bottom:.5rem}.mb-3{margin-bottom:.75rem}.mb-4{margin-bottom:1rem}.mt-1{margin-top:.25rem}.mt-2{margin-top:.5rem}
 .font-semibold{font-weight:600}.text-base{font-size:1rem;line-height:1.5rem}.text-xl{font-size:1.25rem;line-height:1.75rem}
 .overflow-hidden{overflow:hidden}.overflow-x-auto{overflow-x:auto}.cursor-pointer{cursor:pointer}
+/* ===== ปรับ UI ===== */
+.rb{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 12px;margin:0 12px 10px;border:1px dashed var(--bd);border-radius:10px;background:var(--s2)}
+#v-mrg .rb{margin:0}.rbt{font-weight:600;font-size:12px;color:var(--mu)}
+.chip{font-weight:500}.card{box-shadow:0 1px 2px rgba(15,23,42,.05)}
+.tab{border-radius:9px 9px 0 0;transition:background .15s,color .15s}.tab:hover{background:var(--s2)}.tab.on{background:var(--ac2)}
+.btn{transition:background .15s,filter .15s,transform .05s}.btn:active{transform:translateY(1px)}.btn.p:hover{filter:brightness(1.1)}
+#kpi .card{border-top:3px solid var(--ac);padding:12px 14px}#kpi .card:nth-last-child(2){border-top-color:var(--bad)}#kpi .card:last-child{border-top-color:var(--wn)}
+#kpi .text-xl{font-size:1.5rem;line-height:2rem}
+#v-stock .overflow-x-auto{max-height:calc(100vh - 250px);overflow:auto}
+#hSort th{position:sticky;top:0;z-index:3;height:34px}
+tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--s2) 60%,transparent)}
+tbody tr:hover td{background:var(--ac2)}
+tr.lk td:first-child{box-shadow:inset 3px 0 0 var(--bad)}tr.lk td{color:var(--mu)}
 </style>
 </head>
 <body>
@@ -92,14 +105,15 @@ dialog::backdrop{background:rgba(8,12,24,.55)}
       <button class="btn" id="bReset">ล้างตัวกรอง</button>
       <span class="sub" id="cnt"></span>
     </div>
-    <div class="overflow-x-auto"><table style="min-width:1400px"><thead>
+    <div class="ruleBar"></div>
+    <div class="overflow-x-auto"><table style="min-width:1500px"><thead>
       <tr id="hSort"></tr>
       <!-- Inline Column Filter -->
       <tr id="hFilt">
         <th><input class="inp" data-f="item" placeholder="กรอง Item"></th><th><input class="inp" data-f="desc" placeholder="กรองชื่อ"></th>
         <th><input class="inp" data-f="lot" placeholder="กรอง Lot"></th><th style="min-width:190px"><div class="flex flex-col gap-1"><select class="inp" data-f="locz"><option value="">ทุก Location</option><option value="nopk">ไม่เอา PICKTO</option><option value="nosg">ไม่เอา STAGE</option><option value="nopksg">ไม่เอา PICKTO + STAGE</option><option value="rack">เฉพาะ Rack ปกติ</option><option value="pk">เฉพาะ PICKTO</option><option value="sg">เฉพาะ STAGE</option></select><input class="inp" data-f="loc" placeholder="กรอง Location"><input class="inp" data-f="locx" placeholder="ไม่เอา เช่น 02A, CS3"></div></th>
         <th style="min-width:210px"><div class="flex flex-col gap-1"><select class="inp" data-f="lpnt"><option value="">ทุกประเภท LPN</option><option value="nonum">ไม่เอา LPN ตัวเลขล้วน (0000178433)</option><option value="num">เฉพาะ LPN ตัวเลขล้วน</option></select><input class="inp" data-f="lpn" placeholder="กรอง LPN"><input class="inp" data-f="lpnx" placeholder="ไม่เอาขึ้นต้นด้วย เช่น 00001784"></div></th><th></th><th><select class="inp" data-f="alloc"><option value="">ทุก Allocated</option><option value="free">Allocated = 0 (พร้อมรวม/ตัด)</option><option value="held">มี Allocated &gt; 0</option></select></th><th></th>
-        <th><select class="inp" data-f="st"><option value="">ทุกสถานะ</option><option value="ok">OK</option><option value="merge">รอรวม</option><option value="over">เกิน Cap</option><option value="alloc">ติด Allocated (ทั้งหมด)</option><option value="partial">จองบางล็อต (ต้องเคลียร์ทั้งพาเลท)</option></select></th><th><select class="inp" data-f="fs"><option value="">ทุก Status (ไฟล์)</option><option value="ok">OK</option><option value="not">ไม่ใช่ OK (ไม่นำไปรวม)</option></select></th>
+        <th><select class="inp" data-f="st"><option value="">ทุกสถานะ</option><option value="ok">OK</option><option value="merge">รอรวม</option><option value="over">เกิน Cap</option><option value="alloc">ติด Allocated (ทั้งหมด)</option><option value="partial">จองบางล็อต (ต้องเคลียร์ทั้งพาเลท)</option></select></th><th><select class="inp" data-f="fs"><option value="">ทุก Status</option><option value="ok">ผ่านเงื่อนไข</option><option value="not">ไม่ผ่าน (ไม่นำไปรวม)</option></select></th><th><input class="inp" data-f="ls" placeholder="กรอง Lot Status"></th>
         <th><select class="inp" data-f="wh" id="cWh"></select></th><th></th>
       </tr></thead><tbody id="tb"></tbody></table></div>
     <div class="p-3 flex gap-2 items-center"><button class="btn hide" id="bMore">แสดงเพิ่ม 200 แถว</button></div>
@@ -129,10 +143,11 @@ dialog::backdrop{background:rgba(8,12,24,.55)}
         <select class="inp" style="max-width:440px" id="mi"></select>
         
       </div>
+      <div class="ruleBar"></div>
       <div id="mBar" class="flex flex-wrap gap-2 items-end"></div>
       <div class="flex flex-wrap gap-2 items-center"><span id="mSum"></span><div class="flex-1"></div>
         <button class="btn" id="bMClr">ล้างที่เลือก</button><button class="btn" id="bMAuto">ให้โปรแกรมหาชุดที่ตรง Cap</button><button class="btn p" id="bMrg" disabled>รวมเลท…</button><button class="btn p" id="bMCut" disabled title="ใช้ได้เมื่อยอดที่เลือกเท่ากับหรือน้อยกว่า Master Cap">ตัดยอด…</button></div>
-      <div class="sub">ติ๊กเลือก LPN เอง แล้วกด “รวมเลท” หรือกด “ให้โปรแกรมหาชุดที่ตรง Cap” เพื่อให้แบ่งชุดให้ แล้วเลือกรวมเลท/ตัดยอดอัตโนมัติทั้งหมดหรือทีละชุด (ถ้าติ๊กไว้บางส่วน โปรแกรมจะหา LPN มาเติมให้ครบ Cap เป็นชุดแรก) · รวมได้เฉพาะ LPN ในคลัง (CS) เดียวกันเท่านั้น · ระบบยังไม่รวมจนกว่าคุณจะกดยืนยัน · <b>รวมเลท/ตัดยอดได้เฉพาะ LPN ที่ Allocated = 0 และ Status (จากไฟล์) = OK</b> (LPN ที่มี Allocated จะถูกล็อกและไม่ถูกนำไปจัดชุดให้) · เมื่อยอดรวมที่เลือก<b>เท่ากับหรือน้อยกว่า Cap</b> (ไม่เกิน) กด “ตัดยอด” เพื่อตัดชุดนี้ออกจากสต็อกได้ ไม่จำเป็นต้องเต็ม Cap (ยกเลิกได้จากประวัติการตัดยอด)</div>
+      <div class="sub">ติ๊กเลือก LPN เอง แล้วกด “รวมเลท” หรือกด “ให้โปรแกรมหาชุดที่ตรง Cap” เพื่อให้แบ่งชุดให้ แล้วเลือกรวมเลท/ตัดยอดอัตโนมัติทั้งหมดหรือทีละชุด (ถ้าติ๊กไว้บางส่วน โปรแกรมจะหา LPN มาเติมให้ครบ Cap เป็นชุดแรก) · รวมได้เฉพาะ LPN ในคลัง (CS) เดียวกันเท่านั้น · ระบบยังไม่รวมจนกว่าคุณจะกดยืนยัน · <b>รวมเลท/ตัดยอดได้เฉพาะ LPN ที่ Allocated = 0 , Status = OK และ Lot Status อยู่ในรายการที่อนุญาต</b> (LPN ที่มี Allocated จะถูกล็อกและไม่ถูกนำไปจัดชุดให้) · เมื่อยอดรวมที่เลือก<b>เท่ากับหรือน้อยกว่า Cap</b> (ไม่เกิน) กด “ตัดยอด” เพื่อตัดชุดนี้ออกจากสต็อกได้ ไม่จำเป็นต้องเต็ม Cap (ยกเลิกได้จากประวัติการตัดยอด)</div>
     </div>
     <div id="mPrev"></div>
     <div class="card overflow-hidden"><div class="overflow-x-auto"><table><thead><tr><th></th><th>LPN</th><th>Location</th><th>Lot</th><th class="r">Case On Hand</th><th class="r">Allocated</th><th>Status (ไฟล์)</th><th>LPN ปลายทาง</th></tr></thead><tbody id="mTb"></tbody></table></div></div>
@@ -197,7 +212,7 @@ function modal(title, body, btns) {                                         // M
 
 /* ===================== สถานะ + บันทึกถาวร (IndexedDB) ===================== */
 let rows = [], master = {}, logs = [], merges = [], cuts = [], fixes = [], tab = 'stock', limit = 200, sortK = 'lpn', sortD = 1, pm = {}, pa = {};
-const flt = { q: '', item: '', desc: '', lot: '', loc: '', lpn: '', wh: '', locz: '', locx: '', lpnt: '', lpnx: '', alloc: '', st: '', fs: '' };
+const flt = { q: '', item: '', desc: '', lot: '', loc: '', lpn: '', wh: '', locz: '', locx: '', lpnt: '', lpnx: '', alloc: '', st: '', fs: '', ls: '' };
 const idb = () => new Promise((ok, no) => { const r = indexedDB.open('wms_single', 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error); });
 let svT; const save = () => { clearTimeout(svT); svT = setTimeout(async () => { try { const d = await idb(); d.transaction('kv', 'readwrite').objectStore('kv').put({ rows, master, logs, merges, cuts, fixes }, 'wms'); } catch (e) {} }, 400); };
 async function load() {
@@ -216,7 +231,7 @@ const packCap = p => { const v = parseFloat(String(p || '').split('_').pop()); r
 /* ===================== นำเข้า Excel / CSV ===================== */
 const AL = { item: ['item', 'itemcode', 'material', 'sku'], desc: ['description', 'desc'], loc: ['location', 'loc'], lpn: ['lpn'],
   qty: ['caseonhand', 'onhand', 'qty'], lot: ['loterp', 'lot', 'lotnumber', 'lotno'], lot2: ['lotdld', 'lotdid', 'lotid'],
-  wh: ['wh', 'warehouse'], alloc: ['allocated', 'allocatedqty', 'caseallocated', 'allocatedcase', 'allocqty', 'alloc'], cap: ['mastercap', 'cap'], pack: ['pack'], st: ['status', 'lotstatus'] };
+  wh: ['wh', 'warehouse'], alloc: ['allocated', 'allocatedqty', 'caseallocated', 'allocatedcase', 'allocqty', 'alloc'], cap: ['mastercap', 'cap'], pack: ['pack'], st: ['status'], ls: ['lotstatus'] };
 function parse(aoa) {
   const h = aoa.findIndex(r => r.some(c => N(c) === 'lpn') && r.some(c => AL.item.includes(N(c))));   // หาแถวหัวตารางเอง
   if (h < 0) throw new Error('ไม่พบหัวตาราง (ต้องมีคอลัมน์ Item และ LPN)');
@@ -231,10 +246,10 @@ function parse(aoa) {
     const item = g(r, 'item'), lpn = g(r, 'lpn'); if (!item || !lpn) return;   // ข้ามแถวว่าง / แถวผลรวม
     const q = parseFloat(g(r, 'qty').replace(/,/g, ''));
     out.push({ id: uid(), item, desc: g(r, 'desc'), lot: g(r, 'lot') || '-', lot2: g(r, 'lot2'), loc: g(r, 'loc'), lpn,
-      qty: r2(isNaN(q) ? 0 : q), wh: (g(r, 'wh') || 'CS2').toUpperCase(), st: col.st === undefined ? '' : (g(r, 'st').toUpperCase() || 'N/A'),
+      qty: r2(isNaN(q) ? 0 : q), wh: (g(r, 'wh') || 'CS2').toUpperCase(), st: col.st === undefined ? '' : (g(r, 'st').toUpperCase() || 'N/A'), ls: col.ls === undefined ? '' : (g(r, 'ls').toUpperCase() || 'N/A'),
       alloc: Math.max(0, r2(parseFloat(g(r, 'alloc').replace(/,/g, '')) || 0)), pack: packCap(g(r, 'pack')), cap: parseFloat(g(r, 'cap')) || 0 });
   });
-  return { out, names, hasAlloc: col.alloc !== undefined, hasSt: col.st !== undefined };
+  return { out, names, hasAlloc: col.alloc !== undefined, hasSt: col.st !== undefined || col.ls !== undefined };
 }
 async function readFile(f) {
   const wb = XLSX.read(await f.arrayBuffer(), { type: 'array' });
@@ -253,16 +268,20 @@ function applyImport(p, replace) {
 }
 
 /* ===================== ตารางสต็อก ===================== */
-const COLS = [['item', 'ITEM'], ['desc', 'DESCRIPTION'], ['lot', 'LOT'], ['loc', 'LOCATION'], ['lpn', 'LPN ▲'], ['qty', 'CASE ON HAND'], ['alloc', 'ALLOCATED'], ['pt', 'รวม LPN / CAP'], ['cst', 'สถานะ Cap'], ['st', 'STATUS (ไฟล์)'], ['wh', 'WH'], ['', '']];
+const COLS = [['item', 'ITEM'], ['desc', 'DESCRIPTION'], ['lot', 'LOT'], ['loc', 'LOCATION'], ['lpn', 'LPN ▲'], ['qty', 'CASE ON HAND'], ['alloc', 'ALLOCATED'], ['pt', 'รวม LPN / CAP'], ['cst', 'สถานะ Cap'], ['st', 'STATUS'], ['ls', 'LOT STATUS'], ['wh', 'WH'], ['', '']];
 /* Allocated: พาเลทที่มี Allocated > 0 ห้ามนำไปรวมเลท / ตัดยอด (ต้องเป็น 0 เท่านั้น) */
 const aOf = r => r.alloc > 0 ? r.alloc : 0;
 const palFree = (item, lpn) => !(pa[item + '|' + lpn] > 0);
 /* Status จากไฟล์: รวมเลท / ตัดยอด / จัดชุด ได้เฉพาะพาเลทที่ "ทุกแถว" มี Status = OK (ไฟล์ไม่มีคอลัมน์ Status = ไม่บังคับ) */
-const stFile = r => String(r.st == null ? '' : r.st).trim().toUpperCase();
-const fOk = r => { const s = stFile(r); return s === '' || s === 'OK'; };
+let lsAllow = (() => { try { const v = JSON.parse(localStorage.getItem('wms_ls_allow')); if (Array.isArray(v)) return v; } catch (e) {} return ['ACTIVE', 'GO1', 'GO2']; })();   // Lot Status ที่อนุญาต (ตั้งค่าเองได้)
+const badList = r => { const a = [], s = String(r.st == null ? '' : r.st).trim().toUpperCase(), l = String(r.ls == null ? '' : r.ls).trim().toUpperCase();
+  if (s && s !== 'OK') a.push('Status ' + s); if (l && !lsAllow.includes(l)) a.push('Lot ' + l); return a; };   // '' = ไฟล์ไม่มีคอลัมน์ → ไม่บังคับ
+const stFile = r => badList(r).join(' · ');
+const fOk = r => !badList(r).length;
 const palFok = p => !(p.bad && p.bad.size);
 const fsPass = r => !flt.fs || (flt.fs === 'ok' ? fOk(r) : !fOk(r));
-const fsChip = r => fOk(r) ? (stFile(r) ? '<span class="chip ok">OK</span>' : '<span class="sub">—</span>') : '<span class="chip bad">' + esc(stFile(r)) + '</span>';
+const fsChip = r => { const s = String(r.st || '').toUpperCase(); return !s ? '<span class="sub">—</span>' : '<span class="chip ' + (s === 'OK' ? 'ok' : 'bad') + '">' + esc(s) + '</span>'; };
+const lsChip = r => { const l = String(r.ls || '').toUpperCase(); return !l ? '<span class="sub">—</span>' : '<span class="chip ' + (lsAllow.includes(l) ? 'ok' : 'bad') + '">' + esc(l) + '</span>'; };
 const palFs = p => palFok(p) ? '<span class="chip ok">OK</span>' : [...p.bad].map(s => '<span class="chip bad">' + esc(s) + '</span>').join(' ');
 function stOk(r) { const z = flt.st; if (!z) return true; const x = (PMAP[r.item + '|' + r.lpn] || {}).st; return z === 'alloc' ? (x === 'partial' || x === 'full') : x === z; }
 function allocOk(r, f = flt) { const z = f.alloc, free = palFree(r.item, r.lpn); return z === 'free' ? free : z === 'held' ? !free : true; }
@@ -294,12 +313,12 @@ function lpnOk(r, f = flt) {
 function viewRows() {
   const q = flt.q.toLowerCase(), has = (v, f) => !f || String(v || '').toLowerCase().includes(f.toLowerCase());
   const out = rows.filter(r => (!q || [r.item, r.desc, r.lot, r.lot2, r.loc, r.lpn].some(v => String(v || '').toLowerCase().includes(q))) &&
-    has(r.item, flt.item) && has(nameOf(r.item, r.desc), flt.desc) && has(r.lot + ' ' + r.lot2, flt.lot) && has(r.loc, flt.loc) && has(r.lpn, flt.lpn) && (!flt.wh || r.wh === flt.wh) && locOk(r) && lpnOk(r) && allocOk(r) && stOk(r) && fsPass(r));
+    has(r.item, flt.item) && has(nameOf(r.item, r.desc), flt.desc) && has(r.lot + ' ' + r.lot2, flt.lot) && has(r.loc, flt.loc) && has(r.lpn, flt.lpn) && (!flt.wh || r.wh === flt.wh) && locOk(r) && lpnOk(r) && allocOk(r) && stOk(r) && fsPass(r) && has(r.ls, flt.ls));
   return out.sort((a, b) => (sortK === 'qty' || sortK === 'alloc' ? (sortK === 'alloc' ? aOf(a) - aOf(b) : a.qty - b.qty) : CO.compare(String(a[sortK] || ''), String(b[sortK] || ''))) * sortD || CO.compare(a.lpn, b.lpn));
 }
 /* ===================== Status OK + ลำดับ Item ที่ควรทำก่อน ===================== */
 let PAL = [], PMAP = {}, GRP = {}, _prio = null;
-const ST = { ok: ['ok', 'OK'], merge: ['wn', 'รอรวม'], over: ['bad', 'เกิน Cap'], partial: ['bad', 'จองบางล็อต'], full: ['bad', 'จองทั้งพาเลท'], hold: ['wn', 'Status ≠ OK'] };
+const ST = { ok: ['ok', 'OK'], merge: ['wn', 'รอรวม'], over: ['bad', 'เกิน Cap'], partial: ['bad', 'จองบางล็อต'], full: ['bad', 'จองทั้งพาเลท'], hold: ['wn', 'Status ไม่ผ่าน'] };
 function calcStatus() {                                           // สถานะรายพาเลท: OK = เต็ม Cap หรือรวมต่อไม่ได้แล้ว
   const P = {}; _prio = null;
   rows.forEach(r => { const k = r.item + '|' + r.lpn, o = P[k] || (P[k] = { item: r.item, wh: r.wh, lpn: r.lpn, loc: r.loc || '', qty: 0, alloc: 0, bad: new Set() }); if (!fOk(r)) o.bad.add(stFile(r)); o.qty = r2(o.qty + r.qty); o.alloc = r2(o.alloc + aOf(r)); });
@@ -323,7 +342,7 @@ function stHtml(item, lpn) {
   let h = '<span class="chip ' + c[0] + '">' + c[1] + (p.st === 'ok' && p.qty < p.cap - 1e-9 ? ' · รวมต่อไม่ได้' : '') + '</span>';
   if (p.st === 'partial') h += '<div class="sub" style="color:var(--bad)">ต้องเคลียร์ทั้งพาเลท · ไม่ถูกจองอีก ' + fmt(p.qty - p.alloc) + '</div>';
   else if (p.st === 'full') h += '<div class="sub" style="color:var(--bad)">รอหยิบจนหมด</div>';
-  else if (p.st === 'hold') h += '<div class="sub" style="color:var(--wn)">Status ไฟล์ไม่ใช่ OK · ไม่นำไปรวม/ตัดยอด</div>';
+  else if (p.st === 'hold') h += '<div class="sub" style="color:var(--wn)">Status/Lot Status ไม่ผ่านเงื่อนไข · ไม่นำไปรวม/ตัดยอด</div>';
   else if (p.st === 'over') h += '<div class="sub" style="color:var(--bad)">เกิน ' + fmt(p.qty - p.cap) + ' · แก้ที่แท็บ “แก้เกิน Cap”</div>';
   return h;
 }
@@ -354,12 +373,13 @@ function refresh() {
   ['#fWh', '#cWh'].forEach(s => { const e = $(s), v = e.value; e.innerHTML = opt; e.value = whs.includes(v) ? v : ''; });
   $$('[data-ff="wh"]').forEach(e => { const v = e.value; e.innerHTML = opt; e.value = whs.includes(v) ? v : ''; FS[e.dataset.fk].wh = e.value; });
   $('#kpi').innerHTML = [['SKU', new Set(rows.map(r => r.item)).size], ['พาเลท (LPN)', Object.keys(pm).length], ['แถวสต็อก', rows.length], ['Case On Hand รวม', fmt(rows.reduce((a, r) => a + r.qty, 0))],
-    ['พาเลท OK', PAL.filter(p => p.st === 'ok').length.toLocaleString() + ' / ' + PAL.length.toLocaleString()], ['ต้องจัดการ', PAL.filter(p => p.st !== 'ok' && p.st !== 'hold').length.toLocaleString() + ' พาเลท'], ['Status ≠ OK (ข้าม)', PAL.filter(p => p.st === 'hold').length.toLocaleString() + ' พาเลท']]
+    ['พาเลท OK', PAL.filter(p => p.st === 'ok').length.toLocaleString() + ' / ' + PAL.length.toLocaleString()], ['ต้องจัดการ', PAL.filter(p => p.st !== 'ok' && p.st !== 'hold').length.toLocaleString() + ' พาเลท'], ['Status ไม่ผ่าน (ข้าม)', PAL.filter(p => p.st === 'hold').length.toLocaleString() + ' พาเลท']]
     .map(([l, v]) => '<div class="card p-3"><div class="sub">' + l + '</div><div class="text-xl font-semibold mono">' + (typeof v === 'number' ? v.toLocaleString() : v) + '</div></div>').join('');
   const ov = PAL.filter(p => p.qty > p.cap + 1e-9).length; $('[data-t="fix"]').textContent = 'แก้เกิน Cap' + (ov ? ' (' + ov + ')' : '');
   render(); save();
 }
 function render() {
+  renderRule();
   if (tab === 'stock') {
     $('#hSort').innerHTML = COLS.map(([k, l]) => '<th class="' + (k && k !== 'pt' && k !== 'cst' ? 'so' : '') + '" data-s="' + k + '">' + l + '</th>').join('');
     const v = viewRows(), shown = v.slice(0, limit);
@@ -367,12 +387,12 @@ function render() {
     $('#bMore').classList.toggle('hide', v.length <= limit);
     $('#tb').innerHTML = shown.length ? shown.map(r => {
       const cap = capOf(r.item, r.wh), t = pm[r.item + '|' + r.lpn] || 0, cl = t > cap ? 'bad' : t === cap ? 'ok' : 'wn', col = t > cap ? 'var(--bad)' : t === cap ? 'var(--ok)' : 'var(--wn)';
-      return '<tr><td class="mono">' + esc(r.item) + '</td><td>' + esc(nameOf(r.item, r.desc)) + '</td><td class="mono">' + esc(r.lot) + '<div class="sub">' + esc(r.lot2) + '</div></td><td>' + esc(r.loc || '—') + '</td>' +
+      return '<tr' + (fOk(r) ? '' : ' class="lk"') + '><td class="mono">' + esc(r.item) + '</td><td>' + esc(nameOf(r.item, r.desc)) + '</td><td class="mono">' + esc(r.lot) + '<div class="sub">' + esc(r.lot2) + '</div></td><td>' + esc(r.loc || '—') + '</td>' +
         '<td class="mono"><b>' + esc(r.lpn) + '</b>' + (r.from ? '<div class="sub">รวมจาก ' + esc(r.from) + '</div>' : '') + '</td><td class="r mono"><b>' + fmt(r.qty) + '</b></td>' +
         '<td class="r mono">' + (aOf(r) > 0 ? '<span class="chip bad">' + fmt(aOf(r)) + '</span>' : palFree(r.item, r.lpn) ? '<span class="sub">0</span>' : '<span class="sub">0</span><div class="sub" style="color:var(--bad)">พาเลทนี้มี Alloc ' + fmt(pa[r.item + '|' + r.lpn]) + '</div>') + '</td>' +
         '<td class="mono"><span class="chip ' + cl + '">' + fmt(t) + ' / ' + fmt(cap) + '</span><div class="bar"><i style="width:' + Math.min(100, t / cap * 100) + '%;background:' + col + '"></i></div></td>' +
-        '<td>' + stHtml(r.item, r.lpn) + '</td><td>' + fsChip(r) + '</td><td>' + esc(r.wh) + '</td><td style="white-space:nowrap"><button class="btn s" data-o="' + esc(r.item) + '">จัดชุด</button> <button class="btn s" data-g="' + esc(r.item) + '|' + esc(r.wh) + '">รวมเลท</button> <button class="btn s d" data-d="' + r.id + '">ลบ</button></td></tr>';
-    }).join('') : '<tr><td colspan="12" class="sub" style="text-align:center;padding:40px">' + (rows.length ? 'ไม่พบรายการตามตัวกรอง' : 'ยังไม่มีข้อมูล — กด “นำเข้า Excel / CSV”') + '</td></tr>';
+        '<td>' + stHtml(r.item, r.lpn) + '</td><td>' + fsChip(r) + '</td><td>' + lsChip(r) + '</td><td>' + esc(r.wh) + '</td><td style="white-space:nowrap"><button class="btn s" data-o="' + esc(r.item) + '">จัดชุด</button> <button class="btn s" data-g="' + esc(r.item) + '|' + esc(r.wh) + '">รวมเลท</button> <button class="btn s d" data-d="' + r.id + '">ลบ</button></td></tr>';
+    }).join('') : '<tr><td colspan="13" class="sub" style="text-align:center;padding:40px">' + (rows.length ? 'ไม่พบรายการตามตัวกรอง' : 'ยังไม่มีข้อมูล — กด “นำเข้า Excel / CSV”') + '</td></tr>';
   }
   if (tab === 'opt') renderOpt();
   if (tab === 'mrg') renderMrg();
@@ -417,7 +437,7 @@ function renderOpt() {
   $('#oList').innerHTML = list.slice(0, 30).map(a => {
     const cap = capOf(a.item, a.wh), ps = palletsOf(a.item, a.wh, FS.o), held = palletsOf(a.item, a.wh, FS.o, true).length - ps.length, sets = pack(ps, cap, mode), tot = r2(ps.reduce((s, p) => s + p.qty, 0));
     return '<details class="card p-3"' + (q ? ' open' : '') + '><summary class="cursor-pointer">' + (getPrio().rank[a.item + '|' + a.wh] ? '<span class="chip wn">#' + getPrio().rank[a.item + '|' + a.wh] + '</span> ' : '<span class="chip ok">OK</span> ') + '<b class="mono">' + esc(a.item) + '</b> ' + esc(nameOf(a.item)) +
-      ' <span class="chip">' + esc(a.wh) + '</span> <span class="chip">Cap ' + fmt(cap) + ' · ' + srcOf(a.item) + '</span> <span class="chip">' + ps.length + ' พาเลท → ' + sets.length + ' ชุด</span>' + (held ? ' <span class="chip bad">ข้าม ' + held + ' พาเลทที่มี Allocated / Status ไม่ใช่ OK</span>' : '') + ' <span class="chip">รวม ' + fmt(tot) + '</span></summary><div class="grid gap-2 mt-2">' +
+      ' <span class="chip">' + esc(a.wh) + '</span> <span class="chip">Cap ' + fmt(cap) + ' · ' + srcOf(a.item) + '</span> <span class="chip">' + ps.length + ' พาเลท → ' + sets.length + ' ชุด</span>' + (held ? ' <span class="chip bad">ข้าม ' + held + ' พาเลทที่มี Allocated / Status/Lot Status ไม่ผ่านเงื่อนไข</span>' : '') + ' <span class="chip">รวม ' + fmt(tot) + '</span></summary><div class="grid gap-2 mt-2">' +
       sets.map((s, i) => { const keep = s.ps.reduce((m, p) => p.qty > m.qty ? p : m, s.ps[0]);
         return '<div class="card p-2"><b>ชุดที่ ' + (i + 1) + '</b> <span class="chip ' + (s.over ? 'bad' : s.t === cap ? 'ok' : 'wn') + '">' + fmt(s.t) + ' / ' + fmt(cap) + (s.over ? ' เกิน Cap' : '') + '</span> <span class="sub">เก็บที่ ' + esc(keep.lpn) + '</span><div class="mt-1 flex flex-wrap gap-1">' +
           s.ps.map(p => '<span class="chip mono' + (p === keep ? ' ok' : '') + '">' + esc(p.lpn) + ' · ' + fmt(p.qty) + (p.locs.size ? ' · ' + esc([...p.locs].join(', ')) : '') + '</span>').join('') + '</div></div>'; }).join('') + '</div></details>';
@@ -469,7 +489,7 @@ function mAuto() {
   const view = () => {
     const ex = S.filter(s => Math.abs(s.total - cap) < 1e-9).length, t = todo(), tm = t.filter(s => s.pals.length >= 2).length;
     d.innerHTML = '<div class="p-4"><h3 class="font-semibold mb-1">หาชุดที่ตรง Cap · <span class="mono">' + esc(item) + '</span> ' + esc(nameOf(item)) + ' <span class="chip">' + esc(wh) + '</span></h3>' +
-      '<div class="sub mb-3">Cap ' + fmt(cap) + ' · พบ ' + S.length + ' ชุด (เต็ม Cap พอดี ' + ex + ' ชุด)' + (plan.left.length ? ' · ข้าม ' + plan.left.length + ' พาเลทที่เกิน Cap' : '') + (heldA ? ' · ข้าม ' + heldA + ' พาเลทที่ติด Allocated หรือ Status ไม่ใช่ OK' : '') + ' · เลือก “ทำทั้งหมดอัตโนมัติ” หรือกดรวมเลท/ตัดยอดทีละชุด (ยกเลิกได้จากประวัติ)</div>' +
+      '<div class="sub mb-3">Cap ' + fmt(cap) + ' · พบ ' + S.length + ' ชุด (เต็ม Cap พอดี ' + ex + ' ชุด)' + (plan.left.length ? ' · ข้าม ' + plan.left.length + ' พาเลทที่เกิน Cap' : '') + (heldA ? ' · ข้าม ' + heldA + ' พาเลทที่ติด Allocated หรือ Status/Lot Status ไม่ผ่านเงื่อนไข' : '') + ' · เลือก “ทำทั้งหมดอัตโนมัติ” หรือกดรวมเลท/ตัดยอดทีละชุด (ยกเลิกได้จากประวัติ)</div>' +
       '<div class="flex flex-wrap gap-2 mb-3"><button class="btn p" data-a="mrgAll"' + (tm ? '' : ' disabled') + '>รวมเลททั้งหมดที่เลือก (' + tm + ' ชุด)</button><button class="btn p" data-a="cutAll"' + (t.length ? '' : ' disabled') + '>ตัดยอดทั้งหมดที่เลือก (' + t.length + ' ชุด)</button>' +
       '<button class="btn" data-a="all">เลือกทุกชุด</button><button class="btn" data-a="none">ไม่เลือกเลย</button><div class="flex-1"></div><button class="btn" data-a="close">ปิด</button></div>' +
       '<div class="grid gap-2">' + S.map((s, i) => {
@@ -530,7 +550,7 @@ function renderMrg() {
   if (!mSel.has(mDest)) mDest = ch.length ? ch.reduce((m, p) => p.qty > m.qty ? p : m).lpn : '';
   const st = tot === cap ? ['ok', 'ตรง Cap พอดี'] : tot > cap ? ['bad', 'เกิน Cap ' + fmt(tot - cap)] : ['wn', 'ขาดอีก ' + fmt(cap - tot)];
   const heldN = ps.filter(p => !mOk(p)).length;
-  $('#mSum').innerHTML = item ? '<b>เลือก ' + ch.length + ' LPN</b> · รวม <b class="mono">' + fmt(tot) + '</b> / Cap ' + fmt(cap) + ' (' + srcOf(item) + ') <span class="chip ' + st[0] + '">' + st[1] + '</span>' + ((GRP[key] || {}).ok ? ' <span class="chip ok">Item OK</span>' : '') + (heldN ? ' <span class="chip bad">ข้าม ' + heldN + ' LPN ที่มี Allocated / Status ไม่ใช่ OK</span>' : '') : '';
+  $('#mSum').innerHTML = item ? '<b>เลือก ' + ch.length + ' LPN</b> · รวม <b class="mono">' + fmt(tot) + '</b> / Cap ' + fmt(cap) + ' (' + srcOf(item) + ') <span class="chip ' + st[0] + '">' + st[1] + '</span>' + ((GRP[key] || {}).ok ? ' <span class="chip ok">Item OK</span>' : '') + (heldN ? ' <span class="chip bad">ข้าม ' + heldN + ' LPN ที่มี Allocated / Status/Lot Status ไม่ผ่านเงื่อนไข</span>' : '') : '';
   const full = Math.abs(tot - cap) < 1e-9, pct = cap ? Math.min(100, tot / cap * 100) : 0, pc = tot > cap + 1e-9 ? 'var(--bad)' : full ? 'var(--ok)' : 'var(--wn)';
   $('#mPrev').innerHTML = ch.length ? '<div class="card p-3" style="border-color:' + pc + '"><div class="flex flex-wrap gap-4 items-center">' +
     '<div><div class="sub">ยอด Case On Hand หลังรวม (ตัวอย่าง ยังไม่รวมจริง)</div><div class="text-xl font-semibold mono">' + fmt(tot) + ' <span class="sub">/ Cap ' + fmt(cap) + '</span></div></div>' +
@@ -542,7 +562,7 @@ function renderMrg() {
   $('#bMCut').disabled = !(ch.length >= 1 && tot > 0 && tot <= cap + 1e-9 && ch.every(mOk));          // ตัดยอดได้เมื่อยอดเท่ากับหรือน้อยกว่า Cap (ไม่เกิน)
   $('#mTb').innerHTML = ps.map(p => {
     const on = mSel.has(p.lpn), ok = mOk(p), lots = [...new Set(p.rows.map(r => r.lot))];
-    return '<tr' + (ok ? '' : ' style="opacity:.6"') + '><td><input type="checkbox" data-m="' + esc(p.lpn) + '"' + (on ? ' checked' : '') + (ok ? '' : ' disabled title="' + (p.alloc > 0 ? 'มี Allocated' : 'Status ไม่ใช่ OK') + ' — รวมเลทไม่ได้"') + '></td><td class="mono"><b>' + esc(p.lpn) + '</b></td><td>' + esc([...p.loc].join(', ') || '—') + '</td>' +
+    return '<tr' + (ok ? '' : ' style="opacity:.6"') + '><td><input type="checkbox" data-m="' + esc(p.lpn) + '"' + (on ? ' checked' : '') + (ok ? '' : ' disabled title="' + (p.alloc > 0 ? 'มี Allocated' : 'Status/Lot Status ไม่ผ่านเงื่อนไข') + ' — รวมเลทไม่ได้"') + '></td><td class="mono"><b>' + esc(p.lpn) + '</b></td><td>' + esc([...p.loc].join(', ') || '—') + '</td>' +
       '<td class="mono">' + esc(lots.slice(0, 3).join(', ')) + (lots.length > 3 ? ' +' + (lots.length - 3) : '') + '</td><td class="r mono"><b>' + fmt(p.qty) + '</b></td>' +
       '<td class="r mono">' + (p.alloc <= 0 ? '<span class="sub">0</span>' : '<span class="chip bad">' + fmt(p.alloc) + '</span>' + (p.qty - p.alloc > 1e-9 ? '<div class="sub" style="color:var(--bad)">จองบางล็อต · ต้องเคลียร์ทั้งพาเลท</div>' : '<div class="sub" style="color:var(--bad)">จองทั้งพาเลท</div>')) + '</td>' +
       '<td>' + palFs(p) + '</td><td><label class="flex items-center gap-1"><input type="radio" name="md" data-md="' + esc(p.lpn) + '"' + (mDest === p.lpn ? ' checked' : '') + (on ? '' : ' disabled') + '> เก็บที่ LPN นี้</label></td></tr>';
@@ -564,7 +584,7 @@ function doMerge() {
   mergeSet(ch, mDest);
 }
 function mergeSet(ch, mDest, quiet) {                          // รวมพาเลท ch เข้า LPN ปลายทาง (quiet = ไม่รีเฟรช/ไม่แจ้งเตือน ใช้กับโหมดอัตโนมัติ)
-  if (ch.some(p => !mOk(p))) return toast('มี LPN ที่ Allocated > 0 หรือ Status ไม่ใช่ OK — รวมเลทไม่ได้');
+  if (ch.some(p => !mOk(p))) return toast('มี LPN ที่ Allocated > 0 หรือ Status/Lot Status ไม่ผ่านเงื่อนไข — รวมเลทไม่ได้');
   const item = ch[0].rows[0].item, tot = r2(ch.reduce((a, p) => a + p.qty, 0)), dp = ch.find(p => p.lpn === mDest), destLoc = [...dp.loc][0] || '';
   const rec = { id: uid(), ts: Date.now(), at: new Date().toLocaleString('th-TH'), item, name: nameOf(item), wh: dp.wh, cap: capOf(item, dp.wh), dest: mDest, destLoc, total: tot, moved: [],
     src: ch.map(p => ({ lpn: p.lpn, loc: [...p.loc].join(', '), qty: p.qty, lots: p.rows.map(r => ({ lot: r.lot, lot2: r.lot2, qty: r.qty })) })) };
@@ -597,7 +617,7 @@ function byOrig(rs) {                                              // จัด�
 }
 function cutPrompt(item, wh, rs) {                                  // rs = แถวสต็อกที่จะตัด (ของ LPN ที่เลือก)
   const tot = r2(rs.reduce((a, r) => a + r.qty, 0)), cap = capOf(item, wh), lpns = byOrig(rs).map(o => o.lpn + ' (' + fmt(o.qty) + ')');
-  if (rs.some(r => !fOk(r))) return toast('ตัดยอดไม่ได้ — Status ไม่ใช่ OK');
+  if (rs.some(r => !fOk(r))) return toast('ตัดยอดไม่ได้ — Status/Lot Status ไม่ผ่านเงื่อนไข');
   if (rs.some(r => aOf(r) > 0)) return toast('ตัดยอดไม่ได้ — มี Allocated > 0 (ต้องเป็น 0 ก่อน)');
   if (tot <= 0 || tot > cap + 1e-9) return toast('ตัดยอดได้เฉพาะเมื่อยอดรวมไม่เกิน Cap (' + fmt(tot) + ' / ' + fmt(cap) + ')');
   modal('ยืนยันการตัดยอด', '<div>Item <b class="mono">' + esc(item) + '</b> ' + esc(nameOf(item)) + ' · ' + esc(wh) + '<br>พาเลทเดิม: ' + lpns.map(l => '<span class="mono">' + esc(l) + '</span>').join(' + ') +
@@ -807,7 +827,7 @@ function renderFix() {
   $('#bFixAll').disabled = !fixList.some(x => x.pl && !x.pl.blocked);
   $('#fTb').innerHTML = fixList.slice(0, 300).map((x, i) => { const p = x.p, pl = x.pl; if (!pl) return '';
     return '<tr><td class="mono">' + esc(p.item) + '</td><td>' + esc(nameOf(p.item)) + '</td><td class="mono"><b>' + esc(p.lpn) + '</b></td><td>' + esc(p.loc || '—') + '</td><td class="r mono"><b>' + fmt(p.qty) + '</b></td><td class="r mono">' + fmt(pl.cap) + '</td><td class="r mono"><span class="chip bad">+' + fmt(pl.excess) + '</span></td>' +
-      '<td>' + (pl.blocked ? (pl.src.alloc > 0 ? '<span class="chip bad">ติด Allocated ' + fmt(p.alloc) + '</span> <span class="sub">ต้องเคลียร์ทั้งพาเลทก่อน</span>' : '<span class="chip bad">Status ไม่ใช่ OK</span> ' + palFs(pl.src)) : planTxt(pl)) + '</td>' +
+      '<td>' + (pl.blocked ? (pl.src.alloc > 0 ? '<span class="chip bad">ติด Allocated ' + fmt(p.alloc) + '</span> <span class="sub">ต้องเคลียร์ทั้งพาเลทก่อน</span>' : '<span class="chip bad">Status/Lot Status ไม่ผ่านเงื่อนไข</span> ' + palFs(pl.src)) : planTxt(pl)) + '</td>' +
       '<td><button class="btn s p" data-fx="' + i + '"' + (pl.blocked ? ' disabled' : '') + '>แก้ไข</button></td></tr>'; }).join('') || '<tr><td colspan="9" class="sub" style="text-align:center;padding:30px">ไม่มีพาเลทที่เกิน Cap</td></tr>';
   $('#fHist').innerHTML = fixes.slice(0, 30).map(f => {
     const newL = new Set(f.moves.filter(m => m.isNew).map(m => m.to));
@@ -865,9 +885,31 @@ function dl(aoa, name, sheet) {
 }
 function exportStock() {
   const v = viewRows(); if (!v.length) return toast('ไม่มีข้อมูลให้ Export');
-  dl([['Item', 'Description', 'Lot', 'Lot DLD', 'Location', 'LPN', 'Case On Hand', 'Allocated', 'รวม LPN', 'Master Cap', 'ที่มา Cap', 'สถานะ Cap', 'WH', 'Status (ไฟล์)']]
-    .concat(v.map(r => [r.item, nameOf(r.item, r.desc), r.lot, r.lot2, r.loc, r.lpn, r.qty, aOf(r), pm[r.item + '|' + r.lpn], capOf(r.item, r.wh), srcOf(r.item), (ST[(PMAP[r.item + '|' + r.lpn] || {}).st] || ['', ''])[1], r.wh, r.st])), 'WMS_Stock_' + new Date().toISOString().slice(0, 10) + '.xlsx', 'Stock');
+  dl([['Item', 'Description', 'Lot', 'Lot DLD', 'Location', 'LPN', 'Case On Hand', 'Allocated', 'รวม LPN', 'Master Cap', 'ที่มา Cap', 'สถานะ Cap', 'WH', 'Status', 'Lot Status']]
+    .concat(v.map(r => [r.item, nameOf(r.item, r.desc), r.lot, r.lot2, r.loc, r.lpn, r.qty, aOf(r), pm[r.item + '|' + r.lpn], capOf(r.item, r.wh), srcOf(r.item), (ST[(PMAP[r.item + '|' + r.lpn] || {}).st] || ['', ''])[1], r.wh, r.st, r.ls])), 'WMS_Stock_' + new Date().toISOString().slice(0, 10) + '.xlsx', 'Stock');
 }
+
+/* ===================== แถบเงื่อนไข + ตั้งค่า Lot Status ที่อนุญาต ===================== */
+function renderRule() {
+  const n = PAL.filter(p => p.st === 'hold').length;
+  const h = '<div class="rb"><span class="rbt">เงื่อนไขรวมเลท / ตัดยอด</span><span class="chip ok">Status = OK</span><span class="chip ok">Lot Status: ' + (lsAllow.map(esc).join(', ') || '—') + '</span><span class="chip ok">Allocated = 0</span><span style="flex:1"></span>' +
+    (n ? '<span class="chip bad">ถูกล็อก ' + n.toLocaleString() + ' พาเลท</span>' : '') + '<button class="btn s" data-lsdlg="1">ตั้งค่า Lot Status</button></div>';
+  $$('.ruleBar').forEach(e => { e.innerHTML = h; });
+}
+function lsDlg() {
+  const cnt = {}; rows.forEach(r => { if (r.ls) cnt[r.ls] = (cnt[r.ls] || 0) + 1; });
+  const vals = [...new Set(Object.keys(cnt).concat(lsAllow))].sort(CO.compare), d = document.createElement('dialog');
+  const draw = () => { d.innerHTML = '<div class="p-4"><h3 class="font-semibold mb-1">ตั้งค่า Lot Status ที่รวมเลทได้</h3><div class="sub mb-3">ติ๊กค่าที่ “อนุญาต” · ค่าที่ไม่ติ๊กและช่องว่างจะถูกล็อก (ไม่รวมเลท/ตัดยอด/จัดชุด)</div><div class="flex flex-wrap gap-2 mb-4">' +
+    (vals.map(v => '<label class="chip ' + (lsAllow.includes(v) ? 'ok' : 'bad') + '" style="cursor:pointer;padding:4px 11px"><input type="checkbox" data-v="' + esc(v) + '"' + (lsAllow.includes(v) ? ' checked' : '') + '> ' + esc(v) + ' <span class="sub">(' + (cnt[v] || 0).toLocaleString() + ')</span></label>').join('') || '<span class="sub">ยังไม่มีข้อมูล Lot Status</span>') +
+    '</div><div class="flex gap-2 justify-end"><button class="btn" data-x="rst">ค่าเริ่มต้น</button><button class="btn p" data-x="ok">ตกลง</button></div></div>'; };
+  d.addEventListener('change', e => { const v = e.target.dataset.v; if (v === undefined) return; lsAllow = e.target.checked ? [...new Set(lsAllow.concat(v))] : lsAllow.filter(x => x !== v); draw(); });
+  d.addEventListener('click', e => { const x = e.target.closest('[data-x]'); if (!x) return;
+    if (x.dataset.x === 'rst') { lsAllow = ['ACTIVE', 'GO1', 'GO2']; return draw(); }
+    try { localStorage.setItem('wms_ls_allow', JSON.stringify(lsAllow)); } catch (er) {}
+    d.close(); refresh(); toast('บันทึกเงื่อนไข Lot Status แล้ว'); });
+  d.addEventListener('close', () => d.remove()); draw(); document.body.appendChild(d); d.showModal();
+}
+document.addEventListener('click', e => { if (e.target.closest('[data-lsdlg]')) lsDlg(); });
 
 /* ===================== เหตุการณ์ (Event Wiring) ===================== */
 $('#bImp').onclick = () => $('#fIn').click();
