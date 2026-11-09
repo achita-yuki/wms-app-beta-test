@@ -221,10 +221,10 @@ body.on-stock #jump{bottom:calc(68px + env(safe-area-inset-bottom,0px))}
   <section id="v-cap" class="card overflow-hidden hide">
     <div class="p-3 flex flex-wrap gap-2 items-center">
       <input class="inp" style="max-width:320px" id="cq" placeholder="ค้นหา Item / ชื่อ">
-      <button class="btn p" id="bCapIn">นำเข้า Master Cap (เพิ่ม/อัปเดต ต่อเนื่องได้)</button>
+      <button class="btn p" id="bCapIn">นำเข้า Master Cap / Master Cap update (เพิ่ม/อัปเดต ต่อเนื่องได้)</button>
       <button class="btn" id="bCapOut">Export Master Cap</button>
       <input type="file" id="fCap" accept=".xlsx,.xls,.csv" class="hide">
-      <span class="sub">ลำดับ: Master Cap (ฐานที่นำเข้า / แก้เอง) &gt; Pack &gt; ค่าเริ่มต้นคลัง (CS1 72 · CS2 64 · CS3 72) · ไฟล์นำเข้า: Item, Master Cap (+ ชื่อ, Priority ถ้ามี) · นำเข้าไฟล์ใหม่ได้เรื่อย ๆ — Item ใหม่จะเพิ่ม Item เดิมจะอัปเดต ส่วนที่ไม่อยู่ในไฟล์คงเดิม · <b id="capInfo"></b></span>
+      <span class="sub">ลำดับ: Master Cap (ฐานที่นำเข้า / แก้เอง) &gt; Pack &gt; ค่าเริ่มต้นคลัง (CS1 72 · CS2 64 · CS3 72) · ไฟล์นำเข้า: Item, Master Cap (+ ชื่อ, Priority ถ้ามี) หรือไฟล์ Master Cap update (Item + CAP CS1/CS2/CS3 · ใช้ Cap ตามคลังของพาเลท) · นำเข้าไฟล์ใหม่ได้เรื่อย ๆ — Item ใหม่จะเพิ่ม Item เดิมจะอัปเดต ส่วนที่ไม่อยู่ในไฟล์คงเดิม · <b id="capInfo"></b></span>
     </div>
     <div class="overflow-x-auto"><table><thead><tr><th>Item</th><th>ชื่อสินค้า</th><th>WH</th><th class="r">Cap ที่ใช้</th><th>ที่มา</th><th>ลำดับทำก่อน</th><th>กำหนด Master Cap</th></tr></thead><tbody id="cb"></tbody></table></div>
   </section>
@@ -270,8 +270,8 @@ function log(type, r, ref) { logs.unshift({ at: new Date().toLocaleString('th-TH
 
 /* ===================== Master Cap (ลำดับความสำคัญ) ===================== */
 // 1) Master Cap บริษัทราย Item  2) Cap จากคอลัมน์ Pack  3) ค่าเริ่มต้นตามคลัง
-const capOf = (it, wh) => { const m = master[it]; return m && m.cap > 0 ? m.cap : m && m.pack > 0 ? m.pack : (DEF[wh] || 72); };
-const srcOf = it => { const m = master[it]; return m && m.cap > 0 ? (m.capSrc === 'manual' ? 'Master (แก้เอง)' : m.capSrc === 'stock' ? 'ไฟล์สต็อก' : 'Master') : m && m.pack > 0 ? 'Pack' : 'ค่าเริ่มต้น'; };
+const capOf = (it, wh) => { const m = master[it]; if (m && m.cap > 0 && m.capSrc === 'manual') return m.cap; const c = m && m.caps && m.caps[wh]; return c > 0 ? c : m && m.cap > 0 ? m.cap : m && m.pack > 0 ? m.pack : (DEF[wh] || 72); };   // แก้เอง > Cap แยกคลัง (Master Cap update) > Master > Pack > ค่าเริ่มต้น
+const srcOf = it => { const m = master[it]; return m && m.cap > 0 ? (m.capSrc === 'manual' ? 'Master (แก้เอง)' : m.capSrc === 'stock' ? 'ไฟล์สต็อก' : m.caps ? 'Master update' : 'Master') : m && m.pack > 0 ? 'Pack' : 'ค่าเริ่มต้น'; };
 const nameOf = (it, fb) => (master[it] && master[it].name) || fb || '';
 const packCap = p => { const v = parseFloat(String(p || '').split('_').pop()); return v > 0 ? v : 0; };   // CS3_C06_12_72 -> 72
 
@@ -643,7 +643,7 @@ function mergeSet(ch, mDest, quiet) {                          // รวมพ�
   if (ch.some(p => !mOk(p))) return toast('มี LPN ที่ Allocated > 0 หรือ Status/Lot Status ไม่ผ่านเงื่อนไข — รวมเลทไม่ได้');
   const item = ch[0].rows[0].item, tot = r2(ch.reduce((a, p) => a + p.qty, 0)), dp = ch.find(p => p.lpn === mDest), destLoc = [...dp.loc][0] || '';
   const rec = { id: uid(), ts: Date.now(), at: new Date().toLocaleString('th-TH'), item, name: nameOf(item), wh: dp.wh, cap: capOf(item, dp.wh), dest: mDest, destLoc, total: tot, moved: [],
-    src: ch.map(p => ({ lpn: p.lpn, loc: [...p.loc].join(', '), qty: p.qty, lots: p.rows.map(r => ({ lot: r.lot, lot2: r.lot2, qty: r.qty })) })) };
+    src: ch.map(p => ({ lpn: p.lpn, loc: [...p.loc].join(', '), qty: p.qty, lots: p.rows.map(r => ({ lot: r.lot, lot2: r.lot2, qty: r.qty, ls: r.ls || '' })) })) };
   ch.forEach(p => {
     if (p.lpn === mDest) return;
     p.rows.forEach(r => { rec.moved.push({ id: r.id, lpn: r.lpn, loc: r.loc, from: r.from || '', orig: r.orig || '' }); r.orig = r.orig || r.lpn; r.from = r.lpn; r.lpn = mDest; r.loc = destLoc; });   // ย้ายสต็อกเข้า LPN ปลายทาง (Lot เดิมคงไว้)
@@ -744,17 +744,18 @@ const XL = (() => {
         return '<row r="' + r + '"' + (sh.rowH[r] ? ' ht="' + sh.rowH[r] + '" customHeight="1"' : '') + '>' + cs + '</row>';
       }).join('');
       const brk = sh.breaks.length ? '<rowBreaks count="' + sh.breaks.length + '" manualBreakCount="' + sh.breaks.length + '">' + sh.breaks.map(b => '<brk id="' + b + '" max="16383" man="1"/>').join('') + '</rowBreaks>' : '';
-      return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><dimension ref="A1:F' + sh.last + '"/><sheetViews><sheetView workbookViewId="0"/></sheetViews><sheetFormatPr defaultRowHeight="13.8"/>' +
-        '<cols>' + sh.cols.map((w, i) => '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + w + '" customWidth="1"/>').join('') + '</cols><sheetData>' + body + '</sheetData>' +
-        '<pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/><pageSetup paperSize="9" orientation="portrait"/>' + brk + '</worksheet>';
+      const mg = sh.merges && sh.merges.length ? '<mergeCells count="' + sh.merges.length + '">' + sh.merges.map(m => '<mergeCell ref="' + m + '"/>').join('') + '</mergeCells>' : '';
+      return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' + (sh.fit ? '<sheetPr><pageSetUpPr fitToPage="1"/></sheetPr>' : '') + '<dimension ref="A1:' + (sh.lastCol || 'F') + sh.last + '"/><sheetViews><sheetView workbookViewId="0"/></sheetViews><sheetFormatPr defaultRowHeight="' + (sh.defH || 13.8) + '"' + (sh.defH ? ' customHeight="1"' : '') + '/>' +
+        '<cols>' + sh.cols.map((w, i) => '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + w + '" customWidth="1"/>').join('') + '</cols><sheetData>' + body + '</sheetData>' + mg +
+        '<pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/><pageSetup paperSize="9" orientation="portrait"' + (sh.fit ? ' fitToWidth="1" fitToHeight="0"' : '') + '/>' + brk + '</worksheet>';
     });
-    const side = (on, n) => on ? '<' + n + ' style="medium"><color indexed="64"/></' + n + '>' : '<' + n + '/>';
+    const side = (on, n, thin) => on ? '<' + n + ' style="medium"><color indexed="64"/></' + n + '>' : thin ? '<' + n + ' style="thin"><color indexed="64"/></' + n + '>' : '<' + n + '/>';
     const styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
-      '<fonts count="2"><font><sz val="11"/><name val="Tahoma"/><family val="2"/></font><font><b/><sz val="10"/><color rgb="FF000000"/><name val="Arial"/><family val="2"/></font></fonts>' +
-      '<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFFFF00"/><bgColor indexed="64"/></patternFill></fill></fills>' +
-      '<borders count="' + bds.length + '">' + bds.map(m => '<border>' + side(m & 1, 'left') + side(m & 2, 'right') + side(m & 4, 'top') + side(m & 8, 'bottom') + '<diagonal/></border>').join('') + '</borders>' +
+      '<fonts count="4"><font><sz val="11"/><name val="Tahoma"/><family val="2"/></font><font><b/><sz val="10"/><color rgb="FF000000"/><name val="Arial"/><family val="2"/></font><font><sz val="14"/><name val="Angsana New"/><family val="1"/></font><font><b/><sz val="14"/><name val="Angsana New"/><family val="1"/></font></fonts>' +
+      '<fills count="4"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFFFF00"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFB4C6E7"/><bgColor indexed="64"/></patternFill></fill></fills>' +
+      '<borders count="' + bds.length + '">' + bds.map(m => '<border>' + side(m & 1, 'left', m & 16) + side(m & 2, 'right', m & 16) + side(m & 4, 'top', m & 16) + side(m & 8, 'bottom', m & 16) + '<diagonal/></border>').join('') + '</borders>' +
       '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
-      '<cellXfs count="' + xfs.length + '">' + xfs.map(s => '<xf numFmtId="0" fontId="' + (s.f || 0) + '" fillId="' + (s.fill ? 2 : 0) + '" borderId="' + bmap[s.b || 0] + '" xfId="0" applyFont="1" applyFill="1" applyBorder="1"' + (s.h || s.v ? ' applyAlignment="1"><alignment' + (s.h ? ' horizontal="' + s.h + '"' : '') + (s.v ? ' vertical="' + s.v + '"' : '') + '/></xf>' : '/>')).join('') + '</cellXfs>' +
+      '<cellXfs count="' + xfs.length + '">' + xfs.map(s => '<xf numFmtId="0" fontId="' + (s.f || 0) + '" fillId="' + (s.fill === 2 ? 3 : s.fill ? 2 : 0) + '" borderId="' + bmap[s.b || 0] + '" xfId="0" applyFont="1" applyFill="1" applyBorder="1"' + (s.h || s.v ? ' applyAlignment="1"><alignment' + (s.h ? ' horizontal="' + s.h + '"' : '') + (s.v ? ' vertical="' + s.v + '"' : '') + '/></xf>' : '/>')).join('') + '</cellXfs>' +
       '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
     const files = [
       { name: '[Content_Types].xml', text: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' + sheets.map((s, i) => '<Override PartName="/xl/worksheets/sheet' + (i + 1) + '.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>').join('') + '</Types>' },
@@ -794,7 +795,44 @@ const XL = (() => {
     });
     return { name, cells, rowH, breaks, cols: [12, 12.1, 13.2, 9, 7.2, 6.7], last: r - 1 };
   }
-  return { build, sheet };
+  /* ใบงานรวมเลท (รูปแบบใหม่): หัวเรื่อง + ใบงานที่ · ต่อกลุ่ม: Location/Lot DLD/Lot Number/Status/CTN + รวม + จัดเก็บ (ช่องเขียนพาเลทใหม่) · ท้ายใบ: ปล่อย/เก็บ/ได้คืน */
+  function work(name, title, no, itemLine, groups, sum) {
+    const cells = [], rowH = {}, breaks = [], merges = [], put = (r, c, v, s) => cells.push({ r, c, v, s });
+    const PER = 30;                                                    // แถวต่อหน้า (ฟอนต์ใหญ่ขึ้น) · ไม่ตัดกลุ่มข้ามหน้า
+    put(1, 1, title, { f: 3, fill: 2, h: 'center', v: 'center' }); put(1, 2, '', { f: 3, fill: 2 }); put(1, 3, '', { f: 3, fill: 2 }); merges.push('A1:C1');
+    put(1, 7, 'ใบงานที่ ' + no, { f: 3, h: 'right', v: 'center' }); put(1, 8, '', { f: 3 }); merges.push('G1:H1');
+    put(3, 1, itemLine, { f: 3, fill: 2, h: 'left', v: 'center' }); for (let c = 2; c <= 4; c++) put(3, c, '', { f: 3, fill: 2 }); merges.push('A3:D3');
+    let r = 4, pageEnd = PER, top = 4;
+    groups.forEach(g => {
+      const n = g.pals.reduce((a, p) => a + Math.max(1, p.lots.length), 0), h = n + 1;
+      let gap = r > top ? 1 : 0;
+      if (r + gap + h - 1 > pageEnd && r > top) { breaks.push(pageEnd); r = pageEnd + 1; top = r; pageEnd += PER; gap = 0; }
+      while (r + gap + h - 1 > pageEnd) pageEnd += PER;
+      r += gap;
+      const h0 = r, g0 = r + 1, g1 = r + n;                            // h0 = แถวหัวตาราง · g0..g1 = แถวข้อมูล
+      const bd = (c, row) => 16 | (c === 1 ? 1 : 0) | (c === 8 ? 2 : 0) | (row === h0 ? 4 : 0) | (row === g1 ? 8 : 0);
+      ['Location', 'Lot DLD', 'Lot Number', 'Status', 'CTN'].forEach((t, i) => put(h0, i + 1, t, { f: 2, h: 'center', v: 'center', b: bd(i + 1, h0) }));
+      put(h0, 6, 'รวม', { f: 3, fill: 2, h: 'center', v: 'center', b: bd(6, h0) });
+      put(h0, 7, 'จัดเก็บ', { f: 3, fill: 2, h: 'center', v: 'center', b: bd(7, h0) }); put(h0, 8, '', { f: 3, fill: 2, b: bd(8, h0) }); merges.push('G' + h0 + ':H' + h0);
+      r = g0;
+      g.pals.forEach(p => {
+        const lots = p.lots.length ? p.lots : [{ lot: '', lot2: '', qty: 0, ls: '' }];
+        lots.forEach(l => {
+          put(r, 1, p.lpn, { f: 2, h: 'center', v: 'center', b: bd(1, r) }); put(r, 2, l.lot2 || '', { f: 2, h: 'center', v: 'center', b: bd(2, r) }); put(r, 3, l.lot, { f: 2, h: 'center', v: 'center', b: bd(3, r) });
+          put(r, 4, l.ls || '', { f: 2, h: 'center', v: 'center', b: bd(4, r) }); put(r, 5, l.qty, { f: 2, h: 'center', v: 'center', b: bd(5, r) });
+          put(r, 6, r === g0 ? g.total : '', { f: 2, h: 'center', v: 'center', b: bd(6, r) });
+          put(r, 7, '', { f: 2, h: 'center', v: 'center', b: bd(7, r) }); put(r, 8, '', { f: 2, b: bd(8, r) });
+          r++;
+        });
+      });
+      if (n > 1) merges.push('F' + g0 + ':F' + g1);
+      merges.push('G' + g0 + ':H' + g1);                           // ช่องจัดเก็บ = ช่องเดียวต่อกลุ่ม (เขียนพาเลทใหม่ใบเดียว)
+    });
+    r += 1;                                                            // เว้น 1 แถว แล้วสรุปท้ายใบ
+    [['ปล่อย ' + sum.rel], ['เก็บ ' + sum.keep], ['ได้คืน ' + sum.back]].forEach((t, i) => put(r, i + 1, t[0], { f: 3, fill: 2, h: 'center', v: 'center' }));
+    return { name, cells, rowH, breaks, merges, cols: [13, 14, 14, 10, 7, 9, 11, 11], last: r, lastCol: 'H', defH: 21, fit: true };
+  }
+  return { build, sheet, work };
 })();
 const recDM = rec => {                                              // วันที่ของรายการ (ใช้ ts ถ้ามี ไม่งั้นแกะจากข้อความเวลา)
   if (rec.ts) { const d = new Date(rec.ts); return { d: d.getDate(), m: d.getMonth() + 1, t: d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate() }; }
@@ -804,12 +842,20 @@ const recDM = rec => {                                              // วัน
 function exportSheets(kind, recs, fname) {                          // kind: 'merge' | 'cut'
   if (!recs.length) return toast(kind === 'merge' ? 'ยังไม่มีประวัติการรวมเลทให้ Export' : 'ยังไม่มีประวัติการตัดยอดให้ Export');
   const lab = kind === 'merge' ? 'รวมเลท' : 'ตัดยอด', list = recs.slice().sort((a, b) => recDM(a).t - recDM(b).t || (a.ts || 0) - (b.ts || 0));
-  const now = new Date(), dtxt = now.getDate() + '/' + (now.getMonth() + 1);                  // หัวเรื่อง = วันที่ Export (วันปัจจุบัน)
+  const now = new Date(), dtxt = now.getDate() + '/' + (now.getMonth() + 1), dtB = dtxt + '/' + String((now.getFullYear() + 543) % 100).padStart(2, '0');   // หัวเรื่อง = วันที่ Export (วันปัจจุบัน) · รวมเลทใช้ พ.ศ. 2 หลัก
   const by = {}; list.forEach(rec => (by[rec.item + '|' + rec.wh] || (by[rec.item + '|' + rec.wh] = [])).push(rec));
   const keys = Object.keys(by).sort(CO.compare), used = new Set(), multiWh = it => keys.filter(k => k.slice(0, k.lastIndexOf('|')) === it).length > 1;
-  const sheets = keys.map(k => {
-    const rs = by[k], it = rs[0].item, wh = rs[0].wh;
+  const lsNice = v => { v = String(v || '').trim(); return /^[A-Za-z]+$/.test(v) ? v.charAt(0).toUpperCase() + v.slice(1).toLowerCase() : v; };
+  const lsOf = (s, l) => { if (l.ls) return lsNice(l.ls); const f = rows.find(r => r.item === rec0.item && origOf(r) === s.lpn && r.lot === l.lot && (r.lot2 || '') === (l.lot2 || '') && r.ls); return f ? lsNice(f.ls) : ''; };   // ประวัติเก่าไม่มีสถานะ → ดึงจากสต็อกปัจจุบัน
+  let rec0 = null;
+  const sheets = keys.map((k, ki) => {
+    const rs = by[k], it = rs[0].item, wh = rs[0].wh; rec0 = rs[0];
     let nm = (multiWh(it) ? it + '_' + wh : it).replace(/[\[\]:*?\/\\]/g, '-').slice(0, 31) || 'Sheet', q = nm, n = 2; while (used.has(q.toLowerCase())) q = nm.slice(0, 28) + '_' + n++; used.add(q.toLowerCase());
+    if (kind === 'merge') {
+      const gs = rs.map(rec => { rec0 = rec; return { total: rec.total, pals: rec.src.map(s => ({ lpn: s.lpn, total: s.qty, lots: s.lots.map(l => ({ lot: l.lot, lot2: l.lot2, qty: l.qty, ls: lsOf(s, l) })) })) }; });
+      const rel = rs.reduce((a, rec) => a + rec.src.length, 0), keep = rs.length;       // ปล่อย = พาเลทต้นทางที่ปล่อย · เก็บ = พาเลทใหม่ที่เก็บ (1 ชุด = 1 พาเลท) · ได้คืน = ปล่อย − เก็บ
+      return XL.work(q, lab + ' ' + dtB + ' ' + wh, ki + 1, it + '    ' + (rs[0].name || ''), gs, { rel, keep, back: rel - keep });
+    }
     const groups = rs.map(rec => kind === 'merge'
       ? { total: rec.total, pals: rec.src.map(s => ({ lpn: s.lpn, total: s.qty, lots: s.lots.map(l => ({ lot: l.lot, lot2: l.lot2, qty: l.qty })) })) }
       : { total: rec.total, pals: byOrig(rec.removed).map(o => ({ lpn: o.lpn, total: o.qty, lots: o.rows.map(r => ({ lot: r.lot, lot2: r.lot2, qty: r.qty })) })) });
@@ -908,34 +954,41 @@ function renderCap() {
   $('#cb').innerHTML = list.slice(0, 600).map(a => {
     const m = master[a.item] || {}, sc = srcOf(a.item), rk = pr.byItem[a.item], okIt = Object.values(GRP).some(g => g.item === a.item) && !rk;
     return '<tr><td class="mono">' + esc(a.item) + '</td><td>' + esc(nameOf(a.item)) + '</td><td>' + (a.wh ? esc(a.wh) : '<span class="chip">ไม่มีในสต็อก</span>') + '</td><td class="r mono"><b>' + fmt(capOf(a.item, a.wh)) + '</b></td>' +
-      '<td><span class="chip ' + (m.cap > 0 && m.capSrc !== 'stock' ? 'ok' : '') + '">' + esc(sc) + '</span>' + (m.capSrc === 'manual' && m.base > 0 ? '<div class="sub">ฐาน ' + fmt(m.base) + '</div>' : '') + '</td>' +
+      '<td><span class="chip ' + (m.cap > 0 && m.capSrc !== 'stock' ? 'ok' : '') + '">' + esc(sc) + '</span>' + (m.capSrc === 'manual' && m.base > 0 ? '<div class="sub">ฐาน ' + fmt(m.base) + '</div>' : '') + (m.caps ? '<div class="sub">' + ['CS1', 'CS2', 'CS3'].map(k => k + ' ' + (m.caps[k] || '–')).join(' · ') + '</div>' : '') + '</td>' +
       '<td>' + (rk ? '<span class="chip wn">#' + rk + '</span>' : okIt ? '<span class="chip ok">OK</span>' : '<span class="sub">—</span>') + ' <input class="inp" style="width:64px" type="number" min="0" data-p="' + esc(a.item) + '" value="' + (m.prio || '') + '" placeholder="ตั้งเอง"></td>' +
       '<td><div class="flex gap-1"><input class="inp" style="width:90px" type="number" min="0" data-c="' + esc(a.item) + '" value="' + (m.cap || '') + '" placeholder="Cap"><button class="btn s p" data-cs="' + esc(a.item) + '">บันทึก</button>' +
       (m.capSrc === 'manual' && m.base > 0 ? '<button class="btn s" data-cr="' + esc(a.item) + '" title="คืนค่า Master ฐาน">คืนค่าฐาน</button>' : '') + '</div></td></tr>';
   }).join('') || '<tr><td colspan="7" class="sub" style="text-align:center;padding:30px">ไม่มีข้อมูล</td></tr>';
 }
-const ALM = { item: AL.item, cap: AL.cap, desc: AL.desc.concat(['ชื่อสินค้า', 'ชื่อ']), prio: ['priority', 'prio', 'ลำดับ', 'ลำดับความสำคัญ', 'ความสำคัญ', 'ลำดับทำก่อน'] };
-async function importCaps(f) {                                               // ไฟล์: Item, Master Cap (+ ชื่อ, Priority) · นำเข้าซ้ำได้เรื่อย ๆ: เพิ่ม/อัปเดต ไม่ลบของเดิม
+const ALM = { item: AL.item, cap: AL.cap.concat(['capจัดเก็บcs', 'capจัดเก็บ']), cs: ['capcs1', 'capcs2', 'capcs3'], desc: AL.desc.concat(['ชื่อสินค้า', 'ชื่อ', 'desciption']), prio: ['priority', 'prio', 'ลำดับ', 'ลำดับความสำคัญ', 'ความสำคัญ', 'ลำดับทำก่อน'] };
+async function importCaps(f) {                                               // ไฟล์: Item, Master Cap (+ ชื่อ, Priority) หรือ Master Cap update (Item + CAP จัดเก็บ CS + CAP CS1/CS2/CS3) · นำเข้าซ้ำได้เรื่อย ๆ: เพิ่ม/อัปเดต ไม่ลบของเดิม
   const wb = XLSX.read(await f.arrayBuffer(), { type: 'array' });
   let aoa = null, h = -1;
-  for (const n of wb.SheetNames) { const a = XLSX.utils.sheet_to_json(wb.Sheets[n], { header: 1, defval: '' }), i = a.findIndex(r => r.some(c => ALM.item.includes(N(c))) && r.some(c => ALM.cap.includes(N(c)))); if (i >= 0) { aoa = a; h = i; break; } }
-  if (!aoa) return toast('ต้องมีหัวคอลัมน์ Item และ Master Cap');
-  const hn = aoa[h].map(N), ix = k => hn.findIndex(x => ALM[k].includes(x)), ci = ix('item'), cc = ix('cap'), cd = ix('desc'), cp = ix('prio');
-  const add = [], chg = []; let same = 0, bad = 0;
+  for (const n of wb.SheetNames) { const a = XLSX.utils.sheet_to_json(wb.Sheets[n], { header: 1, defval: '' }), i = a.findIndex(r => r.some(c => ALM.item.includes(N(c))) && r.some(c => ALM.cap.includes(N(c)) || ALM.cs.includes(N(c)))); if (i >= 0) { aoa = a; h = i; break; } }
+  if (!aoa) return toast('ต้องมีหัวคอลัมน์ Item และ Master Cap (หรือ CAP CS1 / CS2 / CS3)');
+  const hn = aoa[h].map(N), ix = k => hn.findIndex(x => ALM[k].includes(x)), ci = ix('item'), cc = ix('cap'), cd = ix('desc'), cp = ix('prio'), cx = [1, 2, 3].map(i => hn.indexOf('capcs' + i));
+  const num = x => { const v = parseFloat(String(x == null ? '' : x).replace(/,/g, '')); return v > 0 ? v : 0; };
+  const txt = (cap, caps) => caps && Object.keys(caps).length ? ['CS1', 'CS2', 'CS3'].map(k => caps[k] ? fmt(caps[k]) : '–').join('/') : fmt(cap);
+  const add = [], chg = []; let same = 0, bad = 0, withCs = 0;
   aoa.slice(h + 1).forEach(r => {
-    const it = String(r[ci] == null ? '' : r[ci]).trim(), v = parseFloat(String(r[cc]).replace(/,/g, '')); if (!it) return;
+    const it = String(r[ci] == null ? '' : r[ci]).trim(); if (!it) return;
+    let v = cc >= 0 ? num(r[cc]) : 0; const cs = {};
+    cx.forEach((x, i) => { if (x >= 0) { const q = num(r[x]); if (q) cs['CS' + (i + 1)] = q; } });
+    if (!(v > 0) && Object.keys(cs).length) v = Math.min(...Object.values(cs));        // ไม่มีช่อง CAP จัดเก็บ → ใช้ค่าต่ำสุดของ CS1-3
     if (!(v > 0)) { bad++; return; }
-    const m = master[it] || (master[it] = {}), old = m.cap > 0 ? m.cap : 0;
-    if (!old) add.push(it); else if (old !== v) chg.push([it, old, v]); else same++;
+    const m = master[it] || (master[it] = {}), old = m.cap > 0 ? m.cap : 0, hasC = Object.keys(cs).length > 0;
+    const same0 = old === v && JSON.stringify(m.caps || {}) === JSON.stringify(cs);
+    if (!old) add.push(it); else if (!same0) chg.push([it, txt(old, m.caps), txt(v, hasC ? cs : null)]); else same++;
     m.cap = v; m.base = v; m.capSrc = 'base';                                  // ยึดไฟล์ที่นำเข้าเป็นฐาน
+    if (hasC) { m.caps = cs; withCs++; } else delete m.caps;                   // Cap แยกคลัง (CS1/CS2/CS3) ใช้ตามคลังของพาเลท
     if (cd >= 0 && String(r[cd]).trim() && !m.name) m.name = String(r[cd]).trim();
     if (cp >= 0) { const pv = parseFloat(r[cp]); if (pv > 0) m.prio = pv; }
   });
-  log('นำเข้า Master Cap', { item: '', lpn: '', lot: '', qty: 0, wh: '' }, 'ใหม่ ' + add.length + ' · เปลี่ยน ' + chg.length + ' · เท่าเดิม ' + same + (bad ? ' · ข้าม ' + bad : ''));
+  log('นำเข้า Master Cap', { item: '', lpn: '', lot: '', qty: 0, wh: '' }, 'ใหม่ ' + add.length + ' · เปลี่ยน ' + chg.length + ' · เท่าเดิม ' + same + (withCs ? ' · แยก CS ' + withCs : '') + (bad ? ' · ข้าม ' + bad : ''));
   refresh();
-  modal('นำเข้า Master Cap แล้ว', '<div>เพิ่มใหม่ <b>' + add.length + '</b> Item · อัปเดตค่า <b>' + chg.length + '</b> Item · เท่าเดิม <b>' + same + '</b>' + (bad ? ' · ข้ามแถวที่ Cap ไม่ถูกต้อง ' + bad : '') +
-    (chg.length ? '<div class="sub mt-2">ที่เปลี่ยนค่า: ' + chg.slice(0, 12).map(c => esc(c[0]) + ' ' + fmt(c[1]) + '→' + fmt(c[2])).join(' · ') + (chg.length > 12 ? ' …' : '') + '</div>' : '') +
-    '<div class="sub mt-2">ไฟล์ที่นำเข้าเป็นค่าฐาน — ไฟล์สต็อกที่นำเข้าทีหลังจะไม่เขียนทับ · Item ที่ไม่อยู่ในไฟล์คงเดิม · นำเข้าไฟล์ใหม่ต่อได้เรื่อย ๆ</div></div>', [['ปิด', 'p']]);
+  modal('นำเข้า Master Cap แล้ว', '<div>เพิ่มใหม่ <b>' + add.length + '</b> Item · อัปเดตค่า <b>' + chg.length + '</b> Item · เท่าเดิม <b>' + same + '</b>' + (withCs ? ' · มี Cap แยก CS1/CS2/CS3 <b>' + withCs + '</b> Item' : '') + (bad ? ' · ข้ามแถวที่ Cap ไม่ถูกต้อง ' + bad : '') +
+    (chg.length ? '<div class="sub mt-2">ที่เปลี่ยนค่า: ' + chg.slice(0, 12).map(c => esc(c[0]) + ' ' + c[1] + '→' + c[2]).join(' · ') + (chg.length > 12 ? ' …' : '') + '</div>' : '') +
+    '<div class="sub mt-2">ไฟล์ที่นำเข้าเป็นค่าฐาน — ไฟล์สต็อกที่นำเข้าทีหลังจะไม่เขียนทับ · Item ที่ไม่อยู่ในไฟล์คงเดิม · นำเข้าไฟล์ใหม่ต่อได้เรื่อย ๆ' + (withCs ? '<br>Master Cap update: ระบบใช้ Cap ตามคลังของพาเลท (CS1/CS2/CS3) · ถ้าตั้งเองในหน้านี้ ค่าที่ตั้งเองจะมาก่อน' : '') + '</div></div>', [['ปิด', 'p']]);
 }
 
 /* ===================== Export Excel ===================== */
@@ -1103,7 +1156,7 @@ function clearData(thenImport, o) {
   rows = []; merges = []; cuts = []; fixes = []; mLast = null; mSel.clear(); mDest = ''; pm = {}; limit = 200;       // ล้างสต็อก + ประวัติรวมเลท (ผูกกับแถวเดิม)
   if (o.logs) logs = [];
   if (o.caps) master = {};
-  else { const k = {}; for (const i in master) { const m = master[i]; if (m.cap > 0 || m.prio > 0) k[i] = { cap: m.cap, capSrc: m.capSrc, base: m.base, prio: m.prio, name: m.name }; } master = k; }   // เก็บ Master Cap ฐาน / ที่กำหนดเอง / ลำดับความสำคัญ
+  else { const k = {}; for (const i in master) { const m = master[i]; if (m.cap > 0 || m.prio > 0) k[i] = { cap: m.cap, caps: m.caps, capSrc: m.capSrc, base: m.base, prio: m.prio, name: m.name }; } master = k; }   // เก็บ Master Cap ฐาน / ที่กำหนดเอง / ลำดับความสำคัญ
   log('ล้างข้อมูล', { item: '', lpn: '', lot: '', qty: 0, wh: '' }, 'ล้างสต็อก ' + n.toLocaleString() + ' แถว');
   refresh(); toast('ล้างข้อมูลแล้ว');
   if (thenImport) $('#fIn').click();
@@ -1121,7 +1174,7 @@ $('#bCapIn').onclick = () => $('#fCap').click();
 $('#fCap').onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (f) importCaps(f).catch(() => toast('อ่านไฟล์ไม่ได้')); };
 $('#bCapOut').onclick = () => {
   const seen = {}; rows.forEach(r => seen[r.item] = r.wh); for (const i in master) if (!(i in seen) && (master[i].cap > 0 || master[i].prio > 0)) seen[i] = '';
-  dl([['Item', 'ชื่อสินค้า', 'Master Cap', 'Cap ที่ใช้', 'ที่มา', 'ลำดับความสำคัญ', 'Master ฐาน']].concat(Object.keys(seen).sort(CO.compare).map(i => { const m = master[i] || {}; return [i, nameOf(i), m.cap || '', capOf(i, seen[i]), srcOf(i), m.prio || '', m.base || '']; })), 'WMS_MasterCap.xlsx', 'Master Cap');
+  dl([['Item', 'ชื่อสินค้า', 'Master Cap', 'Cap ที่ใช้', 'ที่มา', 'ลำดับความสำคัญ', 'Master ฐาน', 'CAP CS1', 'CAP CS2', 'CAP CS3']].concat(Object.keys(seen).sort(CO.compare).map(i => { const m = master[i] || {}; return [i, nameOf(i), m.cap || '', capOf(i, seen[i]), srcOf(i), m.prio || '', m.base || '', (m.caps || {}).CS1 || '', (m.caps || {}).CS2 || '', (m.caps || {}).CS3 || '']; })), 'WMS_MasterCap.xlsx', 'Master Cap');
 };
 $('#bLogClr').onclick = () => modal('ล้างประวัติ', 'ลบประวัติทั้งหมด?', [['ยกเลิก'], ['ล้าง', 'd', () => { logs = []; refresh(); }]]);
 $('#bMore').onclick = () => { limit += 200; render(); };
