@@ -2,6 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="utf-8">
+<meta name="app-version" content="2.0">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>WMS Cold Storage · Master Cap</title>
 <link rel="icon" id="fav" href="Logo%20sungroup.jpg">
@@ -190,6 +191,11 @@ tbody tr:hover td,#v-stock tbody tr:hover td{background:var(--ac2)}
 #sKpi .card.kpi-ok{background:var(--ok2);border-color:transparent}#sKpi .card.kpi-ok .text-xl,#sKpi .card.kpi-ok .sub{color:var(--ok)}
 #sTit{font-size:1.05rem;font-weight:600}
 @media print{.hd,#kpi,#jump,.sbar,#toast,.no-print{display:none!important}body{background:#fff}.card{box-shadow:none}}
+
+/* ===== แจ้งเตือนเวอร์ชันใหม่ ===== */
+#updBar{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:60;display:flex;flex-wrap:wrap;align-items:center;gap:10px;max-width:calc(100vw - 24px);padding:10px 14px;background:var(--sf);border:1px solid var(--ac);border-radius:12px;box-shadow:0 10px 30px -8px rgba(11,37,54,.35)}
+#updBar b{color:var(--ac)}
+@media print{#updBar{display:none!important}}
 </style>
 </head>
 <body>
@@ -197,7 +203,7 @@ tbody tr:hover td,#v-stock tbody tr:hover td{background:var(--ac2)}
 <!-- ===== ส่วนหัว + แท็บ ===== -->
 <header class="hd">
   <div class="max-w-[1400px] mx-auto px-4 py-2 flex flex-wrap items-center gap-2">
-    <div style="display:flex;align-items:center;gap:12px;flex:1 1 220px;min-width:200px"><div id="logoBox" title="โลโก้บริษัท · คลิกเพื่ออัปโหลดรูปใหม่ · Shift+คลิกเพื่อกลับไปใช้ไฟล์เดิม" style="height:42px;min-width:42px;padding:3px;background:#fff;border:1px solid var(--bd);border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;flex:0 0 auto"><img id="logoImg" class="hide" alt="โลโก้บริษัท" style="height:100%;width:auto;max-width:150px;object-fit:contain;display:block"><span id="logoMk" style="font-weight:700;color:#0e7c66;font-size:13px;padding:0 6px">LOGO</span></div><input type="file" id="logoFile" accept="image/*" class="hide"><div><div class="font-semibold text-base">WMS Cold Storage</div><div class="sub">ตัดยอด · จัดชุดพาเลทให้พอดี Master Cap</div></div></div>
+    <div style="display:flex;align-items:center;gap:12px;flex:1 1 220px;min-width:200px"><div id="logoBox" title="โลโก้บริษัท · คลิกเพื่ออัปโหลดรูปใหม่ · Shift+คลิกเพื่อกลับไปใช้ไฟล์เดิม" style="height:42px;min-width:42px;padding:3px;background:#fff;border:1px solid var(--bd);border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;flex:0 0 auto"><img id="logoImg" class="hide" alt="โลโก้บริษัท" style="height:100%;width:auto;max-width:150px;object-fit:contain;display:block"><span id="logoMk" style="font-weight:700;color:#0e7c66;font-size:13px;padding:0 6px">LOGO</span></div><input type="file" id="logoFile" accept="image/*" class="hide"><div><div class="font-semibold text-base">WMS Cold Storage</div><div class="sub">ตัดยอด · จัดชุดพาเลทให้พอดี Master Cap · เวอร์ชัน <span id="verTx"></span></div></div></div>
     <button class="btn p" id="bImp">นำเข้า Excel / CSV</button>
     <button class="btn" id="bExp">Export ที่กรองแล้ว</button>
     <button class="btn d" id="bClr">ล้างข้อมูล</button>
@@ -1515,6 +1521,31 @@ $('#sPrev').onclick = () => { const [y, m, d] = sumCalc() && sDay.split('-').map
 $('#sNext').onclick = () => { const [y, m, d] = sumCalc() && sDay.split('-').map(Number); sDay = ymd(new Date(y, m - 1, d + 1)); renderSum(); };
 $('#sToday').onclick = () => { sDay = ymd(new Date()); renderSum(); };
 $('#sWh').onchange = renderSum; $('#sPrint').onclick = () => window.print(); $('#sXls').onclick = sumExport;
+
+/* ===================== แจ้งเตือนเวอร์ชันใหม่ (ใช้เมื่อเปิดผ่าน URL เช่น GitHub Pages) ===================== */
+const APP_VER = ($('meta[name="app-version"]') || {}).content || '';
+$('#verTx').textContent = APP_VER ? 'v' + APP_VER : '';
+async function checkVer() {
+  if (!/^https?:$/.test(location.protocol) || !APP_VER) return;               // เปิดจากไฟล์ในเครื่อง (file://) ไม่ตรวจ
+  try {
+    const r = await fetch(location.pathname + location.search, { cache: 'no-store' }), rd = r.body.getReader(), dec = new TextDecoder();
+    let t = ''; while (t.length < 4096) { const { done, value } = await rd.read(); if (done) break; t += dec.decode(value, { stream: true }); }
+    rd.cancel();                                                                // อ่านแค่ส่วนหัวไฟล์ ไม่ดึงทั้งไฟล์
+    const m = t.match(/<meta name="app-version" content="([^"]*)"/);
+    if (m && m[1] && m[1] !== APP_VER) showUpd(m[1]);
+  } catch (e) { /* ออฟไลน์/เข้าไม่ได้ → ข้ามเงียบ ๆ */ }
+}
+function showUpd(v) {
+  try { if (sessionStorage.getItem('updSkip') === v) return; } catch (e) {}
+  if ($('#updBar')) return;
+  const d = document.createElement('div'); d.id = 'updBar'; d.setAttribute('role', 'status');
+  d.innerHTML = '<span>มีเวอร์ชันใหม่ <b>v' + esc(v) + '</b> (ตอนนี้ v' + esc(APP_VER) + ') · ข้อมูลในเครื่องของคุณไม่หาย</span><button class="btn s p" id="updGo">โหลดเวอร์ชันใหม่</button><button class="btn s" id="updLater">ไว้ทีหลัง</button>';
+  document.body.appendChild(d);
+  $('#updGo').onclick = () => location.reload();
+  $('#updLater').onclick = () => { try { sessionStorage.setItem('updSkip', v); } catch (e) {} d.remove(); };
+}
+setTimeout(checkVer, 3000); setInterval(checkVer, 30 * 60 * 1000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) checkVer(); });
 function setTab(t) { tab = t; $$('.tab').forEach(b => b.classList.toggle('on', b.dataset.t === t)); ['stock', 'opt', 'mrg', 'fix', 'cap', 'log', 'sum'].forEach(x => $('#v-' + x).classList.toggle('hide', x !== t)); render(); }
 $('#tabs').onclick = e => { const b = e.target.closest('.tab'); if (b) setTab(b.dataset.t); };
 document.addEventListener('keydown', e => { if (e.key === '/' && !/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) { e.preventDefault(); setTab('stock'); $('#q').focus(); } });
