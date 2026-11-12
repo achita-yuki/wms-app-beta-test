@@ -120,6 +120,76 @@ body.on-stock #jump{bottom:calc(68px + env(safe-area-inset-bottom,0px))}
 #v-stock .act{white-space:nowrap}#v-stock .act .btn{margin-right:4px;padding:3px 9px;font-size:12px}
 #v-stock th.r{text-align:right}
 .chip{border-radius:7px}
+
+/* ===== UI รอบ 3 · โทนห้องเย็น (Glacier) ===== */
+:root{--bg:#ecf2f6;--sf:#fff;--s2:#f3f7fa;--bd:#dae4eb;--tx:#0f2233;--mu:#5a7084;--ac:#0a6c8f;--ac2:#e0f0f6;--hb:#0b2536;--sh:0 1px 2px rgba(11,37,54,.06),0 6px 16px -8px rgba(11,37,54,.12)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#07121a;--sf:#0e1c27;--s2:#132432;--bd:#213546;--tx:#e6eef4;--mu:#88a0b3;--ac:#4fc3e8;--ac2:#0f2e3d;--hb:#0a1b27}}
+:root[data-theme="dark"]{--bg:#07121a;--sf:#0e1c27;--s2:#132432;--bd:#213546;--tx:#e6eef4;--mu:#88a0b3;--ac:#4fc3e8;--ac2:#0f2e3d;--hb:#0a1b27}
+body{font-family:'Prompt',system-ui,sans-serif;font-size:13.5px}
+.jc{font-family:'Prompt',system-ui,sans-serif}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.card{border-radius:12px;box-shadow:var(--sh)}
+.btn{border-radius:8px}
+body::before{background:var(--hb)}
+/* หัวแถบ: โหมดสว่าง = ขาวสะอาด + แท็บขีดเส้นใต้ · โหมดมืด = แถบน้ำเงินเข้ม (ค่าสีมาจากตัวแปร --h*) */
+:root{--hbg:#fff;--htx:var(--tx);--hsub:var(--mu);--hb-bg:var(--sf);--hb-bd:var(--bd);--hb-tx:var(--tx);--hb-hv:var(--s2);--hp-bg:var(--ac);--hp-tx:#fff;--hd-tx:var(--bad);--htab:var(--mu);--htab-hv:var(--s2);--htab-on:var(--ac)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--hbg:#0a1b27;--htx:#fff;--hsub:rgba(255,255,255,.62);--hb-bg:rgba(255,255,255,.07);--hb-bd:rgba(255,255,255,.2);--hb-tx:#e8f1f6;--hb-hv:rgba(255,255,255,.16);--hp-bg:#5ccbef;--hp-tx:#06222f;--hd-tx:#ffb9b9;--htab:rgba(255,255,255,.66);--htab-hv:rgba(255,255,255,.09);--htab-on:#fff}}
+:root[data-theme="dark"]{--hbg:#0a1b27;--htx:#fff;--hsub:rgba(255,255,255,.62);--hb-bg:rgba(255,255,255,.07);--hb-bd:rgba(255,255,255,.2);--hb-tx:#e8f1f6;--hb-hv:rgba(255,255,255,.16);--hp-bg:#5ccbef;--hp-tx:#06222f;--hd-tx:#ffb9b9;--htab:rgba(255,255,255,.66);--htab-hv:rgba(255,255,255,.09);--htab-on:#fff}
+body::before{background:var(--hbg)}
+.hd{background:var(--hbg);border-bottom:1px solid var(--bd)}
+.hd .font-semibold{color:var(--htx);letter-spacing:.01em}
+.hd .sub{color:var(--hsub)}
+.hd .btn{background:var(--hb-bg);border-color:var(--hb-bd);color:var(--hb-tx)}
+.hd .btn:hover{background:var(--hb-hv)}
+.hd .btn.p{background:var(--hp-bg);border-color:var(--hp-bg);color:var(--hp-tx);font-weight:600}
+.hd .btn.p:hover{filter:brightness(1.08)}
+.hd .btn.d{color:var(--hd-tx)}
+.hd #logoBox{border-color:var(--bd)}
+#tabs{padding-top:2px;gap:2px}
+.tab{white-space:nowrap;flex:0 0 auto;color:var(--htab);font-size:14px;padding:10px 16px;border-radius:8px 8px 0 0;border-bottom:3px solid transparent;background:none}
+.tab:hover{background:var(--htab-hv);color:var(--htx)}
+.tab.on,.tab.on:hover{background:none;color:var(--htab-on);font-weight:600;border-bottom-color:var(--ac)}
+:root[data-theme="dark"] .tab.on,:root[data-theme="dark"] .tab.on:hover{background:var(--bg);border-bottom-color:transparent;color:var(--ac)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .tab.on,:root:not([data-theme="light"]) .tab.on:hover{background:var(--bg);border-bottom-color:transparent;color:var(--ac)}}
+/* KPI */
+#kpi .card{border:1px solid var(--bd);border-top:1px solid var(--bd);padding:12px 14px 11px}
+#kpi .sub{font-size:12px}
+#kpi .text-xl{font-size:1.65rem;line-height:2.1rem;font-weight:600;color:var(--tx)}
+#kpi .u{font-size:.8rem;font-weight:500;color:var(--mu);margin-left:5px}
+#kpi .card.kpi-ok .text-xl{color:var(--ok)}
+#kpi .card.kpi-bad{background:var(--bad2);border-color:transparent}#kpi .card.kpi-bad .text-xl,#kpi .card.kpi-bad .sub{color:var(--bad)}
+#kpi .card.kpi-wn{background:var(--wn2);border-color:transparent}#kpi .card.kpi-wn .text-xl,#kpi .card.kpi-wn .sub{color:var(--wn)}
+#kpi .card:nth-last-child(n){border-top-color:var(--bd)}#kpi .card.kpi-bad:nth-last-child(n),#kpi .card.kpi-wn:nth-last-child(n){border-top-color:transparent}
+/* แถบเงื่อนไข */
+.rb{border:0;border-left:3px solid var(--ac);border-radius:8px;background:var(--ac2)}
+.rbt{color:var(--tx)}
+/* ตาราง */
+th,#v-stock th,#hSort th{text-transform:none!important;letter-spacing:0!important;font-size:12px;font-weight:600;color:var(--mu);background:var(--s2)}
+tbody tr:hover td,#v-stock tbody tr:hover td{background:var(--ac2)}
+#q{background:var(--sf);border-color:var(--bd)}
+.inp{border-radius:8px}
+/* การ์ดสรุปในแท็บรวมเลท */
+#mPrioBox>summary,#mTopBox>summary{list-style:none;display:flex;align-items:center;gap:8px;font-size:14.5px}
+#mPrioBox>summary::-webkit-details-marker,#mTopBox>summary::-webkit-details-marker{display:none}
+#mPrioBox>summary::after,#mTopBox>summary::after{content:'▾';margin-left:auto;color:var(--mu);transition:transform .2s}
+#mPrioBox:not([open])>summary::after,#mTopBox:not([open])>summary::after{transform:rotate(-90deg)}
+#mTopTabs .btn.p{box-shadow:none}
+/* แถบขั้นตอนรวมเลท */
+.stp{display:flex;flex-wrap:wrap;margin:0 0 2px;padding:0;list-style:none}
+.stp li{flex:1 1 180px;display:flex;align-items:center;gap:9px;padding:8px 12px 9px;font-size:13px;color:var(--mu);border-bottom:2px solid var(--bd)}
+.stp b{flex:0 0 auto;width:23px;height:23px;border-radius:50%;display:grid;place-items:center;background:var(--s2);border:1px solid var(--bd);font-size:12px;font-weight:600;color:var(--mu)}
+.stp li.cur{color:var(--tx);font-weight:600;border-bottom-color:var(--ac)}
+.stp li.cur b{background:var(--ac);border-color:var(--ac);color:#fff}
+.stp li.done b{background:var(--ok2);border-color:transparent;color:var(--ok);font-size:0}
+.stp li.done b::after{content:'✓';font-size:13px}
+.stp li.done{border-bottom-color:var(--ok)}
+
+/* ===== สรุปประจำวัน ===== */
+#sKpi .card{padding:12px 14px 11px}#sKpi .sub{font-size:12px}
+#sKpi .text-xl{font-size:1.65rem;line-height:2.1rem;font-weight:600}#sKpi .u{font-size:.8rem;font-weight:500;color:var(--mu);margin-left:5px}
+#sKpi .card.kpi-ok{background:var(--ok2);border-color:transparent}#sKpi .card.kpi-ok .text-xl,#sKpi .card.kpi-ok .sub{color:var(--ok)}
+#sTit{font-size:1.05rem;font-weight:600}
+@media print{.hd,#kpi,#jump,.sbar,#toast,.no-print{display:none!important}body{background:#fff}.card{box-shadow:none}}
 </style>
 </head>
 <body>
@@ -138,7 +208,7 @@ body.on-stock #jump{bottom:calc(68px + env(safe-area-inset-bottom,0px))}
   </div>
   <div class="max-w-[1400px] mx-auto px-3 flex overflow-x-auto" id="tabs">
     <button class="tab on" data-t="stock">สต็อก</button><button class="tab" data-t="opt">จัดชุด Cap</button>
-    <button class="tab" data-t="mrg">รวมเลท</button><button class="tab" data-t="fix">แก้เกิน Cap</button><button class="tab" data-t="cap">Master Cap</button><button class="tab" data-t="log">ประวัติ</button>
+    <button class="tab" data-t="mrg">รวมเลท</button><button class="tab" data-t="fix">แก้เกิน Cap</button><button class="tab" data-t="cap">Master Cap</button><button class="tab" data-t="log">ประวัติ</button><button class="tab" data-t="sum">สรุปประจำวัน</button>
   </div>
 </header>
 
@@ -190,6 +260,7 @@ body.on-stock #jump{bottom:calc(68px + env(safe-area-inset-bottom,0px))}
       <div id="mTop" class="overflow-x-auto"></div>
     </details>
     <div class="card p-3 grid gap-2" id="mWork">
+      <ol class="stp" id="mStp"><li><b>1</b>เลือก Item</li><li><b>2</b>ติ๊ก LPN ที่จะรวม (≥ 2)</li><li><b>3</b>เลือก LPN ที่เก็บ</li><li><b>4</b>กดรวมเลท · ยอดออกจากสต็อกทันที</li></ol>
       <div class="flex flex-wrap gap-2 items-center">
         <input class="inp" style="max-width:240px" id="mq" placeholder="ค้นหา Item / ชื่อ">
         <select class="inp" style="max-width:440px" id="mi"></select>
@@ -230,7 +301,7 @@ body.on-stock #jump{bottom:calc(68px + env(safe-area-inset-bottom,0px))}
       <button class="btn p" id="bCapIn">นำเข้า Master Cap / Master Cap update (เพิ่ม/อัปเดต ต่อเนื่องได้)</button>
       <button class="btn" id="bCapOut">Export Master Cap</button>
       <input type="file" id="fCap" accept=".xlsx,.xls,.csv" class="hide">
-      <span class="sub">ลำดับ: Master Cap (ฐานที่นำเข้า / แก้เอง) &gt; Pack &gt; ค่าเริ่มต้นคลัง (CS1 72 · CS2 64 · CS3 72) · ไฟล์นำเข้า: Item, Master Cap (+ ชื่อ, Priority ถ้ามี) หรือไฟล์ Master Cap update (Item + CAP CS1/CS2/CS3 · ใช้ Cap ตามคลังของพาเลท) · นำเข้าไฟล์ใหม่ได้เรื่อย ๆ — Item ใหม่จะเพิ่ม Item เดิมจะอัปเดต ส่วนที่ไม่อยู่ในไฟล์คงเดิม · <b id="capInfo"></b></span>
+      <span class="sub">ลำดับ: Cap ที่แก้เองรายคลัง (เลือก CS ในช่องกำหนด) &gt; Master Cap (ฐานที่นำเข้า / แก้เอง) &gt; Pack &gt; ค่าเริ่มต้นคลัง (CS1 72 · CS2 64 · CS3 72) · ไฟล์นำเข้า: Item, Master Cap (+ ชื่อ, Priority ถ้ามี) หรือไฟล์ Master Cap update (Item + CAP CS1/CS2/CS3 · ใช้ Cap ตามคลังของพาเลท) · นำเข้าไฟล์ใหม่ได้เรื่อย ๆ — Item ใหม่จะเพิ่ม Item เดิมจะอัปเดต ส่วนที่ไม่อยู่ในไฟล์คงเดิม · <b id="capInfo"></b></span>
     </div>
     <div class="overflow-x-auto"><table><thead><tr><th>Item</th><th>ชื่อสินค้า</th><th>WH</th><th class="r">Cap ที่ใช้</th><th>ที่มา</th><th>ลำดับทำก่อน</th><th>กำหนด Master Cap</th></tr></thead><tbody id="cb"></tbody></table></div>
   </section>
@@ -239,6 +310,19 @@ body.on-stock #jump{bottom:calc(68px + env(safe-area-inset-bottom,0px))}
   <section id="v-log" class="card overflow-hidden hide">
     <div class="p-3 flex flex-wrap gap-2 items-center"><input class="inp" style="max-width:340px" id="lq" placeholder="ค้นหา Item / LPN / Lot / ประเภท / หมายเหตุ"><span class="sub" id="lInfo"></span><div class="flex-1"></div><button class="btn d hide" id="bLogDelF"></button><button class="btn d" id="bLogClr">ล้างประวัติทั้งหมด</button></div>
     <div class="overflow-x-auto"><table><thead><tr><th>เวลา</th><th>ประเภท</th><th>Item</th><th>LPN</th><th>Lot</th><th class="r">จำนวน</th><th>WH</th><th>หมายเหตุ</th><th></th></tr></thead><tbody id="lb"></tbody></table></div>
+  </section>
+  <!-- ===== แท็บสรุปประจำวัน ===== -->
+  <section id="v-sum" class="grid gap-3 hide">
+    <div class="card p-3 flex flex-wrap items-center gap-2 no-print">
+      <button class="btn" id="sPrev" title="วันก่อนหน้า">◀</button><input type="date" class="inp" style="max-width:170px" id="sDate"><button class="btn" id="sNext" title="วันถัดไป">▶</button><button class="btn" id="sToday">วันนี้</button>
+      <select class="inp" id="sWh" style="max-width:130px" title="กรองตามคลัง"></select>
+      <div class="flex-1"></div><button class="btn" id="sXls">Export Excel</button><button class="btn" id="sPrint">พิมพ์</button>
+    </div>
+    <div id="sTit"></div>
+    <div id="sKpi" class="grid gap-3" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))"></div>
+    <div class="card p-3"><div class="font-semibold mb-2">แยกตาม CS</div><div id="sCs" class="overflow-x-auto"></div></div>
+    <div class="card p-3"><div class="font-semibold mb-2">แยกตาม Item</div><div id="sItem" class="overflow-x-auto"></div></div>
+    <div class="card p-3"><div class="font-semibold mb-1">ยังต้องทำต่อ (สถานะสต็อกตอนนี้)</div><div class="sub mb-2">ไม่ขึ้นกับวันที่เลือก · นับเฉพาะพาเลทที่ Allocated = 0</div><div id="sTodo" class="overflow-x-auto"></div></div>
   </section>
 </main>
 <div id="toast"></div>
@@ -265,7 +349,7 @@ function modal(title, body, btns) {                                         // M
 }
 
 /* ===================== สถานะ + บันทึกถาวร (IndexedDB) ===================== */
-let topWh = '', rows = [], master = {}, logs = [], merges = [], cuts = [], fixes = [], tab = 'stock', limit = 200, sortK = 'lpn', sortD = 1, pm = {}, pa = {};
+let topWh = '', sDay = '', rows = [], master = {}, logs = [], merges = [], cuts = [], fixes = [], tab = 'stock', limit = 200, sortK = 'lpn', sortD = 1, pm = {}, pa = {};
 const flt = { q: '', item: '', desc: '', lot: '', loc: '', lpn: '', wh: '', locz: '', locx: '', lpnt: '', lpnx: '', alloc: '', st: '', fs: '', ls: '' };
 const idb = () => new Promise((ok, no) => { const r = indexedDB.open('wms_single', 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error); });
 let svT; const save = () => { clearTimeout(svT); svT = setTimeout(async () => { try { const d = await idb(); d.transaction('kv', 'readwrite').objectStore('kv').put({ rows, master, logs, merges, cuts, fixes }, 'wms'); } catch (e) {} }, 400); };
@@ -277,7 +361,7 @@ function log(type, r, ref) { logs.unshift({ at: new Date().toLocaleString('th-TH
 
 /* ===================== Master Cap (ลำดับความสำคัญ) ===================== */
 // 1) Master Cap บริษัทราย Item  2) Cap จากคอลัมน์ Pack  3) ค่าเริ่มต้นตามคลัง
-const capOf = (it, wh) => { const m = master[it]; if (m && m.cap > 0 && m.capSrc === 'manual') return m.cap; const c = m && m.caps && m.caps[wh]; return c > 0 ? c : m && m.cap > 0 ? m.cap : m && m.pack > 0 ? m.pack : (DEF[wh] || 72); };   // แก้เอง > Cap แยกคลัง (Master Cap update) > Master > Pack > ค่าเริ่มต้น
+const capOf = (it, wh) => { const m = master[it]; if (m && m.man && m.man[wh] > 0) return m.man[wh]; if (m && m.cap > 0 && m.capSrc === 'manual') return m.cap; const c = m && m.caps && m.caps[wh]; return c > 0 ? c : m && m.cap > 0 ? m.cap : m && m.pack > 0 ? m.pack : (DEF[wh] || 72); };   // แก้เอง > Cap แยกคลัง (Master Cap update) > Master > Pack > ค่าเริ่มต้น
 const srcOf = it => { const m = master[it]; return m && m.cap > 0 ? (m.capSrc === 'manual' ? 'Master (แก้เอง)' : m.capSrc === 'stock' ? 'ไฟล์สต็อก' : m.caps ? 'Master update' : 'Master') : m && m.pack > 0 ? 'Pack' : 'ค่าเริ่มต้น'; };
 const nameOf = (it, fb) => (master[it] && master[it].name) || fb || '';
 const packCap = p => { const v = parseFloat(String(p || '').split('_').pop()); return v > 0 ? v : 0; };   // CS3_C06_12_72 -> 72
@@ -445,7 +529,8 @@ function refresh() {
   $$('[data-ff="wh"]').forEach(e => { const v = e.value; e.innerHTML = opt; e.value = whs.includes(v) ? v : ''; FS[e.dataset.fk].wh = e.value; });
   $('#kpi').innerHTML = [['SKU', new Set(rows.map(r => r.item)).size], ['พาเลท (LPN)', Object.keys(pm).length], ['แถวสต็อก', rows.length], ['Case On Hand รวม', fmt(rows.reduce((a, r) => a + r.qty, 0))],
     ['พาเลท OK', PAL.filter(p => p.st === 'ok').length.toLocaleString() + ' / ' + PAL.length.toLocaleString()], ['ต้องจัดการ', PAL.filter(p => p.st !== 'ok' && p.st !== 'hold').length.toLocaleString() + ' พาเลท'], ['Status ไม่ผ่าน (ข้าม)', PAL.filter(p => p.st === 'hold').length.toLocaleString() + ' พาเลท']]
-    .map(([l, v]) => '<div class="card p-3"><div class="sub">' + l + '</div><div class="text-xl font-semibold mono">' + (typeof v === 'number' ? v.toLocaleString() : v) + '</div></div>').join('');
+    .map(([l, v], i) => { const n = parseInt(String(v).replace(/,/g, '')) || 0, cls = i === 4 && PAL.length && n === PAL.length ? ' kpi-ok' : i === 5 && n > 0 ? ' kpi-bad' : i === 6 && n > 0 ? ' kpi-wn' : '', t = typeof v === 'number' ? v.toLocaleString() : String(v).replace(/ พาเลท$/, '<span class="u">พาเลท</span>');
+      return '<div class="card p-3' + cls + '"><div class="sub">' + l + '</div><div class="text-xl font-semibold mono">' + t + '</div></div>'; }).join('');
   const ov = PAL.filter(p => p.qty > p.cap + 1e-9).length; $('[data-t="fix"]').textContent = 'แก้เกิน Cap' + (ov ? ' (' + ov + ')' : '');
   render(); save();
 }
@@ -479,6 +564,7 @@ function render() {
   if (tab === 'fix') renderFix();
   if (tab === 'cap') renderCap();
   if (tab === 'log') renderLog();
+  if (tab === 'sum') renderSum();
 }
 
 /* ===================== ลบแถวสต็อก (Confirm + Log) ===================== */
@@ -639,6 +725,7 @@ function renderMrg() {
     '<div class="sub mt-2">สูตร: ' + esc(ch.map(p => p.lpn + ' (' + fmt(p.qty) + ')').join(' + ')) + ' = ' + fmt(tot) + '</div>' +
     (!full && tot < cap && !ps.some(p => mOk(p) && !mSel.has(p.lpn) && p.qty <= cap - tot + 1e-9) ? '<div class="mt-1"><span class="chip wn">รวมต่อไม่ได้แล้ว — ไม่มี LPN ที่เติมได้โดยไม่เกิน Cap</span> <span class="sub">กด “ตัดยอด…” ได้เลย</span></div>' : '') + '</div>' : '';
   $('#bMrg').disabled = !(ch.length >= 2 && tot <= cap + 1e-9 && ch.every(mOk));
+  { const cur = !$('#mi').value ? 0 : mSel.size < 2 ? 1 : !mDest ? 2 : 3; $$('#mStp li').forEach((li, k) => { li.className = k < cur ? 'done' : k === cur ? 'cur' : ''; }); }
   $('#bMCut').disabled = !(ch.length >= 1 && tot > 0 && tot <= cap + 1e-9 && ch.every(mOk));          // ตัดยอดได้เมื่อยอดเท่ากับหรือน้อยกว่า Cap (ไม่เกิน)
   $('#mTb').innerHTML = ps.map(p => {
     const on = mSel.has(p.lpn), ok = mOk(p), lots = [...new Set(p.rows.map(r => r.lot))];
@@ -981,18 +1068,19 @@ function renderFix() {
 /* ===================== หน้า Master Cap ===================== */
 function renderCap() {
   const q = $('#cq').value.toLowerCase(), agg = {}, pr = getPrio();
-  rows.forEach(r => { if (!agg[r.item]) agg[r.item] = { item: r.item, wh: r.wh }; });
-  for (const it in master) if (!agg[it] && (master[it].cap > 0 || master[it].prio > 0)) agg[it] = { item: it, wh: '' };      // Master ฐานที่ยังไม่มีในสต็อกก็แสดง
+  rows.forEach(r => { const a = agg[r.item] || (agg[r.item] = { item: r.item, wh: r.wh, whs: new Set() }); a.whs.add(r.wh); });
+  for (const it in master) if (!agg[it] && (master[it].cap > 0 || master[it].prio > 0)) agg[it] = { item: it, wh: '', whs: new Set() };      // Master ฐานที่ยังไม่มีในสต็อกก็แสดง
   const list = Object.values(agg).filter(a => !q || (a.item + ' ' + nameOf(a.item)).toLowerCase().includes(q)).sort((a, b) => CO.compare(a.item, b.item));
   const nb = Object.values(master).filter(m => m.capSrc === 'base' && m.cap > 0).length;
   $('#capInfo').textContent = 'Master ฐานที่นำเข้า ' + nb.toLocaleString() + ' Item · แสดง ' + Math.min(list.length, 600).toLocaleString() + '/' + list.length.toLocaleString();
   $('#cb').innerHTML = list.slice(0, 600).map(a => {
     const m = master[a.item] || {}, sc = srcOf(a.item), rk = pr.byItem[a.item], okIt = Object.values(GRP).some(g => g.item === a.item) && !rk;
-    return '<tr><td class="mono">' + esc(a.item) + '</td><td>' + esc(nameOf(a.item)) + '</td><td>' + (a.wh ? esc(a.wh) : '<span class="chip">ไม่มีในสต็อก</span>') + '</td><td class="r mono"><b>' + fmt(capOf(a.item, a.wh)) + '</b></td>' +
-      '<td><span class="chip ' + (m.cap > 0 && m.capSrc !== 'stock' ? 'ok' : '') + '">' + esc(sc) + '</span>' + (m.capSrc === 'manual' && m.base > 0 ? '<div class="sub">ฐาน ' + fmt(m.base) + '</div>' : '') + (m.caps ? '<div class="sub">' + ['CS1', 'CS2', 'CS3'].map(k => k + ' ' + (m.caps[k] || '–')).join(' · ') + '</div>' : '') + '</td>' +
+    const ws = [...a.whs].sort(CO.compare), man = m.man ? Object.keys(m.man).sort(CO.compare).map(k => k + ' ' + fmt(m.man[k])).join(' · ') : '', csl = Object.keys(DEF);
+    return '<tr><td class="mono">' + esc(a.item) + '</td><td>' + esc(nameOf(a.item)) + '</td><td>' + (ws.length ? ws.map(w => '<span class="chip">' + esc(w) + '</span>').join(' ') : '<span class="chip">ไม่มีในสต็อก</span>') + '</td><td class="r mono">' + (ws.length > 1 ? ws.map(w => '<div><span class="sub">' + esc(w) + '</span> <b>' + fmt(capOf(a.item, w)) + '</b></div>').join('') : '<b>' + fmt(capOf(a.item, a.wh)) + '</b>') + '</td>' +
+      '<td><span class="chip ' + (m.cap > 0 && m.capSrc !== 'stock' ? 'ok' : '') + '">' + esc(sc) + '</span>' + (m.capSrc === 'manual' && m.base > 0 ? '<div class="sub">ฐาน ' + fmt(m.base) + '</div>' : '') + (m.caps ? '<div class="sub">' + ['CS1', 'CS2', 'CS3'].map(k => k + ' ' + (m.caps[k] || '–')).join(' · ') + '</div>' : '') + (man ? '<div class="sub" style="color:var(--wn)">แก้เอง ' + esc(man) + '</div>' : '') + '</td>' +
       '<td>' + (rk ? '<span class="chip wn">#' + rk + '</span>' : okIt ? '<span class="chip ok">OK</span>' : '<span class="sub">—</span>') + ' <input class="inp" style="width:64px" type="number" min="0" data-p="' + esc(a.item) + '" value="' + (m.prio || '') + '" placeholder="ตั้งเอง"></td>' +
-      '<td><div class="flex gap-1"><input class="inp" style="width:90px" type="number" min="0" data-c="' + esc(a.item) + '" value="' + (m.cap || '') + '" placeholder="Cap"><button class="btn s p" data-cs="' + esc(a.item) + '">บันทึก</button>' +
-      (m.capSrc === 'manual' && m.base > 0 ? '<button class="btn s" data-cr="' + esc(a.item) + '" title="คืนค่า Master ฐาน">คืนค่าฐาน</button>' : '') + '</div></td></tr>';
+      '<td><div class="flex gap-1"><select class="inp" style="width:104px" data-cw="' + esc(a.item) + '" title="เลือกว่าจะกำหนด Cap ของ CS ไหน"><option value="">ทุก CS</option>' + csl.map(c => '<option' + (ws.includes(c) ? '' : ' style="color:var(--mu)"') + '>' + esc(c) + '</option>').join('') + '</select><input class="inp" style="width:90px" type="number" min="0" data-c="' + esc(a.item) + '" value="' + (m.cap || '') + '" placeholder="Cap"><button class="btn s p" data-cs="' + esc(a.item) + '">บันทึก</button>' +
+      ((m.capSrc === 'manual' && m.base > 0) || m.man ? '<button class="btn s" data-cr="' + esc(a.item) + '" title="คืนค่า Master ฐาน">คืนค่าฐาน</button>' : '') + '</div></td></tr>';
   }).join('') || '<tr><td colspan="7" class="sub" style="text-align:center;padding:30px">ไม่มีข้อมูล</td></tr>';
 }
 const ALM = { item: AL.item, cap: AL.cap.concat(['capจัดเก็บcs', 'capจัดเก็บ']), cs: ['capcs1', 'capcs2', 'capcs3'], desc: AL.desc.concat(['ชื่อสินค้า', 'ชื่อ', 'desciption']), prio: ['priority', 'prio', 'ลำดับ', 'ลำดับความสำคัญ', 'ความสำคัญ', 'ลำดับทำก่อน'] };
@@ -1014,7 +1102,7 @@ async function importCaps(f) {                                               // 
     const m = master[it] || (master[it] = {}), old = m.cap > 0 ? m.cap : 0, hasC = Object.keys(cs).length > 0;
     const same0 = old === v && JSON.stringify(m.caps || {}) === JSON.stringify(cs);
     if (!old) add.push(it); else if (!same0) chg.push([it, txt(old, m.caps), txt(v, hasC ? cs : null)]); else same++;
-    m.cap = v; m.base = v; m.capSrc = 'base';                                  // ยึดไฟล์ที่นำเข้าเป็นฐาน
+    m.cap = v; m.base = v; m.capSrc = 'base'; delete m.man;                                  // ยึดไฟล์ที่นำเข้าเป็นฐาน
     if (hasC) { m.caps = cs; withCs++; } else delete m.caps;                   // Cap แยกคลัง (CS1/CS2/CS3) ใช้ตามคลังของพาเลท
     if (cd >= 0 && String(r[cd]).trim() && !m.name) m.name = String(r[cd]).trim();
     if (cp >= 0) { const pv = parseFloat(r[cp]); if (pv > 0) m.prio = pv; }
@@ -1175,7 +1263,7 @@ document.addEventListener('keydown', e => {
   const k = e.key;
   if (k === '/') { e.preventDefault(); const s = { stock: '#q', mrg: '#mq', fix: '#fq', log: '#lq' }[tab], x = s && $(s); if (x) x.focus(); }
   else if (k === '?') keysHelp();
-  else if (/^[1-6]$/.test(k)) setTab(['stock', 'opt', 'mrg', 'fix', 'cap', 'log'][+k - 1]);
+  else if (/^[1-7]$/.test(k)) setTab(['stock', 'opt', 'mrg', 'fix', 'cap', 'log', 'sum'][+k - 1]);
   else if (tab === 'mrg') {
     const q = k.toLowerCase();
     if (q === 'n' || q === 'p') { const td = getPrio().todo; if (!td.length) return toast('ทุก Item เป็น OK แล้ว');
@@ -1203,7 +1291,7 @@ function clearData(thenImport, o) {
   rows = []; merges = []; cuts = []; fixes = []; mLast = null; mSel.clear(); mDest = ''; pm = {}; limit = 200;       // ล้างสต็อก + ประวัติรวมเลท (ผูกกับแถวเดิม)
   if (o.logs) logs = [];
   if (o.caps) master = {};
-  else { const k = {}; for (const i in master) { const m = master[i]; if (m.cap > 0 || m.prio > 0) k[i] = { cap: m.cap, caps: m.caps, capSrc: m.capSrc, base: m.base, prio: m.prio, name: m.name }; } master = k; }   // เก็บ Master Cap ฐาน / ที่กำหนดเอง / ลำดับความสำคัญ
+  else { const k = {}; for (const i in master) { const m = master[i]; if (m.cap > 0 || m.prio > 0) k[i] = { cap: m.cap, caps: m.caps, man: m.man, capSrc: m.capSrc, base: m.base, prio: m.prio, name: m.name }; } master = k; }   // เก็บ Master Cap ฐาน / ที่กำหนดเอง / ลำดับความสำคัญ
   log('ล้างข้อมูล', { item: '', lpn: '', lot: '', qty: 0, wh: '' }, 'ล้างสต็อก ' + n.toLocaleString() + ' แถว');
   refresh(); toast('ล้างข้อมูลแล้ว');
   if (thenImport) $('#fIn').click();
@@ -1221,7 +1309,7 @@ $('#bCapIn').onclick = () => $('#fCap').click();
 $('#fCap').onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (f) importCaps(f).catch(() => toast('อ่านไฟล์ไม่ได้')); };
 $('#bCapOut').onclick = () => {
   const seen = {}; rows.forEach(r => seen[r.item] = r.wh); for (const i in master) if (!(i in seen) && (master[i].cap > 0 || master[i].prio > 0)) seen[i] = '';
-  dl([['Item', 'ชื่อสินค้า', 'Master Cap', 'Cap ที่ใช้', 'ที่มา', 'ลำดับความสำคัญ', 'Master ฐาน', 'CAP CS1', 'CAP CS2', 'CAP CS3']].concat(Object.keys(seen).sort(CO.compare).map(i => { const m = master[i] || {}; return [i, nameOf(i), m.cap || '', capOf(i, seen[i]), srcOf(i), m.prio || '', m.base || '', (m.caps || {}).CS1 || '', (m.caps || {}).CS2 || '', (m.caps || {}).CS3 || '']; })), 'WMS_MasterCap.xlsx', 'Master Cap');
+  dl([['Item', 'ชื่อสินค้า', 'Master Cap', 'Cap ที่ใช้', 'ที่มา', 'ลำดับความสำคัญ', 'Master ฐาน', 'CAP CS1', 'CAP CS2', 'CAP CS3']].concat(Object.keys(seen).sort(CO.compare).map(i => { const m = master[i] || {}; return [i, nameOf(i), m.cap || '', capOf(i, seen[i]), srcOf(i), m.prio || '', m.base || '', (m.man || {}).CS1 || (m.caps || {}).CS1 || '', (m.man || {}).CS2 || (m.caps || {}).CS2 || '', (m.man || {}).CS3 || (m.caps || {}).CS3 || '']; })), 'WMS_MasterCap.xlsx', 'Master Cap');
 };
 $('#bLogClr').onclick = () => modal('ล้างประวัติ', 'ลบประวัติทั้งหมด?', [['ยกเลิก'], ['ล้าง', 'd', () => { logs = []; refresh(); }]]);
 $('#bMore').onclick = () => { limit += 200; render(); };
@@ -1326,12 +1414,24 @@ $('#mHist').onclick = e => {
   }
   if (x) exportMerge(x.dataset.me);
 }; $('#cq').oninput = renderCap;
+$('#cb').onchange = e => {                                                    // เปลี่ยน CS ที่จะกำหนด → ช่อง Cap แสดงค่าของ CS นั้น
+  const sel = e.target.closest('[data-cw]'); if (!sel) return;
+  const it = sel.dataset.cw, inp = $('#cb').querySelector('[data-c="' + CSS.escape(it) + '"]'), m = master[it] || {};
+  inp.value = sel.value ? ((m.man || {})[sel.value] || '') : (m.cap || '');
+  inp.placeholder = sel.value ? 'ใช้อยู่ ' + fmt(capOf(it, sel.value)) : 'Cap';
+  inp.focus();
+};
 $('#cb').onclick = e => {
   const b = e.target.closest('[data-cs]'), rb = e.target.closest('[data-cr]');
-  if (rb) { const m = master[rb.dataset.cr]; if (m && m.base > 0) { m.cap = m.base; m.capSrc = 'base'; refresh(); toast('คืนค่า Master ฐานแล้ว'); } return; }
+  if (rb) { const m = master[rb.dataset.cr]; if (m) { delete m.man; if (m.capSrc === 'manual' && m.base > 0) { m.cap = m.base; m.capSrc = 'base'; } refresh(); toast('คืนค่า Master ฐานแล้ว'); } return; }
   if (!b) return;
   const it = b.dataset.cs, inp = $('#cb').querySelector('[data-c="' + CSS.escape(it) + '"]'), pin = $('#cb').querySelector('[data-p="' + CSS.escape(it) + '"]'), v = parseFloat(inp.value), pv = parseFloat(pin.value);
-  const m = master[it] || (master[it] = {});
+  const m = master[it] || (master[it] = {}), sel = $('#cb').querySelector('[data-cw="' + CSS.escape(it) + '"]'), cw = sel ? sel.value : '';
+  if (cw) {                                                                   // กำหนด Cap เฉพาะ CS ที่เลือก (ไม่กระทบ CS อื่น)
+    if (v > 0) { (m.man || (m.man = {}))[cw] = v; } else if (m.man) { delete m.man[cw]; if (!Object.keys(m.man).length) delete m.man; }
+    if (pv > 0) m.prio = pv; else delete m.prio;
+    refresh(); toast(v > 0 ? 'บันทึก Cap ของ ' + cw + ' = ' + fmt(v) + ' แล้ว' : 'ล้าง Cap ที่แก้เองของ ' + cw + ' แล้ว'); return;
+  }
   if (v > 0) { if (m.cap !== v) { m.cap = v; m.capSrc = m.base === v ? 'base' : 'manual'; } }
   else if (m.base > 0) { m.cap = m.base; m.capSrc = 'base'; }                // เว้นว่าง = กลับไปใช้ค่าฐาน (ถ้ามี) ไม่งั้น Pack / ค่าเริ่มต้น
   else { delete m.cap; delete m.capSrc; }
@@ -1368,7 +1468,54 @@ $('#fHist').onclick = e => {
   modal('ยกเลิกการแก้เกิน Cap', '<div>คืนส่วนเกินกลับ LPN เดิม — เลือกว่าจะยกเลิก<b>เฉพาะรายการนี้</b> หรือ<b>ทั้งหมด ' + n + ' รายการ</b></div>',
     [['ไม่ใช่'], ['ยกเลิกเฉพาะรายการนี้', 'd', () => undoFix(id)]].concat(undoFound('fix'), n > 1 ? [['ยกเลิกทั้งหมด (' + n + ')', 'd', undoAllFixes]] : []));
 };
-function setTab(t) { tab = t; $$('.tab').forEach(b => b.classList.toggle('on', b.dataset.t === t)); ['stock', 'opt', 'mrg', 'fix', 'cap', 'log'].forEach(x => $('#v-' + x).classList.toggle('hide', x !== t)); render(); }
+
+/* ===================== สรุปประจำวัน ===================== */
+const ymd = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+function sumCalc() {
+  if (!sDay) sDay = ymd(new Date());
+  const [y, m, d] = sDay.split('-').map(Number), t = y * 10000 + m * 100 + d, wh = $('#sWh').value, inD = r => recDM(r).t === t && (!wh || r.wh === wh);
+  const M = merges.filter(inD), C = cuts.filter(inD), F = fixes.filter(inD), blank = () => ({ sets: 0, rel: 0, mctn: 0, cuts: 0, cctn: 0, fix: 0 }), cs = {}, it = {}, tot = blank();
+  const add = (rec, fn) => { const a = cs[rec.wh] || (cs[rec.wh] = blank()), k = rec.item + '|' + rec.wh, b = it[k] || (it[k] = Object.assign(blank(), { item: rec.item, name: rec.name || nameOf(rec.item), wh: rec.wh })); [a, b, tot].forEach(fn); };
+  M.forEach(r => add(r, o => { o.sets++; o.rel += r.src.length; o.mctn = r2(o.mctn + (r.removed ? r.total : 0)); }));
+  C.forEach(r => add(r, o => { o.cuts++; o.cctn = r2(o.cctn + r.total); }));
+  F.forEach(r => add(r, o => { o.fix++; }));
+  return { y, m, d, wh, cs, it, tot, n: M.length + C.length + F.length };
+}
+function renderSum() {
+  const whs = [...new Set(rows.map(r => r.wh).concat(merges.map(r => r.wh), cuts.map(r => r.wh)))].sort(CO.compare), cur = $('#sWh').value;
+  $('#sWh').innerHTML = '<option value="">ทุกคลัง</option>' + whs.map(w => '<option' + (w === cur ? ' selected' : '') + '>' + esc(w) + '</option>').join('');
+  const S = sumCalc(), T = S.tot; $('#sDate').value = sDay;
+  $('#sTit').textContent = 'สรุปประจำวันที่ ' + S.d + '/' + S.m + '/' + (S.y + 543) + (S.wh ? ' · ' + S.wh : '');
+  const tile = (l, v, u, sub, cls) => '<div class="card p-3' + (cls || '') + '"><div class="sub">' + l + '</div><div class="text-xl font-semibold mono">' + v + (u ? '<span class="u">' + u + '</span>' : '') + '</div>' + (sub ? '<div class="sub">' + sub + '</div>' : '') + '</div>';
+  $('#sKpi').innerHTML = tile('รวมเลท', T.sets, 'ชุด', 'ปล่อย ' + T.rel + ' · เก็บ ' + T.sets + ' พาเลท') + tile('ได้พื้นที่คืน', T.rel - T.sets, 'พาเลท', 'ปล่อย − เก็บ', T.rel - T.sets > 0 ? ' kpi-ok' : '') +
+    tile('ยอดนำออกจากสต็อก', fmt(T.mctn + T.cctn), 'CTN', 'รวมเลท ' + fmt(T.mctn) + ' · ตัดยอด ' + fmt(T.cctn)) + tile('ตัดยอด', T.cuts, 'ครั้ง', fmt(T.cctn) + ' CTN') + tile('แก้เกิน Cap', T.fix, 'ครั้ง');
+  const tb = (head, body, empty) => body.length ? '<table><thead><tr>' + head.map(h => '<th' + (h[1] ? ' class="r"' : '') + '>' + h[0] + '</th>').join('') + '</tr></thead><tbody>' + body.join('') + '</tbody></table>' : '<div class="sub">' + empty + '</div>',
+    td = (v, r) => '<td' + (r ? ' class="r mono"' : '') + '>' + v + '</td>', z = v => v || '<span class="sub">—</span>', empty = 'ยังไม่มีการรวมเลท / ตัดยอด / แก้เกิน Cap ในวันที่เลือก';
+  const H = [['ชุด', 1], ['ปล่อย', 1], ['เก็บ', 1], ['ได้คืน', 1], ['ยอดรวมเลท (CTN)', 1], ['ตัดยอด (ครั้ง)', 1], ['ตัดยอด (CTN)', 1], ['แก้เกิน Cap', 1]];
+  const vals = o => td(z(o.sets), 1) + td(z(o.rel), 1) + td(z(o.sets), 1) + td(z(o.rel - o.sets), 1) + td(z(o.mctn ? fmt(o.mctn) : 0), 1) + td(z(o.cuts), 1) + td(z(o.cctn ? fmt(o.cctn) : 0), 1) + td(z(o.fix), 1);
+  const wk = Object.keys(S.cs).sort(CO.compare);
+  $('#sCs').innerHTML = tb([['CS']].concat(H), wk.map(w => '<tr><td><b>' + esc(w) + '</b></td>' + vals(S.cs[w]) + '</tr>').concat(wk.length > 1 ? ['<tr><td><b>รวม</b></td>' + vals(T).replace(/<td/g, '<td style="font-weight:600"') + '</tr>'] : []), empty);
+  const ik = Object.keys(S.it).sort((a, b) => S.it[b].sets - S.it[a].sets || S.it[b].mctn - S.it[a].mctn || CO.compare(a, b));
+  $('#sItem').innerHTML = tb([['Item'], ['CS']].concat(H), ik.map(k => { const o = S.it[k]; return '<tr><td><span class="mono"><b>' + esc(o.item) + '</b></span> ' + esc(o.name) + '</td><td>' + esc(o.wh) + '</td>' + vals(o) + '</tr>'; }), empty);
+  const pr = getPrio(), cw = [...new Set(PAL.map(p => p.wh))].sort(CO.compare);
+  $('#sTodo').innerHTML = tb([['CS'], ['พาเลทในสต็อก', 1], ['Item รอดำเนินการ', 1], ['รวมแล้วว่างได้อีก (พาเลท)', 1], ['ติด Allocated (พาเลท)', 1], ['เกิน Cap (พาเลท)', 1]],
+    cw.map(w => { const l = pr.todo.filter(x => x.wh === w); return '<tr><td><b>' + esc(w) + '</b></td>' + td(PAL.filter(p => p.wh === w).length, 1) + td(z(l.length), 1) + td(z(l.reduce((a, x) => a + x.freed, 0)), 1) + td(z(l.reduce((a, x) => a + x.held, 0)), 1) + td(z(l.reduce((a, x) => a + x.over, 0)), 1) + '</tr>'; }), 'ยังไม่มีข้อมูลสต็อก');
+}
+function sumExport() {
+  const S = sumCalc(), T = S.tot, th = S.d + '/' + S.m + '/' + (S.y + 543), line = o => [o.sets, o.rel, o.sets, o.rel - o.sets, o.mctn, o.cuts, o.cctn, o.fix], head = ['ชุด', 'ปล่อย', 'เก็บ', 'ได้คืน', 'ยอดรวมเลท (CTN)', 'ตัดยอด (ครั้ง)', 'ตัดยอด (CTN)', 'แก้เกิน Cap'];
+  const aoa = [['สรุปประจำวันที่ ' + th + (S.wh ? ' · ' + S.wh : '')], [], ['รวมทั้งหมด'], head, line(T), [], ['แยกตาม CS'], ['CS'].concat(head)];
+  Object.keys(S.cs).sort(CO.compare).forEach(w => aoa.push([w].concat(line(S.cs[w]))));
+  aoa.push([], ['แยกตาม Item'], ['Item', 'ชื่อสินค้า', 'CS'].concat(head));
+  Object.keys(S.it).sort(CO.compare).forEach(k => { const o = S.it[k]; aoa.push([o.item, o.name, o.wh].concat(line(o))); });
+  if (S.n === 0) return toast('วันนี้ยังไม่มีรายการให้ Export');
+  dl(aoa, 'สรุปประจำวัน_' + sDay + '.xlsx', 'สรุปประจำวัน');
+}
+$('#sDate').onchange = e => { if (e.target.value) { sDay = e.target.value; renderSum(); } };
+$('#sPrev').onclick = () => { const [y, m, d] = sumCalc() && sDay.split('-').map(Number); sDay = ymd(new Date(y, m - 1, d - 1)); renderSum(); };
+$('#sNext').onclick = () => { const [y, m, d] = sumCalc() && sDay.split('-').map(Number); sDay = ymd(new Date(y, m - 1, d + 1)); renderSum(); };
+$('#sToday').onclick = () => { sDay = ymd(new Date()); renderSum(); };
+$('#sWh').onchange = renderSum; $('#sPrint').onclick = () => window.print(); $('#sXls').onclick = sumExport;
+function setTab(t) { tab = t; $$('.tab').forEach(b => b.classList.toggle('on', b.dataset.t === t)); ['stock', 'opt', 'mrg', 'fix', 'cap', 'log', 'sum'].forEach(x => $('#v-' + x).classList.toggle('hide', x !== t)); render(); }
 $('#tabs').onclick = e => { const b = e.target.closest('.tab'); if (b) setTab(b.dataset.t); };
 document.addEventListener('keydown', e => { if (e.key === '/' && !/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) { e.preventDefault(); setTab('stock'); $('#q').focus(); } });
 
