@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="utf-8">
-<meta name="app-version" content="3.0">
+<meta name="app-version" content="27">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>WMS Cold Storage · Master Cap</title>
 <link rel="icon" id="fav" href="Logo%20sungroup.jpg">
@@ -529,6 +529,7 @@ function viewRows() {
 }
 /* ===================== Status OK + ลำดับ Item ที่ควรทำก่อน ===================== */
 let PAL = [], PMAP = {}, GRP = {}, _prio = null;
+window.__WMS = { pal: () => PAL, rows: () => rows, master: () => master };
 const ST = { ok: ['ok', 'OK'], merge: ['wn', 'รอรวม'], over: ['bad', 'เกิน Cap'], partial: ['bad', 'จองบางล็อต'], full: ['bad', 'จองทั้งพาเลท'], hold: ['wn', 'Status ไม่ผ่าน'] };
 function calcStatus() {                                           // สถานะรายพาเลท: OK = เต็ม Cap หรือรวมต่อไม่ได้แล้ว
   const P = {}; _prio = null;
@@ -1777,6 +1778,56 @@ function run(x){close();x.f()}function open(){build();sel=0;ci.value="";cp.class
 ci.oninput=function(){sel=0;draw()};cp.onmousedown=function(e){if(e.target===cp)close()};
 ci.onkeydown=function(e){var v=cp._v||[];if(e.key==="ArrowDown"){e.preventDefault();sel=(sel+1)%Math.max(1,v.length);draw()}else if(e.key==="ArrowUp"){e.preventDefault();sel=(sel-1+v.length)%Math.max(1,v.length);draw()}else if(e.key==="Enter"&&v[sel]){e.preventDefault();run(v[sel])}else if(e.key==="Escape"){close()}};
 document.addEventListener("keydown",function(e){if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();e.stopPropagation();cp.classList.contains("on")?close():open()}else if(e.key==="Escape")pn.classList.remove("on")},true)})();
+</script>
+<style>
+#qf{display:flex;gap:8px;flex-wrap:wrap;padding:0 12px 12px}
+#qf .qb{display:inline-flex;align-items:center;gap:7px;padding:6px 13px;border:1px solid var(--bd);border-radius:999px;background:var(--sf);color:var(--tx);cursor:pointer;font-size:.92em;transition:.12s}
+#qf .qb:hover{background:var(--s2)}
+#qf .qb .n{font-weight:600;font-variant-numeric:tabular-nums;color:var(--mu)}
+#qf .qb[data-t="bad"] .n{color:var(--bad)}#qf .qb[data-t="wn"] .n{color:var(--wn)}#qf .qb[data-t="ok"] .n{color:var(--ok)}
+#qf .qb.z{opacity:.55}
+#qf .qb.on{background:var(--ac);border-color:var(--ac);color:var(--onac);opacity:1}#qf .qb.on .n{color:inherit}
+#wl{display:none;padding:34px 22px 40px}
+#v-stock.empty>*:not(#wl){display:none!important}#v-stock.empty #wl{display:block}
+#wl .w{max-width:880px;margin:0 auto}
+#wl h2{font-size:1.5em;font-weight:600;margin:0 0 4px}
+#wl .g{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:22px}
+#wl .s{border:1px solid var(--bd);border-radius:14px;padding:16px;background:var(--sf);display:flex;flex-direction:column;gap:8px}
+#wl .s.cur{border-color:var(--ac);box-shadow:0 0 0 3px var(--ac2)}
+#wl .s .no{width:28px;height:28px;border-radius:50%;background:var(--ac2);color:var(--ac);display:grid;place-items:center;font-weight:600}
+#wl .s.done .no{background:var(--ok2);color:var(--ok)}
+#wl .s b{font-size:1.02em}#wl .s .sub{flex:1}
+#wl .dz{margin-top:18px;border:2px dashed var(--bd);border-radius:14px;padding:22px;text-align:center;color:var(--mu)}
+@media(max-width:800px){#wl .g{grid-template-columns:1fr}}
+</style>
+<script>
+(function(){
+var $=function(q){return document.querySelector(q)},sec=$('#v-stock'),W=function(){return window.__WMS};
+/* ---------- 3) ปุ่มกรองด่วน ---------- */
+var P=[['all','ทั้งหมด',{},null,''],['over','⚠ เกิน Cap',{st:'over'},function(p){return p.st==='over'},'bad'],['merge','รอรวม',{st:'merge'},function(p){return p.st==='merge'},'wn'],['ok','OK',{st:'ok'},function(p){return p.st==='ok'},'ok'],
+['alloc','ติด Allocated',{st:'alloc'},function(p){return p.st==='full'||p.st==='partial'},'bad'],['part','จองบางล็อต',{st:'partial'},function(p){return p.st==='partial'},'bad'],['free','Allocated = 0',{alloc:'free'},function(p){return p.alloc<=0},''],['hold','Status ไม่ผ่าน',{fs:'not'},function(p){return p.st==='hold'},'wn']];
+var K=['st','alloc','fs'],qf=document.createElement('div');qf.id='qf';
+var top=sec.querySelector('.p-3');top.parentNode.insertBefore(qf,top.nextSibling);
+function el(k){return $('[data-f="'+k+'"]')}
+function val(k){var e=el(k);return e?e.value:''}
+function isOn(f){return K.every(function(k){return val(k)===(f[k]||'')})}
+function apply(f){K.forEach(function(k){var e=el(k),v=f[k]||'';if(e&&e.value!==v){e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}))}})}
+qf.addEventListener('click',function(e){var b=e.target.closest('.qb');if(!b)return;apply(P[+b.dataset.i][2])});
+function chips(){var pal=W().pal();qf.innerHTML=P.map(function(x,i){var n=x[3]?pal.filter(x[3]).length:pal.length;return'<button class="qb'+(isOn(x[2])?' on':'')+(n?'':' z')+'" data-i="'+i+'" data-t="'+x[4]+'" title="จำนวนพาเลท">'+x[1]+' <span class="n">'+n.toLocaleString()+'</span></button>'}).join('')}
+/* ---------- 2) หน้าต้อนรับเมื่อยังไม่มีข้อมูล ---------- */
+var wl=document.createElement('div');wl.id='wl';sec.appendChild(wl);
+function welcome(){var cap=Object.keys(W().master()).some(function(k){var m=W().master()[k];return m&&(m.capSrc==='base'||m.caps)});
+wl.innerHTML='<div class="w"><h2>👋 เริ่มต้นใช้งาน</h2><div class="sub">ยังไม่มีข้อมูลสต็อก ทำตามขั้นตอนด้านล่างได้เลย — ระบบจะให้ยืนยันก่อนนำเข้าเสมอ</div><div class="g">'+
+'<div class="s'+(cap?' done':' cur')+'"><div class="no">'+(cap?'✓':'1')+'</div><b>Master Cap</b><div class="sub">'+(cap?'มี Master Cap ในระบบแล้ว นำเข้าเพิ่มหรืออัปเดตได้ทุกเมื่อ':'ไฟล์ Item + Master Cap (หรือ Master Cap update แยกคลัง) เพื่อให้ตรวจ Cap ได้ถูกต้อง')+'</div><button class="btn'+(cap?'':' p')+'" data-w="bCapIn">📂 เลือกไฟล์ Master Cap</button></div>'+
+'<div class="s'+(cap?' cur':'')+'"><div class="no">2</div><b>สต็อกคงเหลือ</b><div class="sub">ไฟล์ Excel / CSV ที่มีคอลัมน์ Item และ LPN ระบบหาแถวหัวตารางให้เอง</div><button class="btn'+(cap?' p':'')+'" data-w="bImp">📥 เลือกไฟล์สต็อก</button></div>'+
+'<div class="s"><div class="no">3</div><b>ดูผลและจัดการ</b><div class="sub">ดูพาเลท OK / รอรวม / เกิน Cap ด้วยปุ่มกรองด่วน แล้วไปแท็บจัดชุดหรือแก้เกิน Cap</div></div></div>'+
+'<div class="dz">⬇ หรือ <b>ลากไฟล์ Excel มาวางที่หน้านี้</b> ได้เลย · กด <b>Ctrl + K</b> เพื่อค้นหาคำสั่งด่วน</div></div>'}
+wl.addEventListener('click',function(e){var b=e.target.closest('[data-w]');if(b)document.getElementById(b.dataset.w).click()});
+var q=0;function upd(){q=0;var empty=!W().rows().length;sec.classList.toggle('empty',empty);empty?welcome():chips()}
+function sch(){if(!q)q=requestAnimationFrame(upd)}
+['#tb','#cnt'].forEach(function(id){var n=$(id);if(n)new MutationObserver(sch).observe(n,{childList:true,characterData:true,subtree:true})});
+document.addEventListener('input',function(e){if(e.target.matches&&e.target.matches('[data-f]'))sch()});
+upd()})();
 </script>
 </body>
 </html>
