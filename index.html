@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="utf-8">
-<meta name="app-version" content="3.5">
+<meta name="app-version" content="4.2">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>WMS Cold Storage · Master Cap</title>
 <link rel="icon" id="fav" href="Logo%20sungroup.jpg">
@@ -1722,7 +1722,7 @@ main>section:not(.hide){animation:fi .22s ease}
 body.dense td,body.dense th{padding-top:3px!important;padding-bottom:3px!important}
 @media(min-width:960px){body.sbmin{grid-template-columns:68px minmax(0,1fr)}
 body.sbmin .hd{padding:14px 8px;align-items:center}
-body.sbmin .hd>div:first-child>*:not(#sbT),body.sbmin #fontSel,body.sbmin #pnB{display:none!important}
+body.sbmin .hd>div:first-child>*:not(#sbT),body.sbmin #fontSel,body.sbmin #pnB,body.sbmin #bNews{display:none!important}
 body.sbmin .tab{font-size:0;text-align:center;padding:10px 0}
 body.sbmin .tab::before{font-size:19px}}
 #sbT{order:0;align-self:flex-end;width:auto!important;padding:2px 9px;margin-bottom:4px}
@@ -1770,7 +1770,7 @@ pb.onclick=function(e){e.stopPropagation();pn.classList.toggle("on")};document.a
 var cp=$("#cp"),ci=$("#cpI"),cl=$("#cpL"),items=[],sel=0;
 function build(){items=[];tabs.forEach(function(x){items.push({n:(x.dataset.ic||"")+" ไปแท็บ "+x.textContent.trim(),k:"tab",f:function(){x.click()}})});
 [["bImp","📥 นำเข้าสต็อก Excel / CSV"],["bCapIn","📥 นำเข้า Master Cap"],["bExp","📤 Export ที่กรองแล้ว"],["bCapOut","📤 Export Master Cap"],["bTheme","🌓 สลับธีม สว่าง/มืด"],["bManual","📖 คู่มือ"]].forEach(function(a){var e=document.getElementById(a[0]);if(e)items.push({n:a[1],k:"action",f:function(){e.click()}})});
-items.push({n:"🎨 เปิดแผงปรับแต่ง (สี · ฟอนต์)",k:"setting",f:function(){pn.classList.add("on")}},{n:"↔ ย่อ/ขยายเมนูข้าง",k:"setting",f:function(){sbm(!B.classList.contains("sbmin"))}},{n:"☰ สลับตารางกะทัดรัด",k:"setting",f:function(){dens(!B.classList.contains("dense"))}});
+items.push({n:"📢 มีอะไรใหม่ (ประกาศอัปเดต)",k:"news",f:function(){window.__news&&window.__news()}});items.push({n:"🎨 เปิดแผงปรับแต่ง (สี · ฟอนต์)",k:"setting",f:function(){pn.classList.add("on")}},{n:"↔ ย่อ/ขยายเมนูข้าง",k:"setting",f:function(){sbm(!B.classList.contains("sbmin"))}},{n:"☰ สลับตารางกะทัดรัด",k:"setting",f:function(){dens(!B.classList.contains("dense"))}});
 A.forEach(function(a,i){items.push({n:"● สีหลัก: "+a[0],k:"setting",f:function(){acc(i)}})})}
 function draw(){var q=ci.value.trim().toLowerCase(),v=items.filter(function(x){return!q||x.n.toLowerCase().indexOf(q)>=0});sel=Math.min(sel,Math.max(0,v.length-1));cp._v=v;
 cl.innerHTML="";v.forEach(function(x,i){var li=document.createElement("li");li.className=i==sel?"on":"";li.innerHTML="<span></span><small>"+x.k+"</small>";li.firstChild.textContent=x.n;li.onmousedown=function(e){e.preventDefault();run(x)};cl.appendChild(li)});if(!v.length)cl.innerHTML="<li><span>ไม่พบคำสั่ง</span></li>"}
@@ -1828,6 +1828,62 @@ function sch(){if(!q)q=requestAnimationFrame(upd)}
 ['#tb','#cnt'].forEach(function(id){var n=$(id);if(n)new MutationObserver(sch).observe(n,{childList:true,characterData:true,subtree:true})});
 document.addEventListener('input',function(e){if(e.target.matches&&e.target.matches('[data-f]'))sch()});
 upd()})();
+</script>
+<style>
+#bNews{order:4;margin-top:6px;width:100%;position:relative}
+#bNews .dt{position:absolute;right:8px;top:50%;transform:translateY(-50%);min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--bad);color:#fff;font-size:11.5px;font-weight:600;display:grid;place-items:center}
+#nw{position:fixed;inset:0;z-index:9997;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(15,25,45,.5);backdrop-filter:blur(2px)}
+#nw.on{display:flex}
+#nw .b{width:min(640px,100%);max-height:86vh;display:flex;flex-direction:column;background:var(--sf);color:var(--tx);border:1px solid var(--bd);border-radius:16px;box-shadow:0 20px 50px rgba(10,20,40,.3);overflow:hidden}
+#nw .h{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--bd)}
+#nw .h b{font-size:1.15em}
+#nw .l{overflow:auto;padding:6px 20px 14px}
+#nw .r{padding:16px 0;border-bottom:1px solid var(--bd)}#nw .r:last-child{border-bottom:0}
+#nw .r.n{background:linear-gradient(90deg,var(--ac2),transparent);margin:0 -20px;padding:16px 20px}
+#nw .t{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+#nw .t b{font-size:1.05em}#nw .t .sub{color:var(--mu);font-size:.85em;margin-left:auto}
+#nw ul{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:7px}
+#nw li{display:flex;gap:9px;align-items:flex-start}#nw li .chip{flex:none;margin-top:2px}
+#nw .f{padding:12px 20px;border-top:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;gap:10px}
+#nw .f .sub{color:var(--mu);font-size:.85em}
+</style>
+<div id="nw"><div class="b"><div class="h"><b>📢 มีอะไรใหม่</b><button class="btn" id="nwx">✕</button></div><div class="l" id="nwl"></div>
+<div class="f"><span class="sub">ดูย้อนหลังได้ทุกเมื่อที่ปุ่ม “มีอะไรใหม่” หรือ Ctrl + K</span><button class="btn p" id="nwok">รับทราบ</button></div></div></div>
+<script>
+(function(){
+/* ============================================================
+   ประกาศอัปเดต — เพิ่มรายการใหม่ไว้บนสุดของ CHANGELOG (ใหม่สุดอยู่บน)
+   v = เลขเวอร์ชัน (ห้ามซ้ำ) · d = วันที่ YYYY-MM-DD · t = หัวข้อ
+   items: [ประเภท, ข้อความ] ประเภท = new (ใหม่) | imp (ปรับปรุง) | fix (แก้ไข)
+   พอเพิ่มรายการใหม่ ทุกคนจะเห็นจุดแดงที่ปุ่ม และมีหน้าต่างเด้งขึ้นครั้งเดียว
+   ============================================================ */
+var CHANGELOG=[
+{v:'4.2',d:'2026-11-17',t:'ทางลัดกรองและหน้าเริ่มต้น',items:[
+ ['new','ปุ่มกรองด่วนเหนือตารางสต็อก: เกิน Cap · รอรวม · OK · ติด Allocated ฯลฯ พร้อมจำนวนพาเลท กดครั้งเดียวกรองทันที'],
+ ['new','หน้าต้อนรับเมื่อยังไม่มีข้อมูล แนะนำ 3 ขั้นตอน: Master Cap → สต็อก → ดูผล'],
+ ['new','ระบบประกาศ “มีอะไรใหม่” (หน้านี้) พร้อมจุดแจ้งเตือนเมื่อมีอัปเดต']]},
+{v:'4.1',d:'2026-11-17',t:'นำเข้าง่ายขึ้น และปรับแต่งได้',items:[
+ ['new','ลากไฟล์ Excel / CSV มาวางที่หน้าเว็บเพื่อนำเข้าสต็อกหรือ Master Cap ได้เลย'],
+ ['new','ค้นหาคำสั่งด่วนด้วย Ctrl + K สลับแท็บ นำเข้า Export เปลี่ยนธีม'],
+ ['new','เลือกสีหลักได้ 6 สี และเลือกฟอนต์ได้ 6 แบบ (ปุ่ม “ปรับแต่ง” ในเมนูข้าง)'],
+ ['imp','ตารางแบบกะทัดรัด · ย่อเมนูข้าง · ไอคอนหน้าแท็บ · เปลี่ยนแท็บแบบนุ่มนวล']]},
+{v:'4.0',d:'2026-11-17',t:'หน้าตาใหม่ทั้งระบบ',items:[
+ ['imp','เปลี่ยนเป็นเมนูด้านข้าง โทนสว่างอ่านง่าย ฟอนต์ใหม่ การ์ดและตารางปรับใหม่ รองรับโหมดมืด'],
+ ['imp','แถบ KPI ใหญ่ขึ้น อ่านตัวเลขได้ชัดขึ้น'],
+ ['imp','ข้อมูล การคำนวณ Cap และขั้นตอนทำงานทั้งหมดเหมือนเดิมทุกอย่าง']]}
+];
+var $=function(q){return document.querySelector(q)},KEY='wmsNewsSeen',TG={new:['ok','ใหม่'],imp:['wn','ปรับปรุง'],fix:['bad','แก้ไข']};
+var esc=function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+function seen(){try{return localStorage.getItem(KEY)||''}catch(e){return''}}
+function unseen(){var i=CHANGELOG.findIndex(function(e){return e.v===seen()});return i<0?CHANGELOG.length:i}
+function fd(d){try{return new Date(d+'T00:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'})}catch(e){return d}}
+var bt=document.createElement('button');bt.id='bNews';bt.className='btn';$('.hd').appendChild(bt);
+function badge(){var n=unseen();bt.innerHTML='📢 มีอะไรใหม่'+(n?'<span class="dt">'+n+'</span>':'')}
+function open(){var n=unseen();$('#nwl').innerHTML=CHANGELOG.map(function(e,i){return'<div class="r'+(i<n?' n':'')+'"><div class="t"><span class="chip ok" style="background:var(--ac2);color:var(--ac)">v'+esc(e.v)+'</span><b>'+esc(e.t)+'</b>'+(i<n?'<span class="chip bad">ใหม่</span>':'')+'<span class="sub">'+fd(e.d)+'</span></div><ul>'+e.items.map(function(x){var g=TG[x[0]]||TG.imp;return'<li><span class="chip '+g[0]+'">'+g[1]+'</span><span>'+esc(x[1])+'</span></li>'}).join('')+'</ul></div>'}).join('');$('#nw').classList.add('on');$('#nwl').scrollTop=0}
+function close(){$('#nw').classList.remove('on');if(CHANGELOG[0]){try{localStorage.setItem(KEY,CHANGELOG[0].v)}catch(e){}}badge()}
+bt.onclick=open;$('#nwx').onclick=close;$('#nwok').onclick=close;$('#nw').addEventListener('mousedown',function(e){if(e.target.id==='nw')close()});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&$('#nw').classList.contains('on')&&!$('#cp').classList.contains('on'))close()});
+window.__news=open;badge();if(unseen())setTimeout(open,700)})();
 </script>
 </body>
 </html>
