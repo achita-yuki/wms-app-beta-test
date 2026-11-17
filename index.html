@@ -2,12 +2,13 @@
 <html lang="th">
 <head>
 <meta charset="utf-8">
-<meta name="app-version" content="2.0">
+<meta name="app-version" content="3.0">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>WMS Cold Storage · Master Cap</title>
 <link rel="icon" id="fav" href="Logo%20sungroup.jpg">
 <link rel="apple-touch-icon" href="Logo%20sungroup.jpg">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&family=Anuphan:wght@400;500;600;700&family=Niramit:wght@400;500;600;700&family=Kanit:wght@400;500;600&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 /* ===== Base reset (แทน Tailwind preflight) ===== */
@@ -196,6 +197,72 @@ tbody tr:hover td,#v-stock tbody tr:hover td{background:var(--ac2)}
 #updBar{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:60;display:flex;flex-wrap:wrap;align-items:center;gap:10px;max-width:calc(100vw - 24px);padding:10px 14px;background:var(--sf);border:1px solid var(--ac);border-radius:12px;box-shadow:0 10px 30px -8px rgba(11,37,54,.35)}
 #updBar b{color:var(--ac)}
 @media print{#updBar{display:none!important}}
+
+/* ===== UI รอบ 4 (v2) · เมนูข้างสว่าง · อ่านง่าย · น้ำเงินเป็นสีหลัก ===== */
+:root{--bg:#f4f6f9;--sf:#fff;--s2:#f1f4f8;--bd:#dfe4ec;--tx:#1b2433;--mu:#5b6678;--ac:#2556d9;--ac2:#e8eefc;--onac:#fff;--ok:#16794a;--ok2:#e2f4ea;--wn:#8a5300;--wn2:#fff3d6;--bad:#c0262d;--bad2:#fde8e8}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1319;--sf:#171c24;--s2:#1d2430;--bd:#2b3442;--tx:#eaeff6;--mu:#98a4b6;--ac:#6e9bff;--ac2:#1b2a49;--onac:#0a1224;--ok:#5fd68a;--ok2:#12301f;--wn:#f5be3c;--wn2:#34270a;--bad:#ff8a80;--bad2:#3a1a18}}
+:root[data-theme="dark"]{--bg:#0f1319;--sf:#171c24;--s2:#1d2430;--bd:#2b3442;--tx:#eaeff6;--mu:#98a4b6;--ac:#6e9bff;--ac2:#1b2a49;--onac:#0a1224;--ok:#5fd68a;--ok2:#12301f;--wn:#f5be3c;--wn2:#34270a;--bad:#ff8a80;--bad2:#3a1a18}
+:root{--ff:'Sarabun','Prompt',system-ui,sans-serif;--fs:16px}
+body,.jc,.jb,button,input,select,textarea{font-family:var(--ff)}
+body{font-size:var(--fs);line-height:1.55}
+#fontSel{order:4;margin-top:6px;width:100%;font-size:13px;padding:5px 8px;border:1px solid var(--bd);border-radius:8px;background:var(--sf);color:var(--tx)}
+td,.mono,#kpi .text-xl{font-variant-numeric:tabular-nums}
+/* ส่วนหัว */
+body::before{background:var(--sf)}
+.hd{background:var(--sf);border-bottom:1px solid var(--bd);color:var(--tx)}
+.hd .font-semibold{color:var(--tx);font-size:15.5px;letter-spacing:0}
+.hd .sub{color:var(--mu)}
+.hd .btn{background:var(--sf);border:1px solid var(--bd);color:var(--tx);border-radius:8px;font-size:13.5px}
+.hd .btn:hover{background:var(--s2)}
+.hd .btn.p{background:var(--ac);border-color:var(--ac);color:var(--onac);font-weight:600}
+.hd .btn.p:hover{filter:brightness(1.1)}
+.hd .btn.d{color:var(--bad)}
+.hd #logoBox{border:1px solid var(--bd);border-radius:8px}
+.tab{color:var(--mu);border-radius:8px;border-bottom:0;font-size:.95em;font-weight:500;padding:9px 14px}
+.tab:hover{background:var(--s2);color:var(--tx)}
+.tab.on,.tab.on:hover,:root[data-theme="dark"] .tab.on,:root[data-theme="dark"] .tab.on:hover{background:var(--ac2);color:var(--ac);font-weight:600;border-bottom:0}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .tab.on,:root:not([data-theme="light"]) .tab.on:hover{background:var(--ac2);color:var(--ac);border-bottom:0}}
+/* เมนูข้างบนจอกว้าง */
+@media(min-width:960px){
+body{display:grid;grid-template-columns:236px minmax(0,1fr);align-items:start}
+body::before{display:none}
+.hd{grid-column:1;grid-row:1;position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;gap:4px;padding:18px 12px 16px;border-bottom:0;border-right:1px solid var(--bd)}
+.hd>div{max-width:none!important;margin:0!important;padding:0!important}
+.hd>div:first-child{display:contents}
+.hd>div:first-child>*{order:3;width:100%;justify-content:flex-start;text-align:left}
+.hd>div:first-child>div:first-child{order:1;flex:0 0 auto!important;min-width:0!important;padding:0 4px 14px!important;border-bottom:1px solid var(--bd);margin-bottom:8px!important}
+.hd #bImp{margin-top:auto}
+.hd>div:first-child>.btn{padding:6px 10px}
+#tabs{order:2;flex-direction:column;overflow:visible;gap:2px;padding:0!important}
+.tab{text-align:left;width:100%}
+main{grid-column:2;grid-row:1;max-width:none!important;margin:0!important;padding:22px 26px!important}
+#hSort th{top:0!important}
+}
+@media print{body{display:block}}
+/* การ์ด / ปุ่ม / ช่องกรอก */
+.card{border-radius:12px;box-shadow:0 1px 2px rgba(20,30,50,.05);border:1px solid var(--bd)}
+.btn{border-radius:8px;background:var(--sf);border-color:var(--bd)}
+.btn:hover{background:var(--s2)}
+.btn.p{background:var(--ac);border-color:var(--ac);color:var(--onac)}.btn.p:hover{background:var(--ac);filter:brightness(1.1)}
+.inp,#q{border-radius:8px;background:var(--sf);border-color:var(--bd)}
+#q{max-width:420px!important}
+:focus-visible,.inp:focus{outline:2px solid var(--ac);outline-offset:1px}
+.chip{border-radius:6px;font-weight:500;font-size:12px}
+/* KPI */
+#kpi .card{padding:14px 16px 13px}
+#kpi .sub{font-size:12.5px}
+#kpi .text-xl{font-size:1.8rem;line-height:2.2rem;font-weight:600}
+/* ตาราง */
+th,#v-stock th,#hSort th{background:var(--s2);color:var(--mu);font-weight:600;font-size:.82em}
+td,#v-stock td{border-bottom:1px solid var(--bd);font-size:.95em}
+tbody tr:hover td,#v-stock tbody tr:hover td{background:var(--ac2)}
+.sbar{background:var(--sf);box-shadow:0 -4px 12px rgba(20,30,50,.06)}
+/* แถบเงื่อนไข / ขั้นตอน */
+.rb{border:0;border-left:4px solid var(--ac);border-radius:8px;background:var(--ac2)}
+.fgt{color:var(--ac);letter-spacing:0}
+.stp li.cur{border-bottom-color:var(--ac)}.stp li.cur b{background:var(--ac);border-color:var(--ac);color:var(--onac)}
+.jb{background:var(--ac);color:var(--onac)}
+#updBar b{color:var(--ac)}
 </style>
 </head>
 <body>
@@ -1602,6 +1669,114 @@ function findLogo(i) {                                 // ลองหาไฟ�
 
 load().then(refresh);
 })();
+</script>
+<script>
+(function(){var F=[["Sarabun","'Sarabun'",16],["Anuphan","'Anuphan'",15],["Niramit","'Niramit'",16],["Kanit","'Kanit'",14.5],["Noto Sans Thai","'Noto Sans Thai'",14.5],["Prompt (เดิม)","'Prompt'",14]];
+var r=document.documentElement,k="wmsFont",cur=0;try{cur=+localStorage.getItem(k)||0}catch(e){}
+function ap(i){var f=F[i]||F[0];r.style.setProperty("--ff",f[1]+",'Prompt',system-ui,sans-serif");r.style.setProperty("--fs",f[2]+"px");try{localStorage.setItem(k,i)}catch(e){}}
+ap(cur);var s=document.createElement("select");s.id="fontSel";s.title="เลือกฟอนต์";
+F.forEach(function(f,i){var o=document.createElement("option");o.value=i;o.textContent="ฟอนต์: "+f[0];s.appendChild(o)});
+s.value=cur;s.onchange=function(){ap(+s.value)};
+var h=document.querySelector(".hd>div:first-child");if(h)h.appendChild(s);})();
+</script>
+<style>
+#dz{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;gap:20px;padding:24px;background:rgba(15,25,45,.55);backdrop-filter:blur(3px)}
+#dz.on{display:flex}
+#dz .z{flex:1;max-width:420px;min-height:230px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:24px;background:var(--sf);color:var(--tx);border:2px dashed var(--bd);border-radius:16px;transition:.12s}
+#dz .z b{font-size:1.25em}#dz .z span{color:var(--mu);font-size:.9em}
+#dz .z.rec{border-color:var(--ac)}
+#dz .z.hot{border:2px solid var(--ac);background:var(--ac2);transform:scale(1.03)}
+#dz .z i{font-style:normal;font-size:2.4em;line-height:1}
+@media(max-width:700px){#dz{flex-direction:column}#dz .z{min-height:140px;max-width:none;width:100%}}
+</style>
+<div id="dz" aria-hidden="true">
+<div class="z" data-in="fIn"><i>📦</i><b>นำเข้าสต็อก</b><span>ปล่อยไฟล์ Excel / CSV ที่นี่</span></div>
+<div class="z" data-in="fCap"><i>🧮</i><b>นำเข้า Master Cap</b><span>ปล่อยไฟล์ Master Cap / Master Cap update ที่นี่</span></div>
+</div>
+<script>
+(function(){var dz=document.getElementById("dz"),n=0;
+function hasF(e){var t=e.dataTransfer&&e.dataTransfer.types;return t&&Array.prototype.indexOf.call(t,"Files")>=0}
+function say(m){try{toast(m)}catch(x){alert(m)}}
+function show(){var on=document.querySelector(".tab.on"),cap=on&&on.dataset.t==="cap";
+dz.querySelectorAll(".z").forEach(function(z){z.classList.remove("hot");z.classList.toggle("rec",cap?z.dataset.in==="fCap":z.dataset.in==="fIn")});dz.classList.add("on")}
+function hide(){n=0;dz.classList.remove("on")}
+window.addEventListener("dragenter",function(e){if(!hasF(e))return;e.preventDefault();if(n++===0)show()});
+window.addEventListener("dragleave",function(e){if(!hasF(e))return;if(--n<=0)hide()});
+window.addEventListener("dragover",function(e){if(!hasF(e))return;e.preventDefault();e.dataTransfer.dropEffect="copy";
+dz.querySelectorAll(".z").forEach(function(z){z.classList.toggle("hot",z.contains(e.target))})});
+window.addEventListener("drop",function(e){if(!hasF(e))return;e.preventDefault();var z=e.target.closest&&e.target.closest("#dz .z");hide();if(!z)return;
+var fs=e.dataTransfer.files;if(!fs.length)return;var f=fs[0];
+if(!/\.(xlsx|xls|csv)$/i.test(f.name))return say("รองรับเฉพาะไฟล์ .xlsx .xls .csv");
+var inp=document.getElementById(z.dataset.in),dt=new DataTransfer();dt.items.add(f);inp.files=dt.files;inp.dispatchEvent(new Event("change",{bubbles:true}));
+if(fs.length>1)say("นำเข้าไฟล์แรกเท่านั้น: "+f.name)});
+window.addEventListener("dragend",hide);document.addEventListener("keydown",function(e){if(e.key==="Escape")hide()});
+var a=document.getElementById("bImp"),b=document.getElementById("bCapIn");
+if(a)a.title="คลิกเลือกไฟล์ หรือลากไฟล์มาวางที่หน้านี้ได้เลย";if(b)b.title="คลิกเลือกไฟล์ หรือลากไฟล์มาวางที่หน้านี้ได้เลย"})();
+</script>
+<style>
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+main>section:not(.hide){animation:fi .22s ease}
+@media(prefers-reduced-motion:reduce){main>section:not(.hide){animation:none}}
+.tab::before{content:attr(data-ic) "  ";font-size:1.05em}
+body.dense td,body.dense th{padding-top:3px!important;padding-bottom:3px!important}
+@media(min-width:960px){body.sbmin{grid-template-columns:68px minmax(0,1fr)}
+body.sbmin .hd{padding:14px 8px;align-items:center}
+body.sbmin .hd>div:first-child>*:not(#sbT),body.sbmin #fontSel,body.sbmin #pnB{display:none!important}
+body.sbmin .tab{font-size:0;text-align:center;padding:10px 0}
+body.sbmin .tab::before{font-size:19px}}
+#sbT{order:0;align-self:flex-end;width:auto!important;padding:2px 9px;margin-bottom:4px}
+@media(max-width:959px){#sbT{display:none}}
+#pnB{order:5;margin-top:4px;width:100%}
+#pn{position:fixed;z-index:9000;left:252px;bottom:16px;width:290px;display:none;padding:14px;background:var(--sf);color:var(--tx);border:1px solid var(--bd);border-radius:14px;box-shadow:0 12px 32px rgba(10,20,40,.22)}
+#pn.on{display:block}@media(max-width:959px){#pn{left:12px}}
+#pn h4{font-weight:600;margin:0 0 8px}#pn .r{margin-top:12px}#pn .r>span{display:block;font-size:.85em;color:var(--mu);margin-bottom:5px}
+#pn .sw{display:flex;gap:8px;flex-wrap:wrap}
+#pn .sw button{width:28px;height:28px;border-radius:50%;border:2px solid var(--sf);box-shadow:0 0 0 1px var(--bd);cursor:pointer}
+#pn .sw button.on{box-shadow:0 0 0 2px var(--tx)}
+#pn label{display:flex;gap:8px;align-items:center;cursor:pointer}#pn #fontSel{width:100%;margin:0;display:block}
+#cp{position:fixed;inset:0;z-index:9998;display:none;align-items:flex-start;justify-content:center;padding-top:14vh;background:rgba(15,25,45,.45);backdrop-filter:blur(2px)}
+#cp.on{display:flex}
+#cp .b{width:min(560px,92vw);background:var(--sf);color:var(--tx);border:1px solid var(--bd);border-radius:14px;box-shadow:0 20px 50px rgba(10,20,40,.3);overflow:hidden}
+#cp input{width:100%;padding:14px 16px;font-size:1.05em;border:0;border-bottom:1px solid var(--bd);background:transparent;color:var(--tx);outline:0}
+#cp ul{list-style:none;margin:0;padding:6px;max-height:320px;overflow:auto}
+#cp li{padding:9px 12px;border-radius:8px;cursor:pointer;display:flex;justify-content:space-between;gap:10px}
+#cp li small{color:var(--mu)}#cp li.on{background:var(--ac2);color:var(--ac)}
+#cp .f{padding:7px 14px;border-top:1px solid var(--bd);color:var(--mu);font-size:.8em}
+</style>
+<div id="pn"><h4>🎨 ปรับแต่งหน้าตา</h4>
+<div class="r"><span>สีหลัก</span><div class="sw" id="pnSw"></div></div>
+<div class="r"><label><input type="checkbox" id="pnD"> ตารางแบบกะทัดรัด (เห็นแถวได้มากขึ้น)</label></div>
+<div class="r"><span>ฟอนต์</span><div id="pnF"></div></div></div>
+<div id="cp"><div class="b"><input id="cpI" placeholder="พิมพ์คำสั่ง… เช่น master, นำเข้า, ธีม" autocomplete="off"><ul id="cpL"></ul><div class="f">↑↓ เลือก · Enter ตกลง · Esc ปิด · เปิดด้วย Ctrl + K</div></div></div>
+<script>
+(function(){var $=function(q){return document.querySelector(q)},B=document.body,L=function(k){try{return localStorage.getItem(k)}catch(e){return null}},S=function(k,v){try{localStorage.setItem(k,v)}catch(e){}};
+var tabs=[].slice.call(document.querySelectorAll(".tab")),IC=["📦","🧩","🔗","🛠","🧮","🕘","📊"];tabs.forEach(function(t,i){t.dataset.ic=IC[i]||"•"});
+/* สีหลัก */
+var A=[["น้ำเงิน","#2556d9","#6e9bff"],["เทอร์ควอยซ์","#0b7f8c","#4fd1dc"],["ม่วง","#6b45d1","#a98bff"],["เขียว","#1b7f4b","#5fd68a"],["ส้ม","#c2570c","#ffa05a"],["กราไฟต์","#3b4658","#aab6c8"]];
+var st=document.createElement("style");document.head.appendChild(st);
+function acc(i){var a=A[i]||A[0],l="--ac:"+a[1]+";--ac2:color-mix(in srgb,"+a[1]+" 11%,#fff);--onac:#fff",d="--ac:"+a[2]+";--ac2:color-mix(in srgb,"+a[2]+" 20%,#171c24);--onac:#0a1224";
+st.textContent=":root{"+l+"}@media(prefers-color-scheme:dark){:root:not([data-theme=light]){"+d+"}}:root[data-theme=dark]{"+d+"}";S("wmsAcc",i);[].forEach.call(document.querySelectorAll("#pnSw button"),function(b,j){b.classList.toggle("on",j==i)})}
+var sw=$("#pnSw");A.forEach(function(a,i){var b=document.createElement("button");b.title=a[0];b.style.background=a[1];b.onclick=function(){acc(i)};sw.appendChild(b)});acc(+L("wmsAcc")||0);
+/* กะทัดรัด / ย่อเมนู */
+var dn=$("#pnD");function dens(v){B.classList.toggle("dense",v);dn.checked=v;S("wmsDens",v?1:0)}dn.onchange=function(){dens(dn.checked)};dens(L("wmsDens")==="1");
+function sbm(v){B.classList.toggle("sbmin",v);S("wmsSb",v?1:0);t.textContent=v?"»":"«";$("#pn").style.left=v?"80px":""}
+var h=$(".hd"),t=document.createElement("button");t.id="sbT";t.className="btn";t.title="ย่อ/ขยายเมนูข้าง";t.onclick=function(){sbm(!B.classList.contains("sbmin"))};h.insertBefore(t,h.firstChild);sbm(L("wmsSb")==="1");
+/* ปุ่มปรับแต่ง + ย้ายตัวเลือกฟอนต์เข้าแผง */
+var pb=document.createElement("button");pb.id="pnB";pb.className="btn";pb.textContent="🎨 ปรับแต่ง · Ctrl+K";h.appendChild(pb);
+var fs=$("#fontSel");if(fs)$("#pnF").appendChild(fs);var pn=$("#pn");
+pb.onclick=function(e){e.stopPropagation();pn.classList.toggle("on")};document.addEventListener("click",function(e){if(!pn.contains(e.target))pn.classList.remove("on")});
+/* ค้นหาคำสั่งด่วน */
+var cp=$("#cp"),ci=$("#cpI"),cl=$("#cpL"),items=[],sel=0;
+function build(){items=[];tabs.forEach(function(x){items.push({n:(x.dataset.ic||"")+" ไปแท็บ "+x.textContent.trim(),k:"tab",f:function(){x.click()}})});
+[["bImp","📥 นำเข้าสต็อก Excel / CSV"],["bCapIn","📥 นำเข้า Master Cap"],["bExp","📤 Export ที่กรองแล้ว"],["bCapOut","📤 Export Master Cap"],["bTheme","🌓 สลับธีม สว่าง/มืด"],["bManual","📖 คู่มือ"]].forEach(function(a){var e=document.getElementById(a[0]);if(e)items.push({n:a[1],k:"action",f:function(){e.click()}})});
+items.push({n:"🎨 เปิดแผงปรับแต่ง (สี · ฟอนต์)",k:"setting",f:function(){pn.classList.add("on")}},{n:"↔ ย่อ/ขยายเมนูข้าง",k:"setting",f:function(){sbm(!B.classList.contains("sbmin"))}},{n:"☰ สลับตารางกะทัดรัด",k:"setting",f:function(){dens(!B.classList.contains("dense"))}});
+A.forEach(function(a,i){items.push({n:"● สีหลัก: "+a[0],k:"setting",f:function(){acc(i)}})})}
+function draw(){var q=ci.value.trim().toLowerCase(),v=items.filter(function(x){return!q||x.n.toLowerCase().indexOf(q)>=0});sel=Math.min(sel,Math.max(0,v.length-1));cp._v=v;
+cl.innerHTML="";v.forEach(function(x,i){var li=document.createElement("li");li.className=i==sel?"on":"";li.innerHTML="<span></span><small>"+x.k+"</small>";li.firstChild.textContent=x.n;li.onmousedown=function(e){e.preventDefault();run(x)};cl.appendChild(li)});if(!v.length)cl.innerHTML="<li><span>ไม่พบคำสั่ง</span></li>"}
+function run(x){close();x.f()}function open(){build();sel=0;ci.value="";cp.classList.add("on");draw();ci.focus()}function close(){cp.classList.remove("on")}
+ci.oninput=function(){sel=0;draw()};cp.onmousedown=function(e){if(e.target===cp)close()};
+ci.onkeydown=function(e){var v=cp._v||[];if(e.key==="ArrowDown"){e.preventDefault();sel=(sel+1)%Math.max(1,v.length);draw()}else if(e.key==="ArrowUp"){e.preventDefault();sel=(sel-1+v.length)%Math.max(1,v.length);draw()}else if(e.key==="Enter"&&v[sel]){e.preventDefault();run(v[sel])}else if(e.key==="Escape"){close()}};
+document.addEventListener("keydown",function(e){if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();e.stopPropagation();cp.classList.contains("on")?close():open()}else if(e.key==="Escape")pn.classList.remove("on")},true)})();
 </script>
 </body>
 </html>
