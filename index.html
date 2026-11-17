@@ -1748,7 +1748,7 @@ body.sbmin .tab::before{font-size:19px}}
 <div class="r"><span>สีหลัก</span><div class="sw" id="pnSw"></div></div>
 <div class="r"><label><input type="checkbox" id="pnD"> ตารางแบบกะทัดรัด (เห็นแถวได้มากขึ้น)</label></div>
 <div class="r"><span>ฟอนต์</span><div id="pnF"></div></div></div>
-<div id="cp"><div class="b"><input id="cpI" placeholder="พิมพ์คำสั่ง… เช่น master, นำเข้า, ธีม" autocomplete="off"><ul id="cpL"></ul><div class="f">↑↓ เลือก · Enter ตกลง · Esc ปิด · เปิดด้วย Ctrl + K</div></div></div>
+<div id="cp"><div class="b"><input id="cpI" placeholder="พิมพ์คำสั่ง… เช่น master, นำเข้า, ธีม" autocomplete="off"><ul id="cpL"></ul><div class="f">↑↓ เลือก · Enter ตกลง · Esc ปิด · เปิดด้วย Alt + K</div></div></div>
 <script>
 (function(){var $=function(q){return document.querySelector(q)},B=document.body,L=function(k){try{return localStorage.getItem(k)}catch(e){return null}},S=function(k,v){try{localStorage.setItem(k,v)}catch(e){}};
 var tabs=[].slice.call(document.querySelectorAll(".tab")),IC=["📦","🧩","🔗","🛠","🧮","🕘","📊"];tabs.forEach(function(t,i){t.dataset.ic=IC[i]||"•"});
@@ -1763,7 +1763,7 @@ var dn=$("#pnD");function dens(v){B.classList.toggle("dense",v);dn.checked=v;S("
 function sbm(v){B.classList.toggle("sbmin",v);S("wmsSb",v?1:0);t.textContent=v?"»":"«";$("#pn").style.left=v?"80px":""}
 var h=$(".hd"),t=document.createElement("button");t.id="sbT";t.className="btn";t.title="ย่อ/ขยายเมนูข้าง";t.onclick=function(){sbm(!B.classList.contains("sbmin"))};h.insertBefore(t,h.firstChild);sbm(L("wmsSb")==="1");
 /* ปุ่มปรับแต่ง + ย้ายตัวเลือกฟอนต์เข้าแผง */
-var pb=document.createElement("button");pb.id="pnB";pb.className="btn";pb.textContent="🎨 ปรับแต่ง · Ctrl+K";h.appendChild(pb);
+var pb=document.createElement("button");pb.id="pnB";pb.className="btn";pb.textContent="🎨 ปรับแต่ง · Alt+K";h.appendChild(pb);
 var fs=$("#fontSel");if(fs)$("#pnF").appendChild(fs);var pn=$("#pn");
 pb.onclick=function(e){e.stopPropagation();pn.classList.toggle("on")};document.addEventListener("click",function(e){if(!pn.contains(e.target))pn.classList.remove("on")});
 /* ค้นหาคำสั่งด่วน */
@@ -1777,7 +1777,7 @@ cl.innerHTML="";v.forEach(function(x,i){var li=document.createElement("li");li.c
 function run(x){close();x.f()}function open(){build();sel=0;ci.value="";cp.classList.add("on");draw();ci.focus()}function close(){cp.classList.remove("on")}
 ci.oninput=function(){sel=0;draw()};cp.onmousedown=function(e){if(e.target===cp)close()};
 ci.onkeydown=function(e){var v=cp._v||[];if(e.key==="ArrowDown"){e.preventDefault();sel=(sel+1)%Math.max(1,v.length);draw()}else if(e.key==="ArrowUp"){e.preventDefault();sel=(sel-1+v.length)%Math.max(1,v.length);draw()}else if(e.key==="Enter"&&v[sel]){e.preventDefault();run(v[sel])}else if(e.key==="Escape"){close()}};
-document.addEventListener("keydown",function(e){if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();e.stopPropagation();cp.classList.contains("on")?close():open()}else if(e.key==="Escape")pn.classList.remove("on")},true)})();
+document.addEventListener("keydown",function(e){if(e.altKey&&!e.ctrlKey&&!e.metaKey&&e.code==="KeyK"){e.preventDefault();e.stopPropagation();cp.classList.contains("on")?close():open()}else if(e.key==="Escape")pn.classList.remove("on")},true)})();
 </script>
 <style>
 #qf{display:flex;gap:8px;flex-wrap:wrap;padding:0 12px 12px}
@@ -1821,7 +1821,7 @@ wl.innerHTML='<div class="w"><h2>👋 เริ่มต้นใช้งาน
 '<div class="s'+(cap?' done':' cur')+'"><div class="no">'+(cap?'✓':'1')+'</div><b>Master Cap</b><div class="sub">'+(cap?'มี Master Cap ในระบบแล้ว นำเข้าเพิ่มหรืออัปเดตได้ทุกเมื่อ':'ไฟล์ Item + Master Cap (หรือ Master Cap update แยกคลัง) เพื่อให้ตรวจ Cap ได้ถูกต้อง')+'</div><button class="btn'+(cap?'':' p')+'" data-w="bCapIn">📂 เลือกไฟล์ Master Cap</button></div>'+
 '<div class="s'+(cap?' cur':'')+'"><div class="no">2</div><b>สต็อกคงเหลือ</b><div class="sub">ไฟล์ Excel / CSV ที่มีคอลัมน์ Item และ LPN ระบบหาแถวหัวตารางให้เอง</div><button class="btn'+(cap?' p':'')+'" data-w="bImp">📥 เลือกไฟล์สต็อก</button></div>'+
 '<div class="s"><div class="no">3</div><b>ดูผลและจัดการ</b><div class="sub">ดูพาเลท OK / รอรวม / เกิน Cap ด้วยปุ่มกรองด่วน แล้วไปแท็บจัดชุดหรือแก้เกิน Cap</div></div></div>'+
-'<div class="dz">⬇ หรือ <b>ลากไฟล์ Excel มาวางที่หน้านี้</b> ได้เลย · กด <b>Ctrl + K</b> เพื่อค้นหาคำสั่งด่วน</div></div>'}
+'<div class="dz">⬇ หรือ <b>ลากไฟล์ Excel มาวางที่หน้านี้</b> ได้เลย · กด <b>Alt + K</b> เพื่อค้นหาคำสั่งด่วน</div></div>'}
 wl.addEventListener('click',function(e){var b=e.target.closest('[data-w]');if(b)document.getElementById(b.dataset.w).click()});
 var q=0;function upd(){q=0;var empty=!W().rows().length;sec.classList.toggle('empty',empty);empty?welcome():chips()}
 function sch(){if(!q)q=requestAnimationFrame(upd)}
@@ -1848,7 +1848,7 @@ upd()})();
 #nw .f .sub{color:var(--mu);font-size:.85em}
 </style>
 <div id="nw"><div class="b"><div class="h"><b>📢 มีอะไรใหม่</b><button class="btn" id="nwx">✕</button></div><div class="l" id="nwl"></div>
-<div class="f"><span class="sub">ดูย้อนหลังได้ทุกเมื่อที่ปุ่ม “มีอะไรใหม่” หรือ Ctrl + K</span><button class="btn p" id="nwok">รับทราบ</button></div></div></div>
+<div class="f"><span class="sub">ดูย้อนหลังได้ทุกเมื่อที่ปุ่ม “มีอะไรใหม่” หรือ Alt + K</span><button class="btn p" id="nwok">รับทราบ</button></div></div></div>
 <script>
 (function(){
 /* ============================================================
@@ -1862,7 +1862,8 @@ var CHANGELOG=[
  ['imp','แถบเมนูข้างปรับให้พอดีจอโน้ตบุ๊กที่ซูม 100% ไม่ต้องเลื่อน'],
  ['imp','ปุ่มนำเข้า / Export ขยายเต็มความกว้าง ปุ่มอื่นเรียงสองช่องเท่ากัน ระยะห่างสม่ำเสมอ'],
  ['imp','ย้ายเลขเวอร์ชันลงบรรทัดใหม่ใต้ชื่อระบบ'],
- ['fix','แก้ปุ่ม “ทำ” ในหน้ารวมเลทและปุ่มลัดต่าง ๆ ให้เลื่อนลงไปที่ตารางพาเลทได้ถูกต้อง']]},
+ ['fix','แก้ปุ่ม “ทำ” ในหน้ารวมเลทและปุ่มลัดต่าง ๆ ให้เลื่อนลงไปที่ตารางพาเลทได้ถูกต้อง'],
+ ['imp','เปลี่ยนปุ่มเรียกค้นหาคำสั่งด่วนเป็น Alt + K เพื่อไม่ให้ชนกับทางลัดของเบราว์เซอร์']]},
 {v:'4.3',d:'2026-11-17',t:'ชื่อระบบใหม่: PMS',items:[
  ['imp','เปลี่ยนชื่อระบบเป็น PMS (Pallet Management System) · ระบบจัดรวมเลทและตัดยอด ที่ชื่อแท็บเบราว์เซอร์และหัวเมนู'],
  ['imp','ไฟล์ Export ไม่ใส่ชื่อระบบนำหน้าแล้ว (Stock_วันที่.xlsx, MasterCap.xlsx) ข้อมูลเดิมที่บันทึกไว้ในเครื่องยังอยู่ครบ']]},
@@ -1872,7 +1873,7 @@ var CHANGELOG=[
  ['new','ระบบประกาศ “มีอะไรใหม่” (หน้านี้) พร้อมจุดแจ้งเตือนเมื่อมีอัปเดต']]},
 {v:'4.1',d:'2026-11-17',t:'นำเข้าง่ายขึ้น และปรับแต่งได้',items:[
  ['new','ลากไฟล์ Excel / CSV มาวางที่หน้าเว็บเพื่อนำเข้าสต็อกหรือ Master Cap ได้เลย'],
- ['new','ค้นหาคำสั่งด่วนด้วย Ctrl + K สลับแท็บ นำเข้า Export เปลี่ยนธีม'],
+ ['new','ค้นหาคำสั่งด่วนด้วย Alt + K สลับแท็บ นำเข้า Export เปลี่ยนธีม'],
  ['new','เลือกสีหลักได้ 6 สี และเลือกฟอนต์ได้ 6 แบบ (ปุ่ม “ปรับแต่ง” ในเมนูข้าง)'],
  ['imp','ตารางแบบกะทัดรัด · ย่อเมนูข้าง · ไอคอนหน้าแท็บ · เปลี่ยนแท็บแบบนุ่มนวล']]},
 {v:'4.0',d:'2026-11-17',t:'หน้าตาใหม่ทั้งระบบ',items:[
