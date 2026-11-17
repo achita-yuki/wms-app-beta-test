@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="app-version" content="4.3">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>LotFit · ระบบจัดรวมเลทและตัดยอด</title>
+<title>PMS · Pallet Management System</title>
 <link rel="icon" id="fav" href="Logo%20sungroup.jpg">
 <link rel="apple-touch-icon" href="Logo%20sungroup.jpg">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap">
@@ -270,7 +270,7 @@ tbody tr:hover td,#v-stock tbody tr:hover td{background:var(--ac2)}
 <!-- ===== ส่วนหัว + แท็บ ===== -->
 <header class="hd">
   <div class="max-w-[1400px] mx-auto px-4 py-2 flex flex-wrap items-center gap-2">
-    <div style="display:flex;align-items:center;gap:12px;flex:1 1 220px;min-width:200px"><div id="logoBox" title="โลโก้บริษัท · คลิกเพื่ออัปโหลดรูปใหม่ · Shift+คลิกเพื่อกลับไปใช้ไฟล์เดิม" style="height:42px;min-width:42px;padding:3px;background:#fff;border:1px solid var(--bd);border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;flex:0 0 auto"><img id="logoImg" class="hide" alt="โลโก้บริษัท" style="height:100%;width:auto;max-width:150px;object-fit:contain;display:block"><span id="logoMk" style="font-weight:700;color:#0e7c66;font-size:13px;padding:0 6px">LOGO</span></div><input type="file" id="logoFile" accept="image/*" class="hide"><div><div class="font-semibold text-base">LotFit</div><div class="sub">ระบบจัดรวมเลท และตัดเลท · เวอร์ชัน <span id="verTx"></span></div></div></div>
+    <div style="display:flex;align-items:center;gap:12px;flex:1 1 220px;min-width:200px"><div id="logoBox" title="โลโก้บริษัท · คลิกเพื่ออัปโหลดรูปใหม่ · Shift+คลิกเพื่อกลับไปใช้ไฟล์เดิม" style="height:42px;min-width:42px;padding:3px;background:#fff;border:1px solid var(--bd);border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;flex:0 0 auto"><img id="logoImg" class="hide" alt="โลโก้บริษัท" style="height:100%;width:auto;max-width:150px;object-fit:contain;display:block"><span id="logoMk" style="font-weight:700;color:#0e7c66;font-size:13px;padding:0 6px">LOGO</span></div><input type="file" id="logoFile" accept="image/*" class="hide"><div><div class="font-semibold text-base">PMS</div><div class="sub">Pallet Management System<br>ระบบจัดรวมเลทและตัดยอด · เวอร์ชัน <span id="verTx"></span></div></div></div>
     <button class="btn p" id="bImp">นำเข้า Excel / CSV</button>
     <button class="btn" id="bExp">Export ที่กรองแล้ว</button>
     <button class="btn d" id="bClr">ล้างข้อมูล</button>
@@ -1196,7 +1196,7 @@ function dl(aoa, name, sheet) {
 function exportStock() {
   const v = viewRows(); if (!v.length) return toast('ไม่มีข้อมูลให้ Export');
   dl([['Item', 'Description', 'Lot', 'Lot DLD', 'Location', 'LPN', 'Case On Hand', 'Allocated', 'รวม LPN', 'Master Cap', 'ที่มา Cap', 'สถานะ Cap', 'WH', 'Status', 'Lot Status']]
-    .concat(v.map(r => [r.item, nameOf(r.item, r.desc), r.lot, r.lot2, r.loc, r.lpn, r.qty, aOf(r), pm[r.item + '|' + r.lpn], capOf(r.item, r.wh), srcOf(r.item), (ST[(PMAP[r.item + '|' + r.lpn] || {}).st] || ['', ''])[1], r.wh, r.st, r.ls])), 'LotFit_Stock_' + new Date().toISOString().slice(0, 10) + '.xlsx', 'Stock');
+    .concat(v.map(r => [r.item, nameOf(r.item, r.desc), r.lot, r.lot2, r.loc, r.lpn, r.qty, aOf(r), pm[r.item + '|' + r.lpn], capOf(r.item, r.wh), srcOf(r.item), (ST[(PMAP[r.item + '|' + r.lpn] || {}).st] || ['', ''])[1], r.wh, r.st, r.ls])), 'Stock_' + new Date().toISOString().slice(0, 10) + '.xlsx', 'Stock');
 }
 
 /* ===================== แถบเงื่อนไข + ตั้งค่า Lot Status ที่อนุญาต ===================== */
@@ -1383,7 +1383,7 @@ $('#bCapIn').onclick = () => $('#fCap').click();
 $('#fCap').onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (f) importCaps(f).catch(() => toast('อ่านไฟล์ไม่ได้')); };
 $('#bCapOut').onclick = () => {
   const seen = {}; rows.forEach(r => seen[r.item] = r.wh); for (const i in master) if (!(i in seen) && (master[i].cap > 0 || master[i].prio > 0)) seen[i] = '';
-  dl([['Item', 'ชื่อสินค้า', 'Master Cap', 'Cap ที่ใช้', 'ที่มา', 'ลำดับความสำคัญ', 'Master ฐาน', 'CAP CS1', 'CAP CS2', 'CAP CS3']].concat(Object.keys(seen).sort(CO.compare).map(i => { const m = master[i] || {}; return [i, nameOf(i), m.cap || '', capOf(i, seen[i]), srcOf(i), m.prio || '', m.base || '', (m.man || {}).CS1 || (m.caps || {}).CS1 || '', (m.man || {}).CS2 || (m.caps || {}).CS2 || '', (m.man || {}).CS3 || (m.caps || {}).CS3 || '']; })), 'LotFit_MasterCap.xlsx', 'Master Cap');
+  dl([['Item', 'ชื่อสินค้า', 'Master Cap', 'Cap ที่ใช้', 'ที่มา', 'ลำดับความสำคัญ', 'Master ฐาน', 'CAP CS1', 'CAP CS2', 'CAP CS3']].concat(Object.keys(seen).sort(CO.compare).map(i => { const m = master[i] || {}; return [i, nameOf(i), m.cap || '', capOf(i, seen[i]), srcOf(i), m.prio || '', m.base || '', (m.man || {}).CS1 || (m.caps || {}).CS1 || '', (m.man || {}).CS2 || (m.caps || {}).CS2 || '', (m.man || {}).CS3 || (m.caps || {}).CS3 || '']; })), 'MasterCap.xlsx', 'Master Cap');
 };
 $('#bLogClr').onclick = () => modal('ล้างประวัติ', 'ลบประวัติทั้งหมด?', [['ยกเลิก'], ['ล้าง', 'd', () => { logs = []; refresh(); }]]);
 $('#bMore').onclick = () => { limit += 200; render(); };
@@ -1858,9 +1858,9 @@ upd()})();
    พอเพิ่มรายการใหม่ ทุกคนจะเห็นจุดแดงที่ปุ่ม และมีหน้าต่างเด้งขึ้นครั้งเดียว
    ============================================================ */
 var CHANGELOG=[
-{v:'4.3',d:'2026-11-17',t:'ชื่อระบบใหม่: LotFit',items:[
- ['imp','เปลี่ยนชื่อระบบเป็น LotFit (ระบบจัดรวมเลท และตัดเลท) ที่ชื่อแท็บเบราว์เซอร์และหัวเมนู'],
- ['imp','ไฟล์ Export ใช้ชื่อขึ้นต้น LotFit_ ข้อมูลเดิมที่บันทึกไว้ในเครื่องยังอยู่ครบ']]},
+{v:'4.3',d:'2026-11-17',t:'ชื่อระบบใหม่: PMS',items:[
+ ['imp','เปลี่ยนชื่อระบบเป็น PMS (Pallet Management System) · ระบบจัดรวมเลทและตัดยอด ที่ชื่อแท็บเบราว์เซอร์และหัวเมนู'],
+ ['imp','ไฟล์ Export ไม่ใส่ชื่อระบบนำหน้าแล้ว (Stock_วันที่.xlsx, MasterCap.xlsx) ข้อมูลเดิมที่บันทึกไว้ในเครื่องยังอยู่ครบ']]},
 {v:'4.2',d:'2026-11-17',t:'ทางลัดกรองและหน้าเริ่มต้น',items:[
  ['new','ปุ่มกรองด่วนเหนือตารางสต็อก: เกิน Cap · รอรวม · OK · ติด Allocated ฯลฯ พร้อมจำนวนพาเลท กดครั้งเดียวกรองทันที'],
  ['new','หน้าต้อนรับเมื่อยังไม่มีข้อมูล แนะนำ 3 ขั้นตอน: Master Cap → สต็อก → ดูผล'],
