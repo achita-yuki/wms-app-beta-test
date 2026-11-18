@@ -915,7 +915,7 @@ const XL = (() => {
   }
   const x = v => String(v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '');
   const colL = c => String.fromCharCode(64 + c);                      // 1..26 -> A..Z
-  /* สไตล์: f 0=Tahoma11 / 1=Arial10หนา · fill 0=ไม่มี / 1=เหลือง · b บิตเส้นขอบหนา L1 R2 T4 B8 · h แนวนอน · v แนวตั้ง */
+  /* สไตล์: f 0=Tahoma11 / 1=Arial10หนา · fill 0=ไม่มี / 1=เหลือง · b บิตเส้นขอบหนา L1 R2 T4 B8 · 16=เส้นบางรอบช่อง · 32=เส้นบางเฉพาะแนวตั้ง · h แนวนอน · v แนวตั้ง */
   function build(sheets) {
     const xfs = [], xmap = {}, bds = [0], bmap = { 0: 0 };
     const sid = s => { const k = (s.f || 0) + '|' + (s.fill || 0) + '|' + (s.b || 0) + '|' + (s.h || '') + '|' + (s.v || ''); if (!(k in xmap)) { xmap[k] = xfs.length; xfs.push(s); if (s.b && !(s.b in bmap)) { bmap[s.b] = bds.length; bds.push(s.b); } } return xmap[k]; };
@@ -942,7 +942,7 @@ const XL = (() => {
     const styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
       '<fonts count="4"><font><sz val="11"/><name val="Tahoma"/><family val="2"/></font><font><b/><sz val="10"/><color rgb="FF000000"/><name val="Arial"/><family val="2"/></font><font><sz val="14"/><name val="Angsana New"/><family val="1"/></font><font><b/><sz val="14"/><name val="Angsana New"/><family val="1"/></font></fonts>' +
       '<fills count="4"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFFFF00"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFB4C6E7"/><bgColor indexed="64"/></patternFill></fill></fills>' +
-      '<borders count="' + bds.length + '">' + bds.map(m => '<border>' + side(m & 1, 'left', m & 16) + side(m & 2, 'right', m & 16) + side(m & 4, 'top', m & 16) + side(m & 8, 'bottom', m & 16) + '<diagonal/></border>').join('') + '</borders>' +
+      '<borders count="' + bds.length + '">' + bds.map(m => '<border>' + side(m & 1, 'left', m & 48) + side(m & 2, 'right', m & 48) + side(m & 4, 'top', m & 16) + side(m & 8, 'bottom', m & 16) + '<diagonal/></border>').join('') + '</borders>' +
       '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
       '<cellXfs count="' + xfs.length + '">' + xfs.map(s => '<xf numFmtId="0" fontId="' + (s.f || 0) + '" fillId="' + (s.fill === 2 ? 3 : s.fill ? 2 : 0) + '" borderId="' + bmap[s.b || 0] + '" xfId="0" applyFont="1" applyFill="1" applyBorder="1"' + (s.h || s.v ? ' applyAlignment="1"><alignment' + (s.h ? ' horizontal="' + s.h + '"' : '') + (s.v ? ' vertical="' + s.v + '"' : '') + '/></xf>' : '/>')).join('') + '</cellXfs>' +
       '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
@@ -1002,7 +1002,7 @@ const XL = (() => {
       r += gap;
       const h0 = r, g0 = r + 1, g1 = r + n; rowH[h0] = 20.4; for (let q = g0; q <= g1; q++) rowH[q] = 19.8;   // ความสูงแถวตามตัวอย่าง
                                  // h0 = แถวหัวตาราง · g0..g1 = แถวข้อมูล
-      const bd = (c, row, T, B) => 16 | (c === 1 || c === 6 || c === 7 || c === 8 ? 1 : 0) | (c === 5 || c === 6 || c === 7 || c === 9 ? 2 : 0) | (T || row === h0 ? 4 : 0) | (B || row === g1 ? 8 : 0);   // T/B = เส้นหนาคั่นพาเลท
+      const bd = (c, row, T, B) => (row === h0 ? 16 : 32) | (c === 1 || c === 6 || c === 7 || c === 8 ? 1 : 0) | (c === 5 || c === 6 || c === 7 || c === 9 ? 2 : 0) | (T || row === h0 ? 4 : 0) | (B || row === g1 ? 8 : 0);   // T/B = เส้นหนาคั่นพาเลท
       ['Location', 'Lot DLD', 'Lot Number', 'Status', 'CTN'].forEach((t, i) => put(h0, i + 1, t, { f: 2, h: 'center', v: 'center', b: bd(i + 1, h0) }));
       put(h0, 6, 'รวม', { f: 3, fill: 2, h: 'center', v: 'center', b: bd(6, h0) });                 // รวมต่อพาเลท (เฉพาะพาเลทที่มีหลาย Lot)
       put(h0, 7, 'รวม', { f: 3, fill: 2, h: 'center', v: 'center', b: bd(7, h0) });                 // รวมทั้งชุด
@@ -1015,11 +1015,12 @@ const XL = (() => {
           const T = r === p0 && pi > 0, B = r === p1;                  // เส้นคั่นพาเลท: บนของพาเลทที่ 2 เป็นต้นไป + ล่างของทุกพาเลท
           put(r, 1, p.lpn, { f: 2, h: 'center', v: 'center', b: bd(1, r, T, B) }); put(r, 2, l.lot2 || '', { f: 2, h: 'center', v: 'center', b: bd(2, r, T, B) }); put(r, 3, l.lot, { f: 2, h: 'center', v: 'center', b: bd(3, r, T, B) });
           put(r, 4, l.ls || '', { f: 2, h: 'center', v: 'center', b: bd(4, r, T, B) }); put(r, 5, l.qty, { f: 2, h: 'center', v: 'center', b: bd(5, r, T, B) });
-          put(r, 6, r === p1 ? psum : '', { f: 2, h: 'center', v: 'center', b: bd(6, r, T, B) });   // ยอดรวมต่อพาเลท ใส่ที่แถวสุดท้ายของพาเลท (Lot เดียวก็แสดงยอดเดียวกับ CTN)
+          put(r, 6, r === p0 ? psum : '', { f: 2, h: 'center', v: 'center', b: bd(6, r, T, B) });   // ยอดรวมต่อพาเลท ใส่ที่แถวสุดท้ายของพาเลท (Lot เดียวก็แสดงยอดเดียวกับ CTN)
           put(r, 7, r === g0 ? g.total : '', { f: 2, h: 'center', v: 'center', b: bd(7, r, T, B) });
           put(r, 8, '', { f: 2, h: 'center', v: 'center', b: bd(8, r, T, B) }); put(r, 9, '', { f: 2, b: bd(9, r, T, B) });
           r++;
         });
+        if (lots.length > 1) merges.push('F' + p0 + ':F' + p1);   // ยอดรวมต่อพาเลท = ช่องเดียวกึ่งกลาง (ตามตัวอย่าง)
       });
       if (n > 1) merges.push('G' + g0 + ':G' + g1);
       merges.push('H' + g0 + ':I' + g1);                           // ช่องจัดเก็บ = ช่องเดียวต่อกลุ่ม (เขียนพาเลทใหม่ใบเดียว)
@@ -1863,7 +1864,8 @@ var CHANGELOG=[
  ['imp','ปุ่มนำเข้า / Export ขยายเต็มความกว้าง ปุ่มอื่นเรียงสองช่องเท่ากัน ระยะห่างสม่ำเสมอ'],
  ['imp','ย้ายเลขเวอร์ชันลงบรรทัดใหม่ใต้ชื่อระบบ'],
  ['fix','แก้ปุ่ม “ทำ” ในหน้ารวมเลทและปุ่มลัดต่าง ๆ ให้เลื่อนลงไปที่ตารางพาเลทได้ถูกต้อง'],
- ['imp','เปลี่ยนปุ่มเรียกค้นหาคำสั่งด่วนเป็น Alt + K เพื่อไม่ให้ชนกับทางลัดของเบราว์เซอร์']]},
+ ['imp','เปลี่ยนปุ่มเรียกค้นหาคำสั่งด่วนเป็น Alt + K เพื่อไม่ให้ชนกับทางลัดของเบราว์เซอร์'],
+ ['imp','ไฟล์ Export ใบงานรวมเลท: เหลือเส้นคั่นเฉพาะระหว่างพาเลท และรวมช่อง “รวม” ต่อพาเลทไว้กึ่งกลาง ตามตัวอย่าง']]},
 {v:'4.3',d:'2026-11-17',t:'ชื่อระบบใหม่: PMS',items:[
  ['imp','เปลี่ยนชื่อระบบเป็น PMS (Pallet Management System) · ระบบจัดรวมเลทและตัดยอด ที่ชื่อแท็บเบราว์เซอร์และหัวเมนู'],
  ['imp','ไฟล์ Export ไม่ใส่ชื่อระบบนำหน้าแล้ว (Stock_วันที่.xlsx, MasterCap.xlsx) ข้อมูลเดิมที่บันทึกไว้ในเครื่องยังอยู่ครบ']]},
