@@ -29,4 +29,12 @@
 ![คู่มือ หน้า 6](page6.png)
 
 ---
+
+![คู่มือ หน้า 7](page6.png)
+
+---
+
+![คู่มือ หน้า 8](page6.png)
+
+---
 💡 **ลิงก์เข้าใช้งานระบบ:** [https://achita-yuki.github.io/wms-app-beta-test/](https://achita-yuki.github.io/wms-app-beta-test/)
